@@ -1,6 +1,4 @@
-import Button from '@mui/material/Button'
-import { AccessAlarm } from '@mui/icons-material'
-import Typography from '@mui/material/Typography'
+
 import {
   // Experimental_CssVarsProvider as CssVarsProvider,
   // experimental_extendTheme as extendTheme,
@@ -15,7 +13,8 @@ import Select from '@mui/material/Select'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness'
-import { Box } from '@mui/material'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -55,36 +54,38 @@ function ModeSelect() {
   )
 }
 
-function ModeToggle() {
-  const { mode, setMode } = useColorScheme()
-  return (
-    <Button
-      onClick={() => {
-        setMode(mode === 'light' ? 'dark' : 'light')
-      }}
-    >
-      {mode === 'light' ? 'Turn dark' : 'Turn light'}
-    </Button>
-  )
-}
-
-
 function App() {
   return (
-    <>
-      <ModeSelect />
-      <ModeToggle />
-      <hr />
-      <Button variant="contained">Contained</Button>
-      <div>HaAlpaca</div>
-      <AccessAlarm />
-      <Typography variant="body2" color={'text.secondary'} >
-        body2. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos
-        blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur,
-        neque doloribus, cupiditate numquam dignissimos laborum fugiat deleniti? Eum
-        quasi quidem quibusdam.
-      </Typography>
-    </>
+    <Container disableGutters maxWidth={false} sx={{ height: '100vh', backgroundColor: 'primary.main' }} >
+      <Box sx={{
+        bgcolor: 'primary.light',
+        width: '100%',
+        height: (theme) => theme.trelloCustom.appBarHeight,
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <ModeSelect />
+      </Box>
+      <Box sx={{
+        bgcolor: 'primary.dark',
+        width: '100%',
+        height: (theme) => theme.trelloCustom.boardBarHeight,
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        Board Bar
+      </Box>
+      <Box sx={{
+        bgcolor: 'primary.main',
+        width: '100%',
+        height: (theme) =>` calc( 100vh - ${theme.trelloCustom.appBarHeight} - ${theme.trelloCustom.boardBarHeight} ) `,
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        Board content
+      </Box>
+
+    </Container>
   )
 
 }
