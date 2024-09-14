@@ -3,7 +3,7 @@
 module.exports = {
   env: { browser: true, es2020: true, node: true },
   extends: [
-    // 'prettier',
+
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
@@ -12,22 +12,22 @@ module.exports = {
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: '18.2' } },
   plugins: [
-    'prettier',
+    // 'prettier',
     'react',
     'react-hooks',
     'react-refresh'
   ],
   rules: {
-    'prettier/prettier': [
-      'error',
-      {
-        semi: false,
-        singleQuote: true,
-        bracketSpacing: true,
-        trailingComma: 'none',
-        arrowParens: 'avoid',
-      }
-    ],
+    // 'prettier/prettier': [
+    //   'error',
+    //   {
+    //     semi: false,
+    //     singleQuote: true,
+    //     bracketSpacing: true,
+    //     trailingComma: 'none',
+    //     arrowParens: 'avoid',
+    //   }
+    // ],
     // MUI
     'no-restricted-imports': [
       'error',
