@@ -11,6 +11,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Badge from '@mui/material/Badge'
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import Tooltip from '@mui/material/Tooltip'
+import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
 
 import Workspaces from './Menus/Workspaces'
 import Recent from './Menus/Recent'
@@ -21,13 +22,13 @@ import Profiles from './Menus/Profiles'
 function AppBar() {
   return (
     <Box
-      px={2}
       sx={{
         width: '100%',
         height: theme => theme.trelloCustom.appBarHeight,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        px: 2,
         gap: 2,
         overflowX: 'auto'
       }}
@@ -67,7 +68,9 @@ function AppBar() {
           <Starred />
           <Templates />
         </Box>
-        <Button variant="outlined">Create</Button>
+        <Button variant="outlined" startIcon={<LibraryAddIcon />}>
+          Create
+        </Button>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <TextField
