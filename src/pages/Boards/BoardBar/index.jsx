@@ -38,6 +38,7 @@ function BoardBar() {
         gap: 2,
         px: 2,
         overflowX: 'auto',
+        '&::-webkit-scrollbar-track': { margin: 2 },
         bgcolor: theme =>
           theme.palette.mode === 'dark' ? '#34495e' : '#1976d2',
         borderBottom: '1px solid white'
@@ -97,7 +98,12 @@ function BoardBar() {
               width: 34,
               height: 34,
               fontSize: 16,
-              border: 'none'
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              '&:first-of-type': {
+                bgcolor: '#a4b0be'
+              }
             }
           }}
         >
