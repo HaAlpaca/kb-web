@@ -19,8 +19,10 @@ import DragHandleIcon from '@mui/icons-material/DragHandle'
 
 import { useState } from 'react'
 import ListCards from './ListCards/ListCards'
+import { mapOrder } from '~/utils/sorts'
 
-function Column() {
+function Column({ column }) {
+  const orderedCard = mapOrder(column?.cards, column?.cardOrderIds, '_id')
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
   const handleClick = event => {
@@ -61,7 +63,7 @@ function Column() {
             cursor: 'pointer'
           }}
         >
-          Column Title
+          {column?.title}
         </Typography>
         <Box>
           <Box>
@@ -130,7 +132,7 @@ function Column() {
       </Box>
 
       {/* Box card  List Card*/}
-      <ListCards />
+      <ListCards cards={orderedCard} />
       {/* Footer */}
       <Box
         sx={{
