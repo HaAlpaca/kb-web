@@ -20,9 +20,22 @@ import DragHandleIcon from '@mui/icons-material/DragHandle'
 import { useState } from 'react'
 import ListCards from './ListCards/ListCards'
 import { mapOrder } from '~/utils/sorts'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 function Column({ column }) {
-  const orderedCard = mapOrder(column?.cards, column?.cardOrderIds, '_id')
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: column._id, data: { ...column } })
+
+  // https://github.com/clauderic/dnd-kit/issues/117
+  // The items are stretched because you're using CSS.Transform.toString(),
+  // use CSS.Translate.toString() if you don't want to have the scale transformation applied.
+  const dndKitColumnStyle = {
+    // touchAction: 'none',
+    transform: CSS.Translate.toString(transform),
+    transition
+  }
+
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
   const handleClick = event => {
@@ -31,8 +44,14 @@ function Column({ column }) {
   const handleClose = () => {
     setAnchorEl(null)
   }
+
+  const orderedCard = mapOrder(column?.cards, column?.cardOrderIds, '_id')
   return (
     <Box
+      ref={setNodeRef}
+      style={dndKitColumnStyle}
+      {...attributes}
+      {...listeners}
       sx={{
         minWidth: '300px',
         maxWidth: '300px',
