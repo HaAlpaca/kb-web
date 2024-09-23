@@ -10,16 +10,17 @@ import {
   DragOverlay,
   defaultDropAnimationSideEffects,
   pointerWithin,
-  rectIntersection,
+  // rectIntersection,
   closestCorners,
-  getFirstCollision,
-  closestCenter
+  getFirstCollision
+  // closestCenter
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { cloneDeep, over } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
+import { generatePlaceholderCard } from '~/utils/formatters'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -99,7 +100,11 @@ function BoardContent({ board }) {
         nextActiveColumn.cards = nextActiveColumn.cards.filter(
           card => card._id !== activeDraggingCardId
         )
-
+        if (isEmpty(nextActiveColumn.cards)) {
+          // console.log('card cuoi cung bi keo di')
+          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
+        }
+        // cap nhat lai mang cardOrderIds cho chuan du lieu
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(
           card => card._id
         )
@@ -121,9 +126,15 @@ function BoardContent({ board }) {
             columnId: nextOverColumn._id
           }
         )
+        // xoa placeholder card di khi co it nhat 1 card => handle backend
+        nextOverColumn.cards = nextOverColumn.cards.filter(
+          card => !card.FE_PlaceholderCard
+        )
+
         // cap nhat lai mang card order id cho chuan du lieu
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
+      console.log('nextColumns: ', nextColumns)
       return nextColumns
     })
   }
@@ -309,18 +320,20 @@ function BoardContent({ board }) {
       // First, let's see if there are any collisions with the pointer
       // tim cac diem va cham voi con tro
       const pointerIntersections = pointerWithin(args)
-      const intersections = !!pointerIntersections?.length
-        ? pointerIntersections
-        : rectIntersection(args)
+      // truong hop ko co diem va cham
+      if (!pointerIntersections?.length) {
+        return
+      }
+      // const intersections = !!pointerIntersections?.length ? pointerIntersections : rectIntersection(args)
       // console.log('intersections', intersections)
-      // tim over id dau tien cu intersection
-      let overId = getFirstCollision(intersections, 'id')
+      // tim over id dau tien cu pointerIntersections
+      let overId = getFirstCollision(pointerIntersections, 'id')
       if (overId) {
-        // thay vi tim den column thi chung ta co gang tim toi card id trong column chuyen toi v nen ta se dung closest center
+        // thay vi tim den column thi chung ta co gang tim toi card id trong column chuyen toi v nen ta se dung closestCorners
         const checkColumn = orderedColumns.find(column => column._id === overId)
         if (checkColumn) {
           // console.log('overId before: ', overId)
-          overId = closestCenter({
+          overId = closestCorners({
             ...args,
             droppableContainers: args.droppableContainers.filter(container => {
               return (
