@@ -9,11 +9,15 @@ import {
   useSensors,
   DragOverlay,
   defaultDropAnimationSideEffects,
-  closestCorners
+  pointerWithin,
+  rectIntersection,
+  closestCorners,
+  getFirstCollision,
+  closestCenter
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { useEffect, useState } from 'react'
-import { cloneDeep } from 'lodash'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { cloneDeep, over } from 'lodash'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
 
@@ -43,6 +47,8 @@ function BoardContent({ board }) {
   const [oldColumnWhenDraggingCard, setOldColumnWhenDraggingCard] =
     useState(null)
 
+  // diem va cham cuoi cung xu li thuat toan phat hien va cham
+  const lastOverId = useRef(null)
   useEffect(() => {
     setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   }, [board])
@@ -293,13 +299,55 @@ function BoardContent({ board }) {
       }
     })
   }
+  // toi uu lai thuat toan va cham
+  const collisionDetectionStrategy = useCallback(
+    args => {
+      // th keo column thi dung closest column la hop li nhat
+      if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+        return closestCorners({ ...args })
+      }
+      // First, let's see if there are any collisions with the pointer
+      // tim cac diem va cham voi con tro
+      const pointerIntersections = pointerWithin(args)
+      const intersections = !!pointerIntersections?.length
+        ? pointerIntersections
+        : rectIntersection(args)
+      // console.log('intersections', intersections)
+      // tim over id dau tien cu intersection
+      let overId = getFirstCollision(intersections, 'id')
+      if (overId) {
+        // thay vi tim den column thi chung ta co gang tim toi card id trong column chuyen toi v nen ta se dung closest center
+        const checkColumn = orderedColumns.find(column => column._id === overId)
+        if (checkColumn) {
+          // console.log('overId before: ', overId)
+          overId = closestCenter({
+            ...args,
+            droppableContainers: args.droppableContainers.filter(container => {
+              return (
+                container.id !== overId &&
+                checkColumn?.cardOrderIds?.includes(container.id)
+              )
+            })
+          })[0]?.id
+          // console.log('overId after: ', overId)
+        }
+        lastOverId.current = overId
+        return [{ id: overId }]
+      }
+      // neu over id null thi tra ve mang rong - tranh crash trang
+      return lastOverId.current ? [{ id: lastOverId }] : []
+    },
+    [activeDragItemType, orderedColumns]
+  )
 
   return (
     <DndContext
       sensors={sensors}
       // thuat toan phat hien va cham
       // https://docs.dndkit.com/api-documentation/context-provider/collision-detection-algorithms
-      collisionDetection={closestCorners}
+      // collisionDetection={closestCorners}
+      // neu dung closestCorners thi se co loi flicking khi de card co img giua 2 column
+      collisionDetection={collisionDetectionStrategy}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
