@@ -6,7 +6,7 @@
   "author": "Ha Alpaca",
   "description": "learn react",
   "engines": {
-    "node": "18.16.0"
+    "node": "16.20.2"
   },
   "scripts": {
     "dev": "vite --host",
@@ -22,6 +22,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.0",
+    "axios": "^1.5.1",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
