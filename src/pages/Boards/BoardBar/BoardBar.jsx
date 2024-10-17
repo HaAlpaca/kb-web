@@ -48,7 +48,7 @@ function BoardBar({ board }) {
         <Chip
           sx={MENU_STYLE}
           icon={<DashboardIcon />}
-          label={board.title}
+          label={board?.title}
           onClick={() => {}}
         />
         <Chip
