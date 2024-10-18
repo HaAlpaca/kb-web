@@ -96,6 +96,7 @@ function ListColumns({ columns }) {
             }}
           >
             <TextField
+              data-no-dnd="true"
               label="Enter column title..."
               type="text"
               size="small"
@@ -118,6 +119,7 @@ function ListColumns({ columns }) {
             />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Button
+                data-no-dnd="true"
                 onClick={addNewColumn}
                 variant="contained"
                 color="success"
@@ -135,6 +137,7 @@ function ListColumns({ columns }) {
                 Add Column
               </Button>
               <CloseIcon
+                data-no-dnd="true"
                 fontSize="small"
                 sx={{
                   color: 'white',
