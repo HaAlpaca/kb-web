@@ -3,8 +3,8 @@ import ListColumns from './ListColumns/ListColumns'
 import { mapOrder } from '~/utils/sorts'
 import {
   DndContext,
-  MouseSensor,
-  TouchSensor,
+  // MouseSensor,
+  // TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -15,6 +15,7 @@ import {
   getFirstCollision
   // closestCenter
 } from '@dnd-kit/core'
+import { MouseSensor, TouchSensor } from '~/CustomLibraries/DndKitSensors'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cloneDeep, isEmpty } from 'lodash'
@@ -134,7 +135,7 @@ function BoardContent({ board }) {
         // cap nhat lai mang card order id cho chuan du lieu
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
-      console.log('nextColumns: ', nextColumns)
+      // console.log('nextColumns: ', nextColumns)
       return nextColumns
     })
   }

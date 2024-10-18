@@ -222,6 +222,7 @@ function Column({ column }) {
                 type="text"
                 size="small"
                 variant="outlined"
+                data-no-dnd="true"
                 autoFocus
                 value={newCardTitle}
                 onChange={e => {
@@ -255,6 +256,7 @@ function Column({ column }) {
               />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button
+                  data-no-dnd="true"
                   onClick={addNewCard}
                   variant="contained"
                   color="success"
@@ -272,6 +274,7 @@ function Column({ column }) {
                   Add
                 </Button>
                 <CloseIcon
+                  data-no-dnd="true"
                   fontSize="small"
                   sx={{
                     color: theme => theme.palette.warning.light,
