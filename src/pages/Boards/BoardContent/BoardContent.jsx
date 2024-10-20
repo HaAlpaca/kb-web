@@ -28,7 +28,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board, createNewColumn, createNewCard }) {
+function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
   // yeu cau chuot di 10px ms active event, fix click goi event
   // const pointerSensor = useSensor(PointerSensor, {
   //   activationConstraint: { distance: 10 }
@@ -289,9 +289,11 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
       )
 
       // xu li goi api
+      moveColumns(dndOrderedColumns)
       // const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
       // console.log(dndOrderedColumns)
       // console.log(dndOrderedColumnsIds)
+      // van phai goi tranh delay cua api dang goi
       setOrderedColumns(dndOrderedColumns)
     }
 

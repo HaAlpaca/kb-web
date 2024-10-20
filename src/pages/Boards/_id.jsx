@@ -12,7 +12,8 @@ import { useEffect, useState } from 'react'
 import {
   createNewCardAPI,
   createNewColumnAPI,
-  fetchBoardDetailsAPI
+  fetchBoardDetailsAPI,
+  updateBoardDetailsAPI
 } from '~/apis'
 function Board() {
   const [board, setBoard] = useState(null)
@@ -64,6 +65,20 @@ function Board() {
     }
     setBoard(newBoard)
   }
+
+  // goi api khi xu ly xong keo tha
+  const moveColumns = async dndOrderedColumns => {
+    const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
+    const newBoard = { ...board }
+    newBoard.columns = dndOrderedColumns
+    newBoard.columnOrderIds = dndOrderedColumnsIds
+    setBoard(newBoard)
+    console.log(newBoard)
+    // goi api update board
+    await updateBoardDetailsAPI(newBoard._id, {
+      columnOrderIds: ['sdfasdf', 'sfdasdfasdf']
+    })
+  }
   return (
     <>
       <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
@@ -73,6 +88,7 @@ function Board() {
           board={board}
           createNewColumn={createNewColumn}
           createNewCard={createNewCard}
+          moveColumns={moveColumns}
         />
       </Container>
     </>
