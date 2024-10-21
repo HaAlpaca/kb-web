@@ -8,24 +8,34 @@ import { generatePlaceholderCard } from '~/utils/formatters'
 import { isEmpty } from 'lodash'
 // import { mockData } from '~/apis/mock-data'
 import { useEffect, useState } from 'react'
-
+import { mapOrder } from '~/utils/sorts'
 import {
   createNewCardAPI,
   createNewColumnAPI,
   fetchBoardDetailsAPI,
-  updateBoardDetailsAPI
+  moveCardToDifferentColumnAPI,
+  updateBoardDetailsAPI,
+  updateColumnDetailsAPI
 } from '~/apis'
+import Box from '@mui/material/Box'
+import CircularProgress from '@mui/material/CircularProgress'
+import { Typography } from '@mui/material'
 function Board() {
   const [board, setBoard] = useState(null)
   useEffect(() => {
     const boardId = '671210d38975d009e2a50179'
     //call api
     fetchBoardDetailsAPI(boardId).then(board => {
+      // sap xep luon column khong phai doi component con map lai
+      board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
       // xu li keo tha khi vao column rong generatePlaceholderCard
       board.columns.forEach(column => {
         if (isEmpty(column.cards)) {
           column.cards = [generatePlaceholderCard(column)]
           column.cardOrderIds = [generatePlaceholderCard(column)._id]
+        } else {
+          // sap xep luon card khong phai doi component con map lai
+          column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
         }
       })
       // console.log('board: ', board)
@@ -73,11 +83,76 @@ function Board() {
     newBoard.columns = dndOrderedColumns
     newBoard.columnOrderIds = dndOrderedColumnsIds
     setBoard(newBoard)
-    console.log(newBoard)
+    // console.log(newBoard)
     // goi api update board
     await updateBoardDetailsAPI(newBoard._id, {
-      columnOrderIds: ['sdfasdf', 'sfdasdfasdf']
+      columnOrderIds: newBoard.columnOrderIds
     })
+  }
+  // cap nhat orderColumnIds
+  const moveCardInTheSameColumn = (
+    dndOrderedCards,
+    dndOrderedCardIds,
+    columnId
+  ) => {
+    // update state board
+    const newBoard = { ...board }
+    const columnToUpdate = newBoard.columns.find(
+      column => column._id === columnId
+    )
+    if (columnToUpdate) {
+      columnToUpdate.cards = dndOrderedCards
+      columnToUpdate.cardOrderIds = dndOrderedCardIds
+    }
+    setBoard(newBoard)
+    updateColumnDetailsAPI(columnId, { cardOrderIds: dndOrderedCardIds })
+  }
+  const moveCardToDifferentColumn = (
+    currentCardId,
+    prevColumnId,
+    nextColumnId,
+    dndOrderedColumns
+  ) => {
+    // console.log('moveCardToDifferentColumn ~ currentCardId:', currentCardId)
+    // console.log('moveCardToDifferentColumn ~ prevColumnId:', prevColumnId)
+    // console.log('moveCardToDifferentColumn ~ nextColumnId:', nextColumnId)
+    // console.log(
+    //   'moveCardToDifferentColumn ~ dndOrderedColumns:',
+    //   dndOrderedColumns
+    // )
+    const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
+    const newBoard = { ...board }
+    newBoard.columns = dndOrderedColumns
+    newBoard.columnOrderIds = dndOrderedColumnsIds
+    setBoard(newBoard)
+
+    // goi api
+    moveCardToDifferentColumnAPI({
+      currentCardId,
+      prevColumnId,
+      prevCardOrderIds: dndOrderedColumns.find(c => c._id === prevColumnId)
+        ?.cardOrderIds,
+      nextColumnId,
+      nextCardOrderIds: dndOrderedColumns.find(c => c._id === nextColumnId)
+        ?.cardOrderIds
+    })
+  }
+  if (!board) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 2,
+          width: '100vw',
+          height: '100vh'
+        }}
+      >
+        <CircularProgress />
+        <Typography>Loading Board...</Typography>
+      </Box>
+    )
   }
   return (
     <>
@@ -89,6 +164,8 @@ function Board() {
           createNewColumn={createNewColumn}
           createNewCard={createNewCard}
           moveColumns={moveColumns}
+          moveCardInTheSameColumn={moveCardInTheSameColumn}
+          moveCardToDifferentColumn={moveCardToDifferentColumn}
         />
       </Container>
     </>
