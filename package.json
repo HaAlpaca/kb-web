@@ -6,7 +6,7 @@
   "author": "Ha Alpaca",
   "description": "learn react",
   "engines": {
-    "node": "16.20.2"
+    "node": "20.x"
   },
   "scripts": {
     "dev": "vite --host",
