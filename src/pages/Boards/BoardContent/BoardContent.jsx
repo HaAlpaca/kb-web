@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box'
 import ListColumns from './ListColumns/ListColumns'
-import { mapOrder } from '~/utils/sorts'
 import {
   DndContext,
   // MouseSensor,
@@ -28,7 +27,14 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
+function BoardContent({
+  board,
+  createNewColumn,
+  createNewCard,
+  moveColumns,
+  moveCardInTheSameColumn,
+  moveCardToDifferentColumn
+}) {
   // yeu cau chuot di 10px ms active event, fix click goi event
   // const pointerSensor = useSensor(PointerSensor, {
   //   activationConstraint: { distance: 10 }
@@ -52,7 +58,7 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
   // diem va cham cuoi cung xu li thuat toan phat hien va cham
   const lastOverId = useRef(null)
   useEffect(() => {
-    setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
+    setOrderedColumns(board.columns)
   }, [board])
 
   // function chung xu li cap nhat lai state trong th di chuyen card giua cac khu vuc khac nhau
@@ -63,7 +69,8 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
     over,
     activeColumn,
     activeDraggingCardId,
-    activeDraggingCardData
+    activeDraggingCardData,
+    triggerFrom
   ) => {
     setOrderedColumns(prevColumn => {
       const overCardIndex = overColumn?.cards?.findIndex(
@@ -135,7 +142,14 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
         // cap nhat lai mang card order id cho chuan du lieu
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
-      // console.log('nextColumns: ', nextColumns)
+      // neu function dc goi tu handle drag end thi ms goi api
+      if (triggerFrom === 'handleDragEnd')
+        moveCardToDifferentColumn(
+          activeDraggingCardId,
+          oldColumnWhenDraggingCard._id,
+          nextOverColumn._id,
+          nextColumns
+        )
       return nextColumns
     })
   }
@@ -198,7 +212,8 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
         over,
         activeColumn,
         activeDraggingCardId,
-        activeDraggingCardData
+        activeDraggingCardData,
+        'handleDragOver'
       )
     }
   }
@@ -234,7 +249,8 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
           over,
           activeColumn,
           activeDraggingCardId,
-          activeDraggingCardData
+          activeDraggingCardData,
+          'handleDragEnd'
         )
       }
       // hanh dong keo tha trong cung 1 column
@@ -253,7 +269,9 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
           oldCardIndex,
           newCardIndex
         )
+        const dndOrderedCardIds = dndOrderedCards.map(card => card._id)
         // console.log(dndOrderedCards)
+        // van goi update state thay vi doi api chay xong
         setOrderedColumns(prevColumn => {
           // clone mang OrderedColumns cu ra 1 cai moi de xu li
           const nextColumns = cloneDeep(prevColumn)
@@ -261,10 +279,15 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
           // tim toi cai column ma ta dang tha
           const targetColumn = nextColumns.find(c => c._id === overColumn._id)
           targetColumn.cards = dndOrderedCards
-          targetColumn.cardOrderIds = dndOrderedCards.map(card => card._id)
+          targetColumn.cardOrderIds = dndOrderedCardIds
           // console.log('targetColumn: ', targetColumn)
           return nextColumns
         })
+        moveCardInTheSameColumn(
+          dndOrderedCards,
+          dndOrderedCardIds,
+          oldColumnWhenDraggingCard._id
+        )
       }
       return
     }
@@ -288,13 +311,13 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns }) {
         newColumnIndex
       )
 
+      // van phai goi tranh delay cua api dang goi
+      setOrderedColumns(dndOrderedColumns)
       // xu li goi api
       moveColumns(dndOrderedColumns)
       // const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
       // console.log(dndOrderedColumns)
       // console.log(dndOrderedColumnsIds)
-      // van phai goi tranh delay cua api dang goi
-      setOrderedColumns(dndOrderedColumns)
     }
 
     // vong doi cuoi cua card nen phai set state ve null
