@@ -1,31 +1,42 @@
-import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 
-import Divider from '@mui/material/Divider'
-import Menu from '@mui/material/Menu'
-import Tooltip from '@mui/material/Tooltip'
-import MenuItem from '@mui/material/MenuItem'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemIcon from '@mui/material/ListItemIcon'
+import AddCardIcon from '@mui/icons-material/AddCard'
+import Cloud from '@mui/icons-material/Cloud'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import ContentCut from '@mui/icons-material/ContentCut'
 import ContentPaste from '@mui/icons-material/ContentPaste'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
-import Cloud from '@mui/icons-material/Cloud'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import AddCardIcon from '@mui/icons-material/AddCard'
-import Button from '@mui/material/Button'
 import DragHandleIcon from '@mui/icons-material/DragHandle'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Tooltip from '@mui/material/Tooltip'
 
-import { useState } from 'react'
-import ListCards from './ListCards/ListCards'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import CloseIcon from '@mui/icons-material/Close'
 import TextField from '@mui/material/TextField'
-import { toast } from 'react-toastify'
 import { useConfirm } from 'material-ui-confirm'
-function Column({ column, createNewCard, deleteColumnDetails }) {
+import { useState } from 'react'
+import { toast } from 'react-toastify'
+import ListCards from './ListCards/ListCards'
+
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  selectCurrentActiveBoard,
+  updateCurrentActiveBoard
+} from '~/redux/activeBoard/activeBoardSlice'
+
+import { createNewCardAPI, deleteColumnDetailsAPI } from '~/apis'
+import { cloneDeep } from 'lodash'
+function Column({ column }) {
+  const board = useSelector(selectCurrentActiveBoard)
+  const dispatch = useDispatch()
   const confirmDeleteColumn = useConfirm()
   const [openNewCardForm, setOpenNewCardForm] = useState(false)
   const toggleOpenNewCardForm = () => {
@@ -33,7 +44,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
   }
 
   const [newCardTitle, setNewCardTitle] = useState('')
-  const addNewCard = () => {
+  const addNewCard = async () => {
     if (!newCardTitle) {
       toast.error('Please enter Card Title!', {
         position: 'bottom-right'
@@ -45,7 +56,29 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
       columnId: column._id
     }
     // goi api
-    createNewCard(newCardData)
+    const createdCard = await createNewCardAPI({
+      ...newCardData,
+      boardId: board._id
+    })
+    // console.log(createdCard)
+    // cap nhat state board
+    const newBoard = cloneDeep(board)
+    const columnToUpdate = newBoard.columns.find(
+      column => column._id === createdCard.columnId
+    )
+    // console.log('🚀 ~ createNewCard ~ columnToUpdate:', columnToUpdate)
+    if (columnToUpdate) {
+      if (columnToUpdate.cards.some(card => card.FE_PlaceholderCard === true)) {
+        columnToUpdate.cards = [createdCard]
+        columnToUpdate.cardOrderIds = [createdCard._id]
+      } else {
+        columnToUpdate.cards.push(createdCard)
+        columnToUpdate.cardOrderIds.push(createdCard._id)
+      }
+    }
+    // setBoard(newBoard)
+    // SET BOARD nhu SETSTATE TRONG REDUX
+    dispatch(updateCurrentActiveBoard(newBoard))
     // dong trang thai
     toggleOpenNewCardForm()
     setNewCardTitle('')
@@ -65,7 +98,22 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
         // console.log(column._id)
         // console.log(column.title)
         // goi tu component cao nhat
-        deleteColumnDetails(column._id)
+
+        // console.log('🚀 ~ Board ~ columnId:', columnId)
+        // update state board
+        const newBoard = cloneDeep(board)
+        newBoard.columns = newBoard.columns.filter(c => c._id !== column._id)
+        newBoard.columnOrderIds = newBoard.columnOrderIds.filter(
+          _id => _id !== column._id
+        )
+        // setBoard(newBoard)
+        // SET BOARD nhu SETSTATE TRONG REDUX
+        dispatch(updateCurrentActiveBoard(newBoard))
+        // goi api xu li
+        deleteColumnDetailsAPI(column._id).then(res => {
+          toast.success(res?.deleteResult)
+          // console.log('🚀 ~ deleteColumnDetails ~ columnId:', columnId)
+        })
       })
       .catch(() => {})
   }
