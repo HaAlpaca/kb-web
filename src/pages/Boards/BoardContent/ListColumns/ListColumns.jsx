@@ -1,30 +1,34 @@
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Column from './Column/Column'
 import {
   SortableContext,
   horizontalListSortingStrategy
 } from '@dnd-kit/sortable'
-import NoteAddIcon from '@mui/icons-material/NoteAdd'
-import { useState } from 'react'
-
-import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
+import NoteAddIcon from '@mui/icons-material/NoteAdd'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import { cloneDeep } from 'lodash'
+import { useState } from 'react'
 import { toast } from 'react-toastify'
+import { createNewColumnAPI } from '~/apis'
+import { generatePlaceholderCard } from '~/utils/formatters'
+import Column from './Column/Column'
 
-function ListColumns({
-  columns,
-  createNewColumn,
-  createNewCard,
-  deleteColumnDetails
-}) {
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  selectCurrentActiveBoard,
+  updateCurrentActiveBoard
+} from '~/redux/activeBoard/activeBoardSlice'
+function ListColumns({ columns }) {
+  const board = useSelector(selectCurrentActiveBoard)
+  const dispatch = useDispatch()
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => {
     setOpenNewColumnForm(!openNewColumnForm)
   }
 
   const [newColumnTitle, setNewColumnTitle] = useState('')
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitle) {
       toast.error('Please enter Column Title!')
       return
@@ -33,8 +37,23 @@ function ListColumns({
     const newColumnData = {
       title: newColumnTitle
     }
-    // goi api
-    createNewColumn(newColumnData)
+    // goi api tao board moi
+    const createdColumn = await createNewColumnAPI({
+      ...newColumnData,
+      boardId: board._id
+    })
+    createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+    createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+    // console.log(createdColumn)
+    // cap nhat state board
+    // tu lam dung thay vi fetch lai api
+    const newBoard = cloneDeep(board)
+    newBoard.columns.push(createdColumn)
+    newBoard.columnOrderIds.push(createdColumn._id)
+    // setBoard(newBoard)
+    // se co loi khi shallow copy => dung clonedeep hoac chuyen sang concat (concat tao mang moi va gan ngc lai) (push se bi loi vi no la merge 2 mang)
+    // https://redux-toolkit.js.org/usage/immer-reducers
+    dispatch(updateCurrentActiveBoard(newBoard))
     // dong trang thai
     toggleOpenNewColumnForm()
     setNewColumnTitle('')
@@ -65,8 +84,6 @@ function ListColumns({
             <Column
               key={column._id}
               column={column}
-              createNewCard={createNewCard}
-              deleteColumnDetails={deleteColumnDetails}
             />
           )
         })}

@@ -11,7 +11,7 @@ const initialState = {
 }
 // goi hanh dong bat dong bo =>
 // middleware createAsyncThunk di kem voi extraReducer
-const fetchBoardDetailsAPI = createAsyncThunk(
+export const fetchBoardDetailsAPI = createAsyncThunk(
   'activeBoard/fetchBoardDetailsAPI',
   async boardId => {
     const respond = await axios.get(`${API_ROOT}/v1/boards/${boardId}`)
