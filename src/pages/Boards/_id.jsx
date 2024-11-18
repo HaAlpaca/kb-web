@@ -23,15 +23,20 @@ import {
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
+
+import { useParams } from 'react-router-dom'
 function Board() {
   const dispatch = useDispatch()
   // const [board, setBoard] = useState(null)
   const board = useSelector(selectCurrentActiveBoard)
+
+  const { boardId } = useParams()
+  // console.log('boardId: ', boardId)
   useEffect(() => {
-    const boardId = '671210d38975d009e2a50179'
+    // const boardId = '671210d38975d009e2a50179'
     //call api
     dispatch(fetchBoardDetailsAPI(boardId))
-  }, [dispatch])
+  }, [dispatch, boardId])
 
   // goi api khi xu ly xong keo tha
   const moveColumns = async dndOrderedColumns => {
