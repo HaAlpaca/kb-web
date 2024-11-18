@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import axios from 'axios'
+import authorizeAxiosInstance from '~/utils/authorizeAxios'
 import { isEmpty } from 'lodash'
 import { API_ROOT } from '~/utils/constants'
 import { generatePlaceholderCard } from '~/utils/formatters'
@@ -14,7 +14,9 @@ const initialState = {
 export const fetchBoardDetailsAPI = createAsyncThunk(
   'activeBoard/fetchBoardDetailsAPI',
   async boardId => {
-    const respond = await axios.get(`${API_ROOT}/v1/boards/${boardId}`)
+    const respond = await authorizeAxiosInstance.get(
+      `${API_ROOT}/v1/boards/${boardId}`
+    )
     return respond.data
   }
 )

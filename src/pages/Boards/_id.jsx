@@ -7,9 +7,6 @@ import AppBar from '~/components/AppBar/AppBar'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
 // import { mockData } from '~/apis/mock-data'
-import { Typography } from '@mui/material'
-import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
 import { useEffect } from 'react'
 import {
   moveCardToDifferentColumnAPI,
@@ -25,6 +22,7 @@ import {
 } from '~/redux/activeBoard/activeBoardSlice'
 
 import { useParams } from 'react-router-dom'
+import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 function Board() {
   const dispatch = useDispatch()
   // const [board, setBoard] = useState(null)
@@ -115,21 +113,7 @@ function Board() {
   }
 
   if (!board) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 2,
-          width: '100vw',
-          height: '100vh'
-        }}
-      >
-        <CircularProgress />
-        <Typography>Loading Board...</Typography>
-      </Box>
-    )
+    return <PageLoadingSpinner caption="Loading Board..." />
   }
   return (
     <>

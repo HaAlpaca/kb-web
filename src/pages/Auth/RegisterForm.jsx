@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Avatar from '@mui/material/Avatar'
@@ -19,8 +19,11 @@ import {
   PASSWORD_RULE_MESSAGE,
   PASSWORD_CONFIRMATION_MESSAGE
 } from '~/utils/validators'
+import { registerUserAPI } from '~/apis'
+import { toast } from 'react-toastify'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 function RegisterForm() {
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
@@ -28,7 +31,14 @@ function RegisterForm() {
     formState: { errors }
   } = useForm()
   const submitRegister = data => {
-    console.log('Submit: ', data)
+    const { email, password } = data
+    toast
+      .promise(registerUserAPI({ email, password }), {
+        pending: 'Registration is in progress...'
+      })
+      .then(user => {
+        navigate(`/login?registeredEmail=${user.email}`)
+      })
   }
   return (
     <form onSubmit={handleSubmit(submitRegister)}>
@@ -58,7 +68,7 @@ function RegisterForm() {
               color: theme => theme.palette.grey[500]
             }}
           >
-            Author: TrungQuanDev
+            REGISTER
           </Box>
           <Box sx={{ padding: '0 1em 1em 1em' }}>
             <Box sx={{ marginTop: '1em' }}>
@@ -116,6 +126,7 @@ function RegisterForm() {
           </Box>
           <CardActions sx={{ padding: '0 1em 1em 1em' }}>
             <Button
+              className="interceptor-loading"
               type="submit"
               variant="contained"
               color="primary"

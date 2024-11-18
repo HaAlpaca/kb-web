@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Avatar from '@mui/material/Avatar'
@@ -19,14 +19,36 @@ import {
   PASSWORD_RULE_MESSAGE
 } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { useDispatch } from 'react-redux'
+import { toast } from 'react-toastify'
+import { loginUserApi } from '~/redux/user/userSlice'
 function LoginForm() {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm()
+
+  let [searchParams] = useSearchParams()
+  //   console.log(searchParams)
+  const registeredEmail = searchParams.get('registeredEmail')
+  const verifiedEmail = searchParams.get('verifiedEmail')
+
   const submitLogIn = data => {
-    console.log('Submit: ', data)
+    const { email, password } = data
+    toast
+      .promise(dispatch(loginUserApi({ email, password })), {
+        pending: 'Logging in...'
+      })
+      .then(res => {
+        // console.log(res)
+        // khong co loi ms ve route /
+        if (!res.error) {
+          navigate('/')
+        }
+      })
   }
   return (
     <form onSubmit={handleSubmit(submitLogIn)}>
@@ -66,35 +88,39 @@ function LoginForm() {
               padding: '0 1em'
             }}
           >
-            <Alert
-              severity="success"
-              sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}
-            >
-              Your email&nbsp;
-              <Typography
-                variant="span"
-                sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}
+            {verifiedEmail && (
+              <Alert
+                severity="success"
+                sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}
               >
-                Mail
-              </Typography>
-              &nbsp;has been verified.
-              <br />
-              Now you can login to enjoy our services! Have a good day!
-            </Alert>
-            <Alert
-              severity="info"
-              sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}
-            >
-              An email has been sent to&nbsp;
-              <Typography
-                variant="span"
-                sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}
+                Your email&nbsp;
+                <Typography
+                  variant="span"
+                  sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}
+                >
+                  {verifiedEmail}
+                </Typography>
+                &nbsp;has been verified.
+                <br />
+                Now you can login to enjoy our services! Have a good day!
+              </Alert>
+            )}
+            {registeredEmail && (
+              <Alert
+                severity="info"
+                sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}
               >
-                Mail
-              </Typography>
-              <br />
-              Please check and verify your account before logging in!
-            </Alert>
+                An email has been sent to&nbsp;
+                <Typography
+                  variant="span"
+                  sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}
+                >
+                  {registeredEmail}
+                </Typography>
+                <br />
+                Please check and verify your account before logging in!
+              </Alert>
+            )}
           </Box>
           <Box sx={{ padding: '0 1em 1em 1em' }}>
             <Box sx={{ marginTop: '1em' }}>
@@ -133,6 +159,7 @@ function LoginForm() {
           </Box>
           <CardActions sx={{ padding: '0 1em 1em 1em' }}>
             <Button
+              className="interceptor-loading"
               type="submit"
               variant="contained"
               color="primary"
