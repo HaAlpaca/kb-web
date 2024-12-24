@@ -1,9 +1,17 @@
 import Board from '~/pages/Boards/_id'
 import NotFound from '~/pages/404/NotFound'
-import { Route, Routes, Navigate } from 'react-router-dom'
+import { Route, Routes, Navigate, Outlet } from 'react-router-dom'
 import Auth from '~/pages/Auth/Auth'
 import AccountVerification from '~/pages/Auth/AccountVerification'
+import { useSelector } from 'react-redux'
+import { selectCurrentUser } from '~/redux/user/userSlice'
+// https://www.robinwieruch.de/react-router-private-routes/
+const ProtectedRoute = ({ user }) => {
+  if (!user) return <Navigate to="/login" replace={true} />
+  return <Outlet />
+}
 function App() {
+  const currentUser = useSelector(selectCurrentUser)
   return (
     <Routes>
       {/* Redirect route */}
@@ -14,7 +22,10 @@ function App() {
           <Navigate to="/boards/671210d38975d009e2a50179" replace="true" />
         }
       />
-      <Route path="/boards/:boardId" element={<Board />} />
+      {/* neu co user se da sang trang board */}
+      <Route element={<ProtectedRoute user={currentUser} />}>
+        <Route path="/boards/:boardId" element={<Board />} />
+      </Route>
       {/* AUTH */}
       <Route path="login" element={<Auth />} />
       <Route path="register" element={<Auth />} />

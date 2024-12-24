@@ -114,7 +114,7 @@ function RegisterForm() {
                 {...register('password_confirmation', {
                   validate: value => {
                     if (value === watch('password')) return true
-                    return 'Password Confirmation does not match'
+                    return PASSWORD_CONFIRMATION_MESSAGE
                   }
                 })}
               />
