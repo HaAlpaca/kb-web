@@ -5,6 +5,8 @@ import Auth from '~/pages/Auth/Auth'
 import AccountVerification from '~/pages/Auth/AccountVerification'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import Settings from '~/pages/Settings/Settings'
+
 // https://www.robinwieruch.de/react-router-private-routes/
 const ProtectedRoute = ({ user }) => {
   if (!user) return <Navigate to="/login" replace={true} />
@@ -25,6 +27,9 @@ function App() {
       {/* neu co user se da sang trang board */}
       <Route element={<ProtectedRoute user={currentUser} />}>
         <Route path="/boards/:boardId" element={<Board />} />
+        {/* User Settings */}
+        <Route path="/settings/account" element={<Settings />} />
+        <Route path="/settings/security" element={<Settings />} />
       </Route>
       {/* AUTH */}
       <Route path="login" element={<Auth />} />
