@@ -11,6 +11,7 @@ import storage from 'redux-persist/lib/storage'
 
 import { configureStore } from '@reduxjs/toolkit'
 import { activeBoardReducer } from './activeBoard/activeBoardSlice'
+import { activeCardReducer } from './activeCard/activeCardSlice'
 import { userReducer } from './user/userSlice'
 //
 const rootPersistConfig = {
@@ -24,6 +25,7 @@ const rootPersistConfig = {
 
 export const reducers = combineReducers({
   activeBoard: activeBoardReducer,
+  activeCard: activeCardReducer,
   user: userReducer
 })
 
