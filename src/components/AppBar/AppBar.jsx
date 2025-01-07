@@ -10,7 +10,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import SearchIcon from '@mui/icons-material/Search'
 
 import Badge from '@mui/material/Badge'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import Tooltip from '@mui/material/Tooltip'
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
@@ -22,7 +21,9 @@ import Starred from './Menus/Starred'
 import Templates from './Menus/Templates'
 import Profiles from './Menus/Profiles'
 import { useState } from 'react'
-
+import { Link } from 'react-router-dom'
+import Notifications from './Notifications/Notifications'
+import AutoCompleteSearchBoard from './SearchBoards/AutoCompleteSearchBoard'
 function AppBar() {
   const [searchValue, setSearchValue] = useState('')
   return (
@@ -42,25 +43,33 @@ function AppBar() {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <AppsIcon sx={{ color: 'white' }}></AppsIcon>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <SvgIcon
-            component={trelloIcon}
-            inheritViewBox
-            fontSize="small"
-            sx={{ color: 'white' }}
-          />
-          <Typography
-            variant="span"
-            sx={{
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-              color: 'white'
-            }}
-          >
-            Trello
-          </Typography>
-        </Box>
+        <Link to={'/boards'}>
+          <Tooltip title="Board List">
+            <AppsIcon
+              sx={{ color: 'white', verticalAlign: 'middle' }}
+            ></AppsIcon>
+          </Tooltip>
+        </Link>
+        <Link to={'/'}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <SvgIcon
+              component={trelloIcon}
+              inheritViewBox
+              fontSize="small"
+              sx={{ color: 'white' }}
+            />
+            <Typography
+              variant="span"
+              sx={{
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+                color: 'white'
+              }}
+            >
+              Trello
+            </Typography>
+          </Box>
+        </Link>
 
         <Box
           sx={{
@@ -89,7 +98,7 @@ function AppBar() {
         </Button>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <TextField
+        {/* <TextField
           required
           id="outlined-search"
           label="Search..."
@@ -130,14 +139,12 @@ function AppBar() {
               '&.Mui-focused fieldset': { borderColor: 'white' }
             }
           }}
-        />
-
+        /> */}
+        <AutoCompleteSearchBoard />
+        {/* dark light mode */}
         <ModeSelect />
-        <Tooltip title="Notification">
-          <Badge color="warning" variant="dot" sx={{ cursor: 'pointer' }}>
-            <NotificationsNoneIcon sx={{ color: 'white' }} />
-          </Badge>
-        </Tooltip>
+        {/* xu li thong bao */}
+        <Notifications />
         <Tooltip title="Help">
           <Badge color="secondary" sx={{ cursor: 'pointer' }}>
             <HelpOutlineIcon sx={{ color: 'white' }} />

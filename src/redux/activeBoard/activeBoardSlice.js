@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import axios from 'axios'
+import authorizeAxiosInstance from '~/utils/authorizeAxios'
 import { isEmpty } from 'lodash'
 import { API_ROOT } from '~/utils/constants'
 import { generatePlaceholderCard } from '~/utils/formatters'
@@ -14,7 +14,9 @@ const initialState = {
 export const fetchBoardDetailsAPI = createAsyncThunk(
   'activeBoard/fetchBoardDetailsAPI',
   async boardId => {
-    const respond = await axios.get(`${API_ROOT}/v1/boards/${boardId}`)
+    const respond = await authorizeAxiosInstance.get(
+      `${API_ROOT}/v1/boards/${boardId}`
+    )
     return respond.data
   }
 )
@@ -34,6 +36,22 @@ export const activeBoardSlice = createSlice({
       // xu li du lieu....
       // update du lieu cho current active board
       state.currentActiveBoard = fullBoard
+    },
+    updateCardInBoard: (state, action) => {
+      // update nested data https://redux-toolkit.js.org/usage/immer-reducers#updating-nested-data
+      const incomingCard = action.payload
+      const column = state.currentActiveBoard.columns.find(
+        i => i._id === incomingCard.columnId
+      )
+      if (column) {
+        const card = column.cards.find(i => i._id === incomingCard._id)
+        if (card) {
+          // column.cards[card] = incomingCard
+          Object.keys(incomingCard).forEach(key => {
+            card[key] = incomingCard[key]
+          })
+        }
+      }
     }
   },
   // extraReducers: noi xu li du lieu bat dong bo
@@ -41,6 +59,9 @@ export const activeBoardSlice = createSlice({
     builder.addCase(fetchBoardDetailsAPI.fulfilled, (state, action) => {
       // action.payload chinh la cai response.data tra ve o tren
       let board = action.payload
+
+      // gộp cả owner và member
+      board.FE_allUsers = board.owners.concat(board.members)
 
       // xu li du lieu truoc khi luu vao redux -> giong xu li truoc ki setState
       // sap xep luon column khong phai doi component con map lai
@@ -66,7 +87,8 @@ export const activeBoardSlice = createSlice({
 
 // Actions: la noi dung cho components ben duoi goi bang dispatch() toi de cap nhat lai du lieu thong qua reducer (chay dong bo)
 // de y o tren thi khong co props actions dau ca, actions duoc redux tao tu dong
-export const { updateCurrentActiveBoard } = activeBoardSlice.actions
+export const { updateCurrentActiveBoard, updateCardInBoard } =
+  activeBoardSlice.actions
 // selectors: la noi cho cac component goi bang hook useSelector de lay du lieu ra ngoai tu trong kho redux store ra su dung
 export const selectCurrentActiveBoard = state => {
   return state.activeBoard.currentActiveBoard

@@ -7,9 +7,6 @@ import AppBar from '~/components/AppBar/AppBar'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
 // import { mockData } from '~/apis/mock-data'
-import { Typography } from '@mui/material'
-import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
 import { useEffect } from 'react'
 import {
   moveCardToDifferentColumnAPI,
@@ -23,15 +20,22 @@ import {
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
+
+import { useParams } from 'react-router-dom'
+import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
+
+import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 function Board() {
   const dispatch = useDispatch()
   // const [board, setBoard] = useState(null)
   const board = useSelector(selectCurrentActiveBoard)
+  const { boardId } = useParams()
+  // console.log('boardId: ', boardId)
   useEffect(() => {
-    const boardId = '671210d38975d009e2a50179'
+    // const boardId = '671210d38975d009e2a50179'
     //call api
     dispatch(fetchBoardDetailsAPI(boardId))
-  }, [dispatch])
+  }, [dispatch, boardId])
 
   // goi api khi xu ly xong keo tha
   const moveColumns = async dndOrderedColumns => {
@@ -110,25 +114,13 @@ function Board() {
   }
 
   if (!board) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 2,
-          width: '100vw',
-          height: '100vh'
-        }}
-      >
-        <CircularProgress />
-        <Typography>Loading Board...</Typography>
-      </Box>
-    )
+    return <PageLoadingSpinner caption="Loading Board..." />
   }
   return (
     <>
       <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
+        {/* ActiveCard: tồn tại dựa trên đk có tồn tại data trong ActiveCard lưu trong redux không có thì mới render , mỗi thời điểm chỉ có 1 modal */}
+        <ActiveCard />
         <AppBar />
         <BoardBar board={board} />
         <BoardContent

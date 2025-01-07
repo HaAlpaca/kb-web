@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-
+// import Typography from '@mui/material/Typography'
 import AddCardIcon from '@mui/icons-material/AddCard'
 import Cloud from '@mui/icons-material/Cloud'
 import ContentCopy from '@mui/icons-material/ContentCopy'
@@ -32,8 +31,13 @@ import {
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 
-import { createNewCardAPI, deleteColumnDetailsAPI } from '~/apis'
+import {
+  createNewCardAPI,
+  deleteColumnDetailsAPI,
+  updateColumnDetailsAPI
+} from '~/apis'
 import { cloneDeep } from 'lodash'
+import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 function Column({ column }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
@@ -147,6 +151,19 @@ function Column({ column }) {
     setAnchorEl(null)
   }
 
+  const onUpdateColumnTitle = newTitle => {
+    updateColumnDetailsAPI(column._id, { title: newTitle }).then(() => {
+      const newBoard = cloneDeep(board)
+      const columnToUpdate = newBoard.columns.find(c => column._id === c._id)
+      if (columnToUpdate) {
+        columnToUpdate.title = newTitle
+      }
+      // setBoard(newBoard)
+      // SET BOARD nhu SETSTATE TRONG REDUX
+      dispatch(updateCurrentActiveBoard(newBoard))
+    })
+  }
+
   const orderedCard = column.cards
   return (
     <div ref={setNodeRef} style={dndKitColumnStyle} {...attributes}>
@@ -176,7 +193,7 @@ function Column({ column }) {
             justifyContent: 'space-between'
           }}
         >
-          <Typography
+          {/* <Typography
             variant="h6"
             sx={{
               fontSize: '1rem',
@@ -185,7 +202,12 @@ function Column({ column }) {
             }}
           >
             {column?.title}
-          </Typography>
+          </Typography> */}
+          <ToggleFocusInput
+            data-no-dnd="true"
+            value={column?.title}
+            onChangedValue={onUpdateColumnTitle}
+          />
           <Box>
             <Box>
               <Tooltip title="More options">
@@ -355,6 +377,7 @@ function Column({ column }) {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button
                   data-no-dnd="true"
+                  className="interceptor-loading"
                   onClick={addNewCard}
                   variant="contained"
                   color="success"

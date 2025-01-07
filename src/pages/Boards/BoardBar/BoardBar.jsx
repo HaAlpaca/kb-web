@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 
-import Button from '@mui/material/Button'
-import Avatar from '@mui/material/Avatar'
-import AvatarGroup from '@mui/material/AvatarGroup'
+// import Button from '@mui/material/Button'
+// import Avatar from '@mui/material/Avatar'
+// import AvatarGroup from '@mui/material/AvatarGroup'
 import { Tooltip } from '@mui/material'
 
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -11,8 +11,10 @@ import VpnLockIcon from '@mui/icons-material/VpnLock'
 import AddToDriveIcon from '@mui/icons-material/AddToDrive'
 import BoltIcon from '@mui/icons-material/Bolt'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
+// import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { capitalizeFirstLetter } from '~/utils/formatters'
+import BoardUserGroup from './BoardUserGroup'
+import InviteBoardUser from './InviteBoardUser'
 const MENU_STYLE = {
   color: 'white',
   bgcolor: 'transparent',
@@ -79,73 +81,8 @@ function BoardBar({ board }) {
         />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Button
-          variant="outlined"
-          startIcon={<PersonAddIcon />}
-          sx={{
-            color: 'white',
-            borderColor: 'white',
-            '&: hover': {
-              borderColor: 'white'
-            }
-          }}
-        >
-          Invite
-        </Button>
-        <AvatarGroup
-          max={4}
-          sx={{
-            gap: '10px',
-            '& .MuiAvatar-root': {
-              width: 34,
-              height: 34,
-              fontSize: 16,
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              '&:first-of-type': {
-                bgcolor: '#a4b0be'
-              }
-            }
-          }}
-        >
-          <Tooltip title="HaAlpaca">
-            <Avatar
-              alt="Remy Sharp"
-              src="https://images.unsplash.com/photo-1717122639077-5d29504b4eb5"
-            />
-          </Tooltip>
-          <Tooltip title="HaAlpaca">
-            <Avatar
-              alt="Remy Sharp"
-              src="https://images.unsplash.com/photo-1717122639077-5d29504b4eb5"
-            />
-          </Tooltip>
-          <Tooltip title="HaAlpaca">
-            <Avatar
-              alt="Remy Sharp"
-              src="https://images.unsplash.com/photo-1717122639077-5d29504b4eb5"
-            />
-          </Tooltip>
-          <Tooltip title="HaAlpaca">
-            <Avatar
-              alt="Remy Sharp"
-              src="https://images.unsplash.com/photo-1717122639077-5d29504b4eb5"
-            />
-          </Tooltip>
-          <Tooltip title="HaAlpaca">
-            <Avatar
-              alt="Remy Sharp"
-              src="https://images.unsplash.com/photo-1717122639077-5d29504b4eb5"
-            />
-          </Tooltip>
-          <Tooltip title="HaAlpaca">
-            <Avatar
-              alt="Remy Sharp"
-              src="https://images.unsplash.com/photo-1717122639077-5d29504b4eb5"
-            />
-          </Tooltip>
-        </AvatarGroup>
+        <InviteBoardUser boardId={board?._id} />
+        <BoardUserGroup boardUsers={board?.FE_allUsers} />
       </Box>
     </Box>
   )
