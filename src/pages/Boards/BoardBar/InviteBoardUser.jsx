@@ -7,30 +7,45 @@ import Button from '@mui/material/Button'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import TextField from '@mui/material/TextField'
 import { useForm } from 'react-hook-form'
-import { EMAIL_RULE, FIELD_REQUIRED_MESSAGE, EMAIL_RULE_MESSAGE } from '~/utils/validators'
+import {
+  EMAIL_RULE,
+  FIELD_REQUIRED_MESSAGE,
+  EMAIL_RULE_MESSAGE
+} from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { inviteUserToBoardAPI } from '~/apis'
+import { socketIoInstance } from '~/main'
 
-function InviteBoardUser() {
+function InviteBoardUser({ boardId }) {
   /**
    * Xử lý Popover để ẩn hoặc hiện một popup nhỏ, tương tự docs để tham khảo ở đây:
    * https://mui.com/material-ui/react-popover/
-  */
+   */
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const isOpenPopover = Boolean(anchorPopoverElement)
   const popoverId = isOpenPopover ? 'invite-board-user-popover' : undefined
-  const handleTogglePopover = (event) => {
+  const handleTogglePopover = event => {
     if (!anchorPopoverElement) setAnchorPopoverElement(event.currentTarget)
     else setAnchorPopoverElement(null)
   }
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm()
-  const submitInviteUserToBoard = (data) => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors }
+  } = useForm()
+  const submitInviteUserToBoard = data => {
     const { inviteeEmail } = data
-    console.log('inviteeEmail:', inviteeEmail)
+    // console.log('inviteeEmail:', inviteeEmail)
+    inviteUserToBoardAPI({ inviteeEmail, boardId }).then(invitation => {
+      // Clear thẻ input sử dụng react-hook-form bằng setValue
+      setValue('inviteeEmail', null)
+      setAnchorPopoverElement(null)
 
-    // Clear thẻ input sử dụng react-hook-form bằng setValue
-    setValue('inviteeEmail', null)
-    setAnchorPopoverElement(null)
+      // mời xong => bắn realtime lời mời cho bên được nhận
+      socketIoInstance.emit('FE_USER_INVITED_TO_BOARD', invitation)
+    })
   }
 
   return (
@@ -41,7 +56,11 @@ function InviteBoardUser() {
           onClick={handleTogglePopover}
           variant="outlined"
           startIcon={<PersonAddIcon />}
-          sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: 'white' } }}
+          sx={{
+            color: 'white',
+            borderColor: 'white',
+            '&:hover': { borderColor: 'white' }
+          }}
         >
           Invite
         </Button>
@@ -56,9 +75,24 @@ function InviteBoardUser() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <form onSubmit={handleSubmit(submitInviteUserToBoard)} style={{ width: '320px' }}>
-          <Box sx={{ p: '15px 20px 20px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="span" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Invite User To This Board!</Typography>
+        <form
+          onSubmit={handleSubmit(submitInviteUserToBoard)}
+          style={{ width: '320px' }}
+        >
+          <Box
+            sx={{
+              p: '15px 20px 20px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <Typography
+              variant="span"
+              sx={{ fontWeight: 'bold', fontSize: '16px' }}
+            >
+              Invite User To This Board!
+            </Typography>
             <Box>
               <TextField
                 autoFocus

@@ -25,12 +25,10 @@ import { useParams } from 'react-router-dom'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
-import { selectCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
 function Board() {
   const dispatch = useDispatch()
   // const [board, setBoard] = useState(null)
   const board = useSelector(selectCurrentActiveBoard)
-  const activeCard = useSelector(selectCurrentActiveCard)
   const { boardId } = useParams()
   // console.log('boardId: ', boardId)
   useEffect(() => {
@@ -122,7 +120,7 @@ function Board() {
     <>
       <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
         {/* ActiveCard: tồn tại dựa trên đk có tồn tại data trong ActiveCard lưu trong redux không có thì mới render , mỗi thời điểm chỉ có 1 modal */}
-        {activeCard && <ActiveCard />}
+        <ActiveCard />
         <AppBar />
         <BoardBar board={board} />
         <BoardContent

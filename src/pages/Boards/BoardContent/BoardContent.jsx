@@ -377,13 +377,59 @@ function BoardContent({
     [activeDragItemType, orderedColumns]
   )
 
+  // return (
+  //   <DndContext
+  //     sensors={sensors}
+  //     // thuat toan phat hien va cham
+  //     // https://docs.dndkit.com/api-documentation/context-provider/collision-detection-algorithms
+  //     // collisionDetection={closestCorners}
+  //     // neu dung closestCorners thi se co loi flicking khi de card co img giua 2 column
+  //     collisionDetection={collisionDetectionStrategy}
+  //     onDragStart={handleDragStart}
+  //     onDragOver={handleDragOver}
+  //     onDragEnd={handleDragEnd}
+  //   >
+  //     <Box
+  //       sx={{
+  //         // backgroundImage:
+  //         //   'url(https://images.unsplash.com/photo-1725830826396-bcb0585da085)',
+  //         // filter: 'blur(5px)',
+  //         // backgroundPosition: 'center',
+  //         // backgroundRepeat: 'no-repeat',
+  //         // backgroundSize: 'cover',
+  //         bgcolor: theme =>
+  //           theme.palette.mode === 'dark' ? '#34495e' : '#1976d2',
+  //         width: '100%',
+  //         height: theme => theme.trelloCustom.boardContentHeight,
+  //         display: 'flex',
+  //         p: '10px 0'
+  //       }}
+  //     >
+  //       {/* Board column */}
+
+  //       <ListColumns
+  //         sx={{ zIndex: 10 }}
+  //         columns={orderedColumns}
+  //         // da dung redux
+  //         // createNewColumn={createNewColumn}
+  //         // createNewCard={createNewCard}
+  //         // deleteColumnDetails={deleteColumnDetails}
+  //       />
+  //       <DragOverlay dropAnimation={customDropAnimation}>
+  //         {!activeDragItemType && null}
+  //         {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN && (
+  //           <Column column={activeDragItemData} />
+  //         )}
+  //         {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD && (
+  //           <Card card={activeDragItemData} />
+  //         )}
+  //       </DragOverlay>
+  //     </Box>
+  //   </DndContext>
+  // )
   return (
     <DndContext
       sensors={sensors}
-      // thuat toan phat hien va cham
-      // https://docs.dndkit.com/api-documentation/context-provider/collision-detection-algorithms
-      // collisionDetection={closestCorners}
-      // neu dung closestCorners thi se co loi flicking khi de card co img giua 2 column
       collisionDetection={collisionDetectionStrategy}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
@@ -391,35 +437,120 @@ function BoardContent({
     >
       <Box
         sx={{
-          bgcolor: theme =>
-            theme.palette.mode === 'dark' ? '#34495e' : '#1976d2',
+          position: 'relative',
           width: '100%',
           height: theme => theme.trelloCustom.boardContentHeight,
-          display: 'flex',
-          p: '10px 0'
+          overflow: 'hidden'
         }}
       >
-        {/* Board column */}
+        {/* Background image blur */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: theme =>
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(https://images.unsplash.com/photo-1669236712949-b58f9758898d)'
+                : 'url(https://images.unsplash.com/photo-1669236712949-b58f9758898d)',
 
-        <ListColumns
-          columns={orderedColumns}
-          // da dung redux
-          // createNewColumn={createNewColumn}
-          // createNewCard={createNewCard}
-          // deleteColumnDetails={deleteColumnDetails}
+            // filter: 'blur(px)',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            zIndex: 1
+          }}
         />
-        <DragOverlay dropAnimation={customDropAnimation}>
-          {!activeDragItemType && null}
-          {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN && (
-            <Column column={activeDragItemData} />
-          )}
-          {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD && (
-            <Card card={activeDragItemData} />
-          )}
-        </DragOverlay>
+
+        {/* Foreground content */}
+        <Box
+          sx={{
+            position: 'relative', // Giữ nội dung trên cùng
+            zIndex: 10, // Đảm bảo nội dung ở trên background
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            p: '10px 0'
+          }}
+        >
+          {/* Board column */}
+          <ListColumns columns={orderedColumns} sx={{ zIndex: 10 }} />
+          <DragOverlay dropAnimation={customDropAnimation}>
+            {!activeDragItemType && null}
+            {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN && (
+              <Column column={activeDragItemData} />
+            )}
+            {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD && (
+              <Card card={activeDragItemData} />
+            )}
+          </DragOverlay>
+        </Box>
       </Box>
     </DndContext>
   )
 }
 
 export default BoardContent
+
+// return (
+//   <DndContext
+//     sensors={sensors}
+//     collisionDetection={collisionDetectionStrategy}
+//     onDragStart={handleDragStart}
+//     onDragOver={handleDragOver}
+//     onDragEnd={handleDragEnd}
+//   >
+//     <Box
+//       sx={{
+//         position: 'relative', // Để chứa các thành phần con đúng vị trí
+//         width: '100%',
+//         height: theme => theme.trelloCustom.boardContentHeight,
+//         overflow: 'hidden', // Ẩn phần ảnh dư thừa
+//       }}
+//     >
+//       {/* Background image blur */}
+//       <Box
+//         sx={{
+//           position: 'absolute',
+//           top: 0,
+//           left: 0,
+//           width: '100%',
+//           height: '100%',
+//           backgroundImage:
+//             'url(https://images.unsplash.com/photo-1725830826396-bcb0585da085)',
+//           filter: 'blur(5px)',
+//           backgroundPosition: 'center',
+//           backgroundRepeat: 'no-repeat',
+//           backgroundSize: 'cover',
+//           zIndex: 1, // Đặt dưới ListColumns
+//         }}
+//       />
+
+//       {/* Foreground content */}
+//       <Box
+//         sx={{
+//           position: 'relative', // Giữ nội dung trên cùng
+//           zIndex: 10, // Đảm bảo nội dung ở trên background
+//           display: 'flex',
+//           p: '10px 0',
+//         }}
+//       >
+//         {/* Board column */}
+//         <ListColumns columns={orderedColumns} sx={{ zIndex: 10 }} />
+//         <DragOverlay dropAnimation={customDropAnimation}>
+//           {!activeDragItemType && null}
+//           {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN && (
+//             <Column column={activeDragItemData} />
+//           )}
+//           {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD && (
+//             <Card card={activeDragItemData} />
+//           )}
+//         </DragOverlay>
+//       </Box>
+//     </Box>
+//   </DndContext>
+// );
