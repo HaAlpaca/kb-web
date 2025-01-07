@@ -23,6 +23,7 @@ import Profiles from './Menus/Profiles'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Notifications from './Notifications/Notifications'
+import AutoCompleteSearchBoard from './SearchBoards/AutoCompleteSearchBoard'
 function AppBar() {
   const [searchValue, setSearchValue] = useState('')
   return (
@@ -97,7 +98,7 @@ function AppBar() {
         </Button>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <TextField
+        {/* <TextField
           required
           id="outlined-search"
           label="Search..."
@@ -138,7 +139,8 @@ function AppBar() {
               '&.Mui-focused fieldset': { borderColor: 'white' }
             }
           }}
-        />
+        /> */}
+        <AutoCompleteSearchBoard />
         {/* dark light mode */}
         <ModeSelect />
         {/* xu li thong bao */}
