@@ -24,9 +24,15 @@ let persistor = persistStore(store)
 // cau hinh react router
 import { BrowserRouter } from 'react-router-dom'
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <BrowserRouter basename="/">
-    <Provider store={store}>
-      <PersistGate persistor={persistor}>
+  <Provider store={store}>
+    <PersistGate persistor={persistor}>
+      <BrowserRouter
+        basename="/"
+        future={{
+          v7_relativeSplatPath: true,
+          v7_startTransition: true
+        }}
+      >
         <CssVarsProvider theme={theme}>
           <ConfirmProvider
             defaultOptions={{
@@ -50,7 +56,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             />
           </ConfirmProvider>
         </CssVarsProvider>
-      </PersistGate>
-    </Provider>
-  </BrowserRouter>
+      </BrowserRouter>
+    </PersistGate>
+  </Provider>
 )
