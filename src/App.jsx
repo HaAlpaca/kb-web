@@ -34,9 +34,9 @@ function App() {
         <Route path="/settings/security" element={<Settings />} />
       </Route>
       {/* AUTH */}
-      <Route path="login" element={<Auth />} />
-      <Route path="register" element={<Auth />} />
-      <Route path="account/verification" element={<AccountVerification />} />
+      <Route path="/login" element={<Auth />} />
+      <Route path="/register" element={<Auth />} />
+      <Route path="/account/verification" element={<AccountVerification />} />
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>

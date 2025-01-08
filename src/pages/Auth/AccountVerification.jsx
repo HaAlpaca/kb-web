@@ -5,10 +5,10 @@ import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 function AccountVerification() {
   let [searchParams] = useSearchParams()
   //   console.log(searchParams)
-  const email = searchParams.get('email')
-  const token = searchParams.get('token')
+  // const email = searchParams.get('email')
+  // const token = searchParams.get('token')
   // hoac
-  // const {email,token} = Object.fromEntries([...searchParams])
+  const { email, token } = Object.fromEntries([...searchParams])
   //   console.log(email, token)
   const [verified, setVerified] = useState(false)
   // goi api verify tai khoan
@@ -19,7 +19,7 @@ function AccountVerification() {
   }, [email, token])
   // url co van de
   if (!email || !token) {
-    return <Navigate to="404" />
+    return <Navigate to="/404" />
   }
   // chua verify thi loading
   if (!verified) {
