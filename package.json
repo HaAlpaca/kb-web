@@ -2,6 +2,7 @@
   "name": "trello-web",
   "private": true,
   "version": "0.0.0",
+  "homepage":"vercel url here",
   "type": "module",
   "author": "Ha Alpaca",
   "description": "learn react",
@@ -52,4 +53,5 @@
     "vite": "^4.3.2",
     "vite-plugin-svgr": "^3.2.0"
   }
+  
 }
