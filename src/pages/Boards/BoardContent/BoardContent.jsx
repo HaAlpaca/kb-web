@@ -453,8 +453,8 @@ function BoardContent({
             height: '100%',
             backgroundImage: theme =>
               theme.palette.mode === 'dark'
-                ? 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(https://images.unsplash.com/photo-1669236712949-b58f9758898d)'
-                : 'url(https://images.unsplash.com/photo-1669236712949-b58f9758898d)',
+                ? 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(/kanban-bg.png)'
+                : 'url(/kanban-bg.png)',
 
             // filter: 'blur(px)',
             backgroundPosition: 'center',
