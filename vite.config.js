@@ -8,7 +8,7 @@ export default defineConfig({
     'process.env': process.env
   },
   plugins: [react(), svgr()],
-  base: './',
+  base: '/trello-web/',
   resolve: {
     alias: [{ find: '~', replacement: '/src' }]
   }
