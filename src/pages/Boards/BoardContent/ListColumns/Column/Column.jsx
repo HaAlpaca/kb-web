@@ -38,6 +38,7 @@ import {
 } from '~/apis'
 import { cloneDeep } from 'lodash'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
+import { socketIoInstance } from '~/socket-client'
 function Column({ column }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
@@ -117,6 +118,8 @@ function Column({ column }) {
         deleteColumnDetailsAPI(column._id).then(res => {
           toast.success(res?.deleteResult)
           // console.log('🚀 ~ deleteColumnDetails ~ columnId:', columnId)
+          socketIoInstance.emit('FE_DELETE_COLUMN', res)
+          console.log('FE_DELETE_COLUMN emit: ', res)
         })
       })
       .catch(() => {})

@@ -1,7 +1,7 @@
 // board details
 
 import Container from '@mui/material/Container'
-import { cloneDeep } from 'lodash'
+import { clone, cloneDeep } from 'lodash'
 import AppBar from '~/components/AppBar/AppBar'
 
 import BoardBar from './BoardBar/BoardBar'
@@ -25,17 +25,67 @@ import { useParams } from 'react-router-dom'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
+import { socketIoInstance } from '~/socket-client'
+import { generatePlaceholderCard } from '~/utils/formatters'
 function Board() {
   const dispatch = useDispatch()
   // const [board, setBoard] = useState(null)
   const board = useSelector(selectCurrentActiveBoard)
   const { boardId } = useParams()
-  // console.log('boardId: ', boardId)
+
+  // FETCH BOARD
   useEffect(() => {
     // const boardId = '671210d38975d009e2a50179'
     //call api
     dispatch(fetchBoardDetailsAPI(boardId))
   }, [dispatch, boardId])
+  // WEBSOCKET EVENT RECEIVE DELETE COLUMN
+  useEffect(() => {
+    // const boardId = '671210d38975d009e2a50179'
+    //call api
+    // dispatch(fetchBoardDetailsAPI(boardId))
+    // socketIoInstance.on('BE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN', move => {
+    //   console.log('BE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN on: ', move)
+    // })
+    socketIoInstance.on('BE_DELETE_COLUMN', deletedColumn => {
+      const newBoard = { ...board }
+      // console.log(newBoard)
+      newBoard.columns = newBoard.columns?.filter(
+        c => c._id !== deletedColumn.columnId
+      )
+      newBoard.columnOrderIds = newBoard.columnOrderIds?.filter(
+        _id => _id !== deletedColumn.columnId
+      )
+      // setBoard(newBoard)
+      // SET BOARD nhu SETSTATE TRONG REDUX
+      dispatch(updateCurrentActiveBoard(newBoard))
+      // console.log('BE_DELETE_COLUMN on: ', deletedColumn)
+    })
+  }, [dispatch, board])
+  // WEBSOCKET EVENT RECEIVE CREATE COLUMN
+  useEffect(() => {
+    socketIoInstance.on('BE_CREATE_COLUMN', createdColumn => {
+      // console.log('BE_CREATE_COLUMN on: ', createdColumn)
+      createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+      createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+      // cap nhat state board
+      // tu lam dung thay vi fetch lai api
+      const newBoard = {
+        ...board
+      }
+      newBoard.columns = newBoard.columns?.concat(createdColumn)
+      newBoard.columnOrderIds = newBoard.columnOrderIds?.concat(
+        createdColumn._id
+      )
+      // console.log('NewBoard: ', newBoard)
+      // newBoard.columns.push(createdColumn)
+      // newBoard.columnOrderIds.push(createdColumn._id)
+      // setBoard(newBoard)
+      // // // se co loi khi shallow copy => dung clonedeep hoac chuyen sang concat (concat tao mang moi va gan ngc lai) (push se bi loi vi no la merge 2 mang)
+      // // // https://redux-toolkit.js.org/usage/immer-reducers
+      dispatch(updateCurrentActiveBoard(newBoard))
+    })
+  }, [dispatch, board])
 
   // goi api khi xu ly xong keo tha
   const moveColumns = async dndOrderedColumns => {
@@ -60,7 +110,7 @@ function Board() {
     columnId
   ) => {
     // update state board
-    const newBoard = cloneDeep(board)
+    const newBoard = clone(board)
     const columnToUpdate = newBoard.columns.find(
       column => column._id === columnId
     )
@@ -110,6 +160,9 @@ function Board() {
       nextColumnId,
       nextCardOrderIds: dndOrderedColumns.find(c => c._id === nextColumnId)
         ?.cardOrderIds
+    }).then(res => {
+      socketIoInstance.emit('FE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN', res)
+      // console.log('FE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN emit: ', res)
     })
   }
 

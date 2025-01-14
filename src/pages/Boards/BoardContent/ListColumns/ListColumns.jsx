@@ -19,6 +19,7 @@ import {
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
+import { socketIoInstance } from '~/socket-client'
 function ListColumns({ columns }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
@@ -41,7 +42,12 @@ function ListColumns({ columns }) {
     const createdColumn = await createNewColumnAPI({
       ...newColumnData,
       boardId: board._id
+    }).then(res => {
+      // socket emit
+      socketIoInstance.emit('FE_CREATE_COLUMN', res)
+      return res
     })
+    // handle column
     createdColumn.cards = [generatePlaceholderCard(createdColumn)]
     createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
     // console.log(createdColumn)
