@@ -1,20 +1,21 @@
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
-
+// import MenuIcon from '@mui/icons-material/Menu'
 // import Button from '@mui/material/Button'
 // import Avatar from '@mui/material/Avatar'
 // import AvatarGroup from '@mui/material/AvatarGroup'
-import { Tooltip } from '@mui/material'
-
-import DashboardIcon from '@mui/icons-material/Dashboard'
+// import { Tooltip } from '@mui/material'
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
+// import DashboardIcon from '@mui/icons-material/Dashboard'
 import VpnLockIcon from '@mui/icons-material/VpnLock'
-import AddToDriveIcon from '@mui/icons-material/AddToDrive'
-import BoltIcon from '@mui/icons-material/Bolt'
+// import AddToDriveIcon from '@mui/icons-material/AddToDrive'
+// import BoltIcon from '@mui/icons-material/Bolt'
 import FilterListIcon from '@mui/icons-material/FilterList'
 // import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { capitalizeFirstLetter } from '~/utils/formatters'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
+import BoardMenuGroup from './BoardMenuGroup'
 const MENU_STYLE = {
   color: 'white',
   bgcolor: 'transparent',
@@ -43,40 +44,53 @@ function BoardBar({ board }) {
         overflowX: 'auto',
         '&::-webkit-scrollbar-track': { margin: 2 },
         bgcolor: theme =>
-          theme.palette.mode === 'dark' ? '#34495e' : '#1976d2'
+          theme.palette.mode === 'dark' ? '#34495e' : '#493D9EE6'
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Tooltip title={board?.description}>
+        {/* <Tooltip title={board?.description}>
           <Chip
             sx={MENU_STYLE}
             icon={<DashboardIcon />}
             label={board?.title}
             onClick={() => {}}
           />
-        </Tooltip>
+        </Tooltip> */}
+        {/* Menu in Board */}
+        <BoardMenuGroup
+          board={board}
+          boardId={board?._id}
+          MENU_STYLE={MENU_STYLE}
+        />
+
         <Chip
           sx={MENU_STYLE}
           icon={<VpnLockIcon />}
           label={capitalizeFirstLetter(board?.type)}
           onClick={() => {}}
         />
-        <Chip
+        {/* <Chip
           sx={MENU_STYLE}
           icon={<AddToDriveIcon />}
           label="Add to Google Drive"
           onClick={() => {}}
-        />
-        <Chip
+        /> */}
+        {/* <Chip
           sx={MENU_STYLE}
           icon={<BoltIcon />}
           label="Automation"
           onClick={() => {}}
-        />
+        /> */}
         <Chip
           sx={MENU_STYLE}
           icon={<FilterListIcon />}
           label="Filters"
+          onClick={() => {}}
+        />
+        <Chip
+          sx={MENU_STYLE}
+          icon={<ChatBubbleOutlineOutlinedIcon />}
+          label="Teams"
           onClick={() => {}}
         />
       </Box>

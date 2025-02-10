@@ -5,22 +5,22 @@ import CreditCardIcon from '@mui/icons-material/CreditCard'
 import CancelIcon from '@mui/icons-material/Cancel'
 import Grid from '@mui/material/Unstable_Grid2'
 import Stack from '@mui/material/Stack'
-import Divider from '@mui/material/Divider'
+// import Divider from '@mui/material/Divider'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined'
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
 import WatchLaterOutlinedIcon from '@mui/icons-material/WatchLaterOutlined'
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined'
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
-import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined'
-import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined'
-import AddToDriveOutlinedIcon from '@mui/icons-material/AddToDriveOutlined'
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
-import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined'
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined'
+// import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined'
+// import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined'
+// import AddToDriveOutlinedIcon from '@mui/icons-material/AddToDriveOutlined'
+// import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
+// import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
+// import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
+// import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined'
+// import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
+// import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined'
 import SubjectRoundedIcon from '@mui/icons-material/SubjectRounded'
 import DvrOutlinedIcon from '@mui/icons-material/DvrOutlined'
 
@@ -263,7 +263,7 @@ function ActiveCard() {
 
             <Stack direction="column" spacing={1}>
               {/* Feature 05: Xử lý hành động bản thân user tự join vào card */}
-              {!activeCard?.memberIds.includes(currentUser._id) && (
+              {!activeCard?.memberIds.includes(currentUser._id) ? (
                 <SidebarItem
                   className="active"
                   onClick={() =>
@@ -274,7 +274,20 @@ function ActiveCard() {
                   }
                 >
                   <PersonOutlineOutlinedIcon fontSize="small" />
-                  Join
+                  Join To Card
+                </SidebarItem>
+              ) : (
+                <SidebarItem
+                  className="active"
+                  onClick={() =>
+                    onUpdateCardMembers({
+                      userId: currentUser._id,
+                      action: CARD_MEMBER_ACTION.REMOVE
+                    })
+                  }
+                >
+                  <PersonOutlineOutlinedIcon fontSize="small" />
+                  Leave Card
                 </SidebarItem>
               )}
               {/* Feature 06: Xử lý hành động cập nhật ảnh Cover của Card */}
@@ -300,15 +313,15 @@ function ActiveCard() {
                 <WatchLaterOutlinedIcon fontSize="small" />
                 Dates
               </SidebarItem>
-              <SidebarItem>
+              {/* <SidebarItem>
                 <AutoFixHighOutlinedIcon fontSize="small" />
                 Custom Fields
-              </SidebarItem>
+              </SidebarItem> */}
             </Stack>
 
-            <Divider sx={{ my: 2 }} />
+            {/* <Divider sx={{ my: 2 }} /> */}
 
-            <Typography
+            {/* <Typography
               sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
             >
               Power-Ups
@@ -356,7 +369,7 @@ function ActiveCard() {
                 <ShareOutlinedIcon fontSize="small" />
                 Share
               </SidebarItem>
-            </Stack>
+            </Stack> */}
           </Grid>
         </Grid>
       </Box>

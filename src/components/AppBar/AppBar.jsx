@@ -2,21 +2,23 @@ import Box from '@mui/material/Box'
 import ModeSelect from '~/components/ModeSelect/ModeSelect'
 import AppsIcon from '@mui/icons-material/Apps'
 import SvgIcon from '@mui/material/SvgIcon'
-import { ReactComponent as trelloIcon } from '~/assets/trello.svg'
+import { ReactComponent as LogoIcon } from '~/assets/logo.svg'
 import { Typography } from '@mui/material'
-import Button from '@mui/material/Button'
+// import Button from '@mui/material/Button'
 import Badge from '@mui/material/Badge'
 import Tooltip from '@mui/material/Tooltip'
-import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import Workspaces from './Menus/Workspaces'
-import Recent from './Menus/Recent'
-import Starred from './Menus/Starred'
-import Templates from './Menus/Templates'
+// import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
+// import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
+// import Workspaces from './Menus/Workspaces'
+// import Recent from './Menus/Recent'
+// import Starred from './Menus/Starred'
+// import Templates from './Menus/Templates'
 import Profiles from './Menus/Profiles'
 import { Link } from 'react-router-dom'
 import Notifications from './Notifications/Notifications'
 import AutoCompleteSearchBoard from './SearchBoards/AutoCompleteSearchBoard'
+import SidebarCreateBoardModal from '~/pages/Boards/create'
 function AppBar() {
   return (
     <Box
@@ -30,7 +32,7 @@ function AppBar() {
         gap: 2,
         overflowX: 'auto',
         bgcolor: theme =>
-          theme.palette.mode === 'dark' ? '#2c3e50' : '#1565c0',
+          theme.palette.mode === 'dark' ? '#2c3e50' : '#493D9E',
         '&::-webkit-scrollbar-track': { margin: 2 }
       }}
     >
@@ -45,7 +47,7 @@ function AppBar() {
         <Link to={'/'}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <SvgIcon
-              component={trelloIcon}
+              component={LogoIcon}
               inheritViewBox
               fontSize="small"
               sx={{ color: 'white' }}
@@ -58,12 +60,12 @@ function AppBar() {
                 color: 'white'
               }}
             >
-              Trello
+              Kb Workspace
             </Typography>
           </Box>
         </Link>
 
-        <Box
+        {/* <Box
           sx={{
             display: {
               xs: 'none',
@@ -76,18 +78,9 @@ function AppBar() {
           <Recent />
           <Starred />
           <Templates />
-        </Box>
-        <Button
-          sx={{
-            color: 'white',
-            border: 'none',
-            '&:hover': { border: 'none' }
-          }}
-          variant="outlined"
-          startIcon={<LibraryAddIcon />}
-        >
-          Create
-        </Button>
+        </Box> */}
+        {/* Create Board Button */}
+        <SidebarCreateBoardModal appBarButton={true} />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <AutoCompleteSearchBoard />
@@ -95,9 +88,14 @@ function AppBar() {
         <ModeSelect />
         {/* xu li thong bao */}
         <Notifications />
-        <Tooltip title="Help">
+        {/* <Tooltip title="Help">
           <Badge color="secondary" sx={{ cursor: 'pointer' }}>
             <HelpOutlineIcon sx={{ color: 'white' }} />
+          </Badge>
+        </Tooltip> */}
+        <Tooltip title="Messages">
+          <Badge color="secondary" sx={{ cursor: 'pointer' }}>
+            <ChatBubbleOutlineOutlinedIcon sx={{ color: 'white' }} />
           </Badge>
         </Tooltip>
         <Profiles />

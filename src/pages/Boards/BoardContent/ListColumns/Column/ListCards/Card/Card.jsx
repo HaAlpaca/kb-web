@@ -16,6 +16,25 @@ import {
   showModalActiveCard,
   updateCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
+import LabelGroup from '~/components/Label/LabelGroup'
+
+const labels = [
+  { id: 1, color: '#C2F0D0', title: 'Label 1' },
+  { id: 2, color: '#4BC99F', title: 'Label 2' },
+  { id: 3, color: '#10754C', title: 'Label 3' },
+  { id: 4, color: '#FBE9A0', title: 'Label 4' },
+  { id: 5, color: '#FFD74B', title: 'Label 5' },
+  { id: 6, color: '#8C6B00', title: 'Label 6' },
+  { id: 7, color: '#FFE2CF', title: 'Label 7' },
+  { id: 8, color: '#FFA160', title: 'Label 8' },
+  { id: 9, color: '#F66A66', title: 'Label 9' },
+  { id: 10, color: '#A085E6', title: 'Label 10' },
+  { id: 11, color: '#A18AFF', title: 'Label 11' },
+  { id: 12, color: '#4E97FF', title: 'Label 12' },
+  { id: 13, color: '#7ECDE6', title: 'Label 13' },
+  { id: 14, color: '#94C950', title: 'Label 14' },
+  { id: 15, color: '#E678B6', title: 'Label 15' }
+]
 
 function Card({ card }) {
   const dispatch = useDispatch()
@@ -42,7 +61,7 @@ function Card({ card }) {
     transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : undefined,
-    border: isDragging ? '1px solid #2ecc71' : undefined
+    border: isDragging ? '2px solid #B1F0F7' : undefined
   }
   const shouldShowCardActions = () => {
     return (
@@ -63,7 +82,8 @@ function Card({ card }) {
         boxShadow: '0 1px 1px rgba(0,0,0,0.2)',
         overflow: 'unset',
         display: card?.FE_PlaceholderCard ? 'none' : 'block',
-        border: '1px solid transparent',
+        // border: '4px solid transparent',
+        borderRadius: '8px',
         '&:hover': {
           // theme.palette.primary.main undefined
           borderColor: theme => {
@@ -76,13 +96,20 @@ function Card({ card }) {
     >
       {card?.cover && (
         <CardMedia
-          sx={{ height: 140 }}
+          sx={{
+            height: 140,
+            borderTopLeftRadius: '8px',
+            borderTopRightRadius: '8px'
+          }}
           image={card.cover}
           title="green iguana"
         />
       )}
+      {/* <LabelGroup labels={labels} /> */}
 
-      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
+      <CardContent
+        sx={{ p: 1.5, py: 0.5, '&:last-child': { px: 1.5, py: 0.5 } }}
+      >
         <Typography>{card?.title}</Typography>
       </CardContent>
 

@@ -39,6 +39,7 @@ function Board() {
     //call api
     dispatch(fetchBoardDetailsAPI(boardId))
   }, [dispatch, boardId])
+
   // WEBSOCKET EVENT RECEIVE DELETE COLUMN
   useEffect(() => {
     // const boardId = '671210d38975d009e2a50179'
@@ -62,7 +63,7 @@ function Board() {
       // console.log('BE_DELETE_COLUMN on: ', deletedColumn)
     })
   }, [dispatch, board])
-  // WEBSOCKET EVENT RECEIVE CREATE COLUMN
+  // WEBSOCKET EVENT RECEIVE CREATECOLUMN
   useEffect(() => {
     socketIoInstance.on('BE_CREATE_COLUMN', createdColumn => {
       // console.log('BE_CREATE_COLUMN on: ', createdColumn)
@@ -101,6 +102,8 @@ function Board() {
     // goi api update board
     await updateBoardDetailsAPI(newBoard._id, {
       columnOrderIds: newBoard.columnOrderIds
+    }).then(res => {
+      socketIoInstance.emit('FE_MOVE_COLUMN', res)
     })
   }
   // cap nhat orderColumnIds
