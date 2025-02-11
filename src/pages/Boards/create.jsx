@@ -18,6 +18,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 
 import { styled } from '@mui/material/styles'
 import { createNewBoardAPI } from '~/apis'
+import { useNavigate } from 'react-router-dom'
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -46,7 +47,11 @@ const BOARD_TYPES = {
  * Bản chất của cái component SidebarCreateBoardModal này chúng ta sẽ trả về một cái SidebarItem để hiển thị ở màn Board List cho phù hợp giao diện bên đó, đồng thời nó cũng chứa thêm một cái Modal để xử lý riêng form create board nhé.
  * Note: Modal là một low-component mà bọn MUI sử dụng bên trong những thứ như Dialog, Drawer, Menu, Popover. Ở đây dĩ nhiên chúng ta có thể sử dụng Dialog cũng không thành vấn đề gì, nhưng sẽ sử dụng Modal để dễ linh hoạt tùy biến giao diện từ con số 0 cho phù hợp với mọi nhu cầu nhé.
  */
-function SidebarCreateBoardModal({ afterCreateNewBoard }) {
+function SidebarCreateBoardModal({
+  afterCreateNewBoard,
+  appBarButton = false
+}) {
+  const navigate = useNavigate()
   const {
     control,
     register,
@@ -68,19 +73,39 @@ function SidebarCreateBoardModal({ afterCreateNewBoard }) {
     // console.log('Board title: ', title)
     // console.log('Board description: ', description)
     // console.log('Board type: ', type)
-    createNewBoardAPI(data).then(() => {
+    createNewBoardAPI(data).then(board => {
       handleCloseModal()
-      afterCreateNewBoard()
+      if (!appBarButton) {
+        afterCreateNewBoard()
+      } else {
+        // console.log(res)
+        navigate(`/boards/${board._id}`)
+      }
     })
   }
 
   // <>...</> nhắc lại cho bạn anof chưa biết hoặc quên nhé: nó là React Fragment, dùng để bọc các phần tử lại mà không cần chỉ định DOM Node cụ thể nào cả.
   return (
     <>
-      <SidebarItem onClick={handleOpenModal}>
-        <LibraryAddIcon fontSize="small" />
-        Create a new board
-      </SidebarItem>
+      {!appBarButton ? (
+        <SidebarItem onClick={handleOpenModal}>
+          <LibraryAddIcon fontSize="small" />
+          Create a new board
+        </SidebarItem>
+      ) : (
+        <Button
+          onClick={handleOpenModal}
+          sx={{
+            color: 'white',
+            border: 'none',
+            '&:hover': { border: 'none' }
+          }}
+          variant="outlined"
+          startIcon={<LibraryAddIcon />}
+        >
+          Create
+        </Button>
+      )}
 
       <Modal
         open={isOpen}

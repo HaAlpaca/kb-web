@@ -178,7 +178,7 @@ function Column({ column }) {
           bgcolor: theme =>
             theme.palette.mode === 'dark' ? '#333643' : '#ebecf0',
           ml: 2,
-          borderRadius: '6px',
+          borderRadius: '12px',
           height: 'fit-content',
           maxHeight: theme =>
             `calc(${theme.trelloCustom.boardContentHeight} - ${theme.spacing(

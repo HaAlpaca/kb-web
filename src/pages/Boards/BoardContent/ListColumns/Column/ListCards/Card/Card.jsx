@@ -16,10 +16,12 @@ import {
   showModalActiveCard,
   updateCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
+import LabelGroup from '~/components/Label/LabelGroup'
+// import { useEffect, useState } from 'react'
+// import { getBoardLabelsAPI } from '~/apis'
 
 function Card({ card }) {
   const dispatch = useDispatch()
-
   const setActiveCard = () => {
     dispatch(updateCurrentActiveCard(card))
     // show modal active card
@@ -42,7 +44,7 @@ function Card({ card }) {
     transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : undefined,
-    border: isDragging ? '1px solid #2ecc71' : undefined
+    border: isDragging ? '2px solid #B1F0F7' : undefined
   }
   const shouldShowCardActions = () => {
     return (
@@ -63,7 +65,8 @@ function Card({ card }) {
         boxShadow: '0 1px 1px rgba(0,0,0,0.2)',
         overflow: 'unset',
         display: card?.FE_PlaceholderCard ? 'none' : 'block',
-        border: '1px solid transparent',
+        // border: '4px solid transparent',
+        borderRadius: '8px',
         '&:hover': {
           // theme.palette.primary.main undefined
           borderColor: theme => {
@@ -76,15 +79,27 @@ function Card({ card }) {
     >
       {card?.cover && (
         <CardMedia
-          sx={{ height: 140 }}
+          sx={{
+            height: 140,
+            borderTopLeftRadius: '8px',
+            borderTopRightRadius: '8px'
+          }}
           image={card.cover}
           title="green iguana"
         />
       )}
-
-      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
-        <Typography>{card?.title}</Typography>
-      </CardContent>
+      {card.labels?.length > 0 ? (
+        <>
+          <LabelGroup labels={card.labels} cardModal={false} />
+          <CardContent sx={{ px: 1.5, py: 0.5 }}>
+            <Typography variant="subtitle2">{card?.title}</Typography>
+          </CardContent>
+        </>
+      ) : (
+        <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
+          <Typography variant="subtitle2">{card?.title}</Typography>
+        </CardContent>
+      )}
 
       {shouldShowCardActions() && (
         <CardActions sx={{ p: '0 4px 8px 4px' }}>
