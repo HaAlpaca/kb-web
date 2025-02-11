@@ -44,6 +44,8 @@ import { updateCardDetailsAPI } from '~/apis'
 import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
+import LabelGroup from '~/components/Label/LabelGroup'
+import { cloneDeep } from 'lodash'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -85,6 +87,8 @@ function ActiveCard() {
   // function dung chung cho update card ,description, cover, comment
   const callApiUpdateCard = async updateData => {
     const updatedCard = await updateCardDetailsAPI(activeCard._id, updateData)
+    // const updatedCardWithLabel = cloneDeep(updatedCard)
+    // updatedCardWithLabel.labels = activeCard.labels
     // cap nhat nho phai luu vao redux
     dispatch(updateCurrentActiveCard(updatedCard))
     // nho cap nhat ca board ns vi card co trong board
@@ -202,6 +206,18 @@ function ActiveCard() {
         <Grid container spacing={2} sx={{ mb: 3 }}>
           {/* Left side */}
           <Grid xs={12} sm={9}>
+            {activeCard?.labels?.length > 0 && (
+              <Box sx={{ mb: 3 }}>
+                <Typography
+                  sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
+                >
+                  Labels
+                </Typography>
+
+                <LabelGroup labels={activeCard?.labels} cardModal={true} />
+              </Box>
+            )}
+
             <Box sx={{ mb: 3 }}>
               <Typography
                 sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
