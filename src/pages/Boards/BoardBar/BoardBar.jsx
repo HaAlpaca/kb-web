@@ -5,17 +5,19 @@ import Chip from '@mui/material/Chip'
 // import Avatar from '@mui/material/Avatar'
 // import AvatarGroup from '@mui/material/AvatarGroup'
 // import { Tooltip } from '@mui/material'
+
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
 // import DashboardIcon from '@mui/icons-material/Dashboard'
 import VpnLockIcon from '@mui/icons-material/VpnLock'
 // import AddToDriveIcon from '@mui/icons-material/AddToDrive'
 // import BoltIcon from '@mui/icons-material/Bolt'
-import FilterListIcon from '@mui/icons-material/FilterList'
+import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined'
 // import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import { capitalizeFirstLetter } from '~/utils/formatters'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
 import BoardMenuGroup from './BoardMenuGroup'
+import LabelModal from '~/components/Modal/Label/LabelModal'
 const MENU_STYLE = {
   color: 'white',
   bgcolor: 'transparent',
@@ -83,10 +85,17 @@ function BoardBar({ board }) {
         /> */}
         <Chip
           sx={MENU_STYLE}
-          icon={<FilterListIcon />}
+          icon={<TuneOutlinedIcon />}
           label="Filters"
           onClick={() => {}}
         />
+
+        <LabelModal
+          MENU_STYLE={MENU_STYLE}
+          labels={board?.labels}
+          boardId={board?._id}
+        />
+
         <Chip
           sx={MENU_STYLE}
           icon={<ChatBubbleOutlineOutlinedIcon />}

@@ -45,7 +45,6 @@ import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
 import LabelGroup from '~/components/Label/LabelGroup'
-import { cloneDeep } from 'lodash'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',

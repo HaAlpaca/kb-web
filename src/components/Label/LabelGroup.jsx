@@ -1,23 +1,5 @@
 import { Box, Grid, Tooltip, Typography } from '@mui/material'
-
-const getTextColor = hexColor => {
-  // https://gist.github.com/jfsiii/5641126
-  // Chuyển từ HEX sang RGB
-  let r = parseInt(hexColor.slice(1, 3), 16) / 255
-  let g = parseInt(hexColor.slice(3, 5), 16) / 255
-  let b = parseInt(hexColor.slice(5, 7), 16) / 255
-
-  // Chuyển đổi giá trị RGB theo chuẩn gamma correction
-  r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4)
-  g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4)
-  b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4)
-
-  // Tính độ sáng theo công thức W3C
-  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-  // Nếu màu quá sáng, đổi chữ sang đen, ngược lại là trắng
-  return luminance > 0.5 ? 'black' : 'white'
-}
+import { getTextColor } from '~/utils/formatters'
 
 const LabelGroup = ({ labels, cardModal = false }) => {
   if (!cardModal) {
