@@ -32,19 +32,20 @@ function Card({ card }) {
     listeners,
     setNodeRef,
     transform,
-    transition,
+    // transition,
     isDragging
   } = useSortable({ id: card._id, data: { ...card } })
 
   // https://github.com/clauderic/dnd-kit/issues/117
   // The items are stretched because you're using CSS.Transform.toString(),
   // use CSS.Translate.toString() if you don't want to have the scale transformation applied.
+  // tạm tắt transition vì lag
   const dndKitCardStyle = {
     // touchAction: 'none',
     transform: CSS.Translate.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : undefined,
-    border: isDragging ? '2px solid #B1F0F7' : undefined
+    // transition,
+    opacity: isDragging ? 0.5 : undefined
+    // border: isDragging ? '2px solid #B1F0F7' : undefined
   }
   const shouldShowCardActions = () => {
     return (
@@ -85,7 +86,7 @@ function Card({ card }) {
             borderTopRightRadius: '8px'
           }}
           image={card.cover}
-          title="green iguana"
+          title={card?.title}
         />
       )}
       {card.labels?.length > 0 ? (

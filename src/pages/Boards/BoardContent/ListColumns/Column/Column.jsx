@@ -36,7 +36,7 @@ import {
   deleteColumnDetailsAPI,
   updateColumnDetailsAPI
 } from '~/apis'
-import { cloneDeep } from 'lodash'
+import { clone, cloneDeep } from 'lodash'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import { socketIoInstance } from '~/socket-client'
 function Column({ column }) {
@@ -65,7 +65,8 @@ function Column({ column }) {
       ...newCardData,
       boardId: board._id
     })
-    // console.log(createdCard)
+
+    createdCard.labels = []
     // cap nhat state board
     const newBoard = cloneDeep(board)
     const columnToUpdate = newBoard.columns.find(
@@ -130,17 +131,18 @@ function Column({ column }) {
     listeners,
     setNodeRef,
     transform,
-    transition,
+    // transition,
     isDragging
   } = useSortable({ id: column._id, data: { ...column } })
 
   // https://github.com/clauderic/dnd-kit/issues/117
   // The items are stretched because you're using CSS.Transform.toString(),
   // use CSS.Translate.toString() if you don't want to have the scale transformation applied.
+  // tạm tắt transition vì lag
   const dndKitColumnStyle = {
     // touchAction: 'none',
     transform: CSS.Translate.toString(transform),
-    transition,
+    // transition,
     height: '100%',
     opacity: isDragging ? 0.5 : undefined
   }

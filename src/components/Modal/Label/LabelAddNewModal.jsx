@@ -41,9 +41,7 @@ const colours = [
   '#607d8b'
 ]
 
-export default function LabelAddNewModal({ boardId, cardId = null }) {
-  const board = useSelector(selectCurrentActiveBoard)
-  const dispatch = useDispatch()
+export default function LabelAddNewModal({ boardId, handleCreateLabel }) {
   // Popover state
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const isOpenPopover = Boolean(anchorPopoverElement)
@@ -65,19 +63,11 @@ export default function LabelAddNewModal({ boardId, cardId = null }) {
   // Xử lý tạo label
   const addNewLabel = data => {
     const { labelTitle } = data
-    handleCreateLabelAPI({ title: labelTitle, colour: hex, boardId }).then(
-      res => {
-        const newBoard = cloneDeep(board)
-        newBoard.labels.push({
-          _id: res._id,
-          title: res.title,
-          colour: res.colour
-        })
-        dispatch(updateCurrentActiveBoard(newBoard))
-        reset() // Reset form sau khi submit thành công
-        setAnchorPopoverElement(null)
-      }
-    )
+
+    handleCreateLabel(labelTitle, hex, boardId).then(() => {
+      setAnchorPopoverElement(null)
+      reset() // Reset form sau khi submit thành công
+    })
   }
 
   return (

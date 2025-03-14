@@ -36,10 +36,13 @@ const colours = [
   '#607d8b'
 ]
 
-export default function LabelEditModal({ labelId, title, colour }) {
-  const board = useSelector(selectCurrentActiveBoard)
-  const dispatch = useDispatch()
-  const confirmDeleteLabel = useConfirm()
+export default function LabelEditModal({
+  labelId,
+  title,
+  colour,
+  handleDeleteLabel,
+  handleChangeLabel
+}) {
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const [hex, setHex] = useState(colour)
 
@@ -65,31 +68,15 @@ export default function LabelEditModal({ labelId, title, colour }) {
 
   const changeLabel = async data => {
     const { labelTitle } = data
-    await handleChangeLabelAPI(labelId, {
-      title: labelTitle,
-      colour: hex
-    }).then(() => {
-      const newBoard = cloneDeep(board)
-      const labelToUpdate = newBoard.labels.find(label => label._id === labelId)
-      if (labelToUpdate) {
-        labelToUpdate.title = labelTitle
-        labelToUpdate.colour = hex
-        newBoard.columns.forEach(column => {
-          column.cards.forEach(card => {
-            if (Array.isArray(card.labels)) {
-              card.labels.forEach(label => {
-                if (label._id === labelId) {
-                  label.title = labelTitle
-                  label.colour = hex
-                }
-              })
-            }
-          })
-        })
-        dispatch(updateCurrentActiveBoard(newBoard))
-      }
+    await handleChangeLabel(labelTitle, labelId, hex).then(() => {
+      setAnchorPopoverElement(null)
     })
-    setAnchorPopoverElement(null)
+  }
+
+  const deleteLabel = async () => {
+    await handleDeleteLabel(labelId).then(() => {
+      setAnchorPopoverElement(null)
+    })
   }
 
   return (
@@ -150,18 +137,7 @@ export default function LabelEditModal({ labelId, title, colour }) {
                 gap: '10px'
               }}
             >
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() =>
-                  confirmDeleteLabel({
-                    title: 'Delete Label',
-                    description: 'Are you sure?',
-                    confirmationText: 'Confirm',
-                    cancellationText: 'Cancel'
-                  }).then(() => handleDeleteLabelAPI(labelId))
-                }
-              >
+              <Button variant="outlined" color="error" onClick={deleteLabel}>
                 <DeleteIcon />
               </Button>
               <Button variant="outlined" type="submit" sx={{ width: '100%' }}>

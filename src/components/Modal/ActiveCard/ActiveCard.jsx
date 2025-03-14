@@ -45,6 +45,7 @@ import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
 import LabelGroup from '~/components/Label/LabelGroup'
+import LabelModal from '../Label/LabelModal'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -316,10 +317,9 @@ function ActiveCard() {
                 <AttachFileOutlinedIcon fontSize="small" />
                 Attachment
               </SidebarItem>
-              <SidebarItem>
-                <LocalOfferOutlinedIcon fontSize="small" />
-                Labels
-              </SidebarItem>
+
+              <LabelModal cardModal={activeCard} SidebarItem={SidebarItem} />
+
               <SidebarItem>
                 <TaskAltOutlinedIcon fontSize="small" />
                 Checklist

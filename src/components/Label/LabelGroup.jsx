@@ -1,5 +1,6 @@
 import { Box, Grid, Tooltip, Typography } from '@mui/material'
 import { getTextColor } from '~/utils/formatters'
+import LabelModal from '../Modal/Label/LabelModal'
 
 const LabelGroup = ({ labels, cardModal = false }) => {
   if (!cardModal) {

@@ -136,3 +136,11 @@ export const handleDeleteLabelAPI = async labelId => {
   toast.success('Label deleted successfully!')
   return response.data
 }
+
+export const handleUpdateCardLabelAPI = async (cardId, data) => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/cards/${cardId}`,
+    data
+  )
+  return response.data
+}

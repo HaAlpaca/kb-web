@@ -44,6 +44,7 @@ function BoardBar({ board }) {
         gap: 2,
         px: 2,
         overflowX: 'auto',
+        // overflowX: 'scroll',
         '&::-webkit-scrollbar-track': { margin: 2 },
         bgcolor: theme =>
           theme.palette.mode === 'dark' ? '#34495e' : '#493D9EE6'
@@ -90,11 +91,7 @@ function BoardBar({ board }) {
           onClick={() => {}}
         />
 
-        <LabelModal
-          MENU_STYLE={MENU_STYLE}
-          labels={board?.labels}
-          boardId={board?._id}
-        />
+        <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />
 
         <Chip
           sx={MENU_STYLE}

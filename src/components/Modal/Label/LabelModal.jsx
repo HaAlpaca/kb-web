@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Popover from '@mui/material/Popover'
 import TextField from '@mui/material/TextField'
-
+import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined'
 import Chip from '@mui/material/Chip'
 import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined'
 import { getTextColor } from '~/utils/formatters'
@@ -11,7 +12,40 @@ import { Tooltip } from '@mui/material'
 import LabelEditModal from './LabelEditModal'
 import Checkbox from '@mui/material/Checkbox'
 import LabelAddNewModal from './LabelAddNewModal'
-function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  selectCurrentActiveBoard,
+  updateCurrentActiveBoard
+} from '~/redux/activeBoard/activeBoardSlice'
+import {
+  handleChangeLabelAPI,
+  handleCreateLabelAPI,
+  handleDeleteLabelAPI,
+  handleUpdateCardLabelAPI
+} from '~/apis'
+import { cloneDeep } from 'lodash'
+import {
+  selectCurrentActiveCard,
+  updateCurrentActiveCard
+} from '~/redux/activeCard/activeCardSlice'
+import { useConfirm } from 'material-ui-confirm'
+
+function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
+  // board query
+  const board = useSelector(selectCurrentActiveBoard)
+  const boardLabels = board?.labels || []
+  const boardId = board?._id
+  const dispatch = useDispatch()
+  const confirmDeleteLabel = useConfirm()
+  const activeCardModal = useSelector(selectCurrentActiveCard)
+
+  // react-hook-form
+  const { control, setValue, watch } = useForm({
+    defaultValues: {
+      selectedLabels: cardModal ? cardModal.labels.map(label => label._id) : []
+    }
+  })
+
   // popover
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -22,8 +56,8 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
     setAnchorPopoverElement(prev => (prev ? null : event.currentTarget))
   }
 
-  // Hàm lọc labels theo title hoặc color
-  const filteredLabels = labels.filter(label => {
+  // Lọc labels theo title hoặc color
+  const filteredLabels = boardLabels.filter(label => {
     const query = searchQuery.toLowerCase().trim()
     return (
       label.title.toLowerCase().includes(query) ||
@@ -31,15 +65,144 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
     )
   })
 
+  const handleCreateLabel = async (labelTitle, hex, boardId) => {
+    await handleCreateLabelAPI({
+      title: labelTitle,
+      colour: hex,
+      boardId
+    }).then(res => {
+      const newBoard = cloneDeep(board)
+      newBoard.labels.push({
+        _id: res._id,
+        title: res.title,
+        colour: res.colour
+      })
+      dispatch(updateCurrentActiveBoard(newBoard))
+    })
+  }
+
+  // Xử lý khi checkbox thay đổi
+  const handleCheckboxChange = (labelId, checked) => {
+    if (!cardModal) return
+
+    const currentLabels = watch('selectedLabels') || []
+
+    let updatedLabels = cloneDeep(currentLabels)
+    if (checked) {
+      // Nếu checkbox được check, thêm label vào cuối danh sách
+      updatedLabels.push(labelId)
+    } else {
+      // Nếu checkbox bị bỏ check, loại bỏ label khỏi danh sách
+      updatedLabels = currentLabels.filter(id => id !== labelId)
+    }
+
+    setValue('selectedLabels', updatedLabels)
+
+    handleUpdateCardLabelAPI(cardModal._id, {
+      updateLabels: updatedLabels
+    }).then(() => {
+      const newBoard = cloneDeep(board)
+      const labelToUpdate = newBoard.labels
+        .filter(label => updatedLabels.includes(label._id))
+        .sort(
+          (a, b) => updatedLabels.indexOf(a._id) - updatedLabels.indexOf(b._id)
+        )
+
+      // Cập nhật danh sách label trong modal card
+      newBoard.columns.forEach(column => {
+        column.cards.forEach(card => {
+          if (Array.isArray(card.labels) && card._id === cardModal._id) {
+            card.labels = labelToUpdate
+            card.cardLabelIds = updatedLabels
+          }
+        })
+      })
+
+      dispatch(updateCurrentActiveBoard(newBoard))
+
+      const newActiveCardModal = cloneDeep(activeCardModal)
+      newActiveCardModal.labels = labelToUpdate
+      dispatch(updateCurrentActiveCard(newActiveCardModal))
+    })
+  }
+
+  const handleDeleteLabel = async labelId => {
+    await confirmDeleteLabel({
+      title: 'Delete Label',
+      description: 'Are you sure?',
+      confirmationText: 'Confirm',
+      cancellationText: 'Cancel'
+    }).then(
+      async () =>
+        await handleDeleteLabelAPI(labelId).then(() => {
+          // update board label
+          const newBoard = cloneDeep(board)
+          newBoard.labels = newBoard.labels.filter(
+            label => label._id !== labelId
+          )
+          newBoard.columns.forEach(column => {
+            column.cards.forEach(card => {
+              card.labels = card.labels.filter(label => label._id !== labelId)
+              card.cardLabelIds = card.cardLabelIds.filter(id => id !== labelId)
+            })
+          })
+          dispatch(updateCurrentActiveBoard(newBoard))
+
+          // update card modal label
+          if (cardModal) {
+            const newActiveCardModal = cloneDeep(activeCardModal)
+            newActiveCardModal.labels = newActiveCardModal.labels.filter(
+              label => label._id !== labelId
+            )
+            dispatch(updateCurrentActiveCard(newActiveCardModal))
+          }
+        })
+    )
+  }
+
+  const handleChangeLabel = async (labelTitle, labelId, hex) => {
+    await handleChangeLabelAPI(labelId, {
+      title: labelTitle,
+      colour: hex
+    }).then(() => {
+      const newBoard = cloneDeep(board)
+      const labelToUpdate = newBoard.labels.find(label => label._id === labelId)
+      if (labelToUpdate) {
+        labelToUpdate.title = labelTitle
+        labelToUpdate.colour = hex
+        newBoard.columns.forEach(column => {
+          column.cards.forEach(card => {
+            if (Array.isArray(card.labels)) {
+              card.labels.forEach(label => {
+                if (label._id === labelId) {
+                  label.title = labelTitle
+                  label.colour = hex
+                }
+              })
+            }
+          })
+        })
+        dispatch(updateCurrentActiveBoard(newBoard))
+      }
+    })
+  }
+
   return (
     <>
-      <Chip
-        sx={MENU_STYLE}
-        icon={<LabelOutlinedIcon />}
-        label="Labels"
-        aria-describedby={popoverId}
-        onClick={handleTogglePopover}
-      />
+      {!cardModal ? (
+        <Chip
+          sx={BOARD_BAR_MENU_STYLE}
+          icon={<LabelOutlinedIcon />}
+          label="Labels"
+          aria-describedby={popoverId}
+          onClick={handleTogglePopover}
+        />
+      ) : (
+        <SidebarItem aria-describedby={popoverId} onClick={handleTogglePopover}>
+          <LocalOfferOutlinedIcon fontSize="small" />
+          Labels
+        </SidebarItem>
+      )}
 
       <Popover
         id={popoverId}
@@ -48,9 +211,7 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
         onClose={handleTogglePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        sx={{
-          height: '600px'
-        }}
+        sx={{ height: '600px' }}
       >
         <Box
           sx={{
@@ -62,10 +223,9 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
           }}
         >
           <Typography sx={{ fontWeight: 'bold', fontSize: '24px' }}>
-            {card ? 'Card Labels' : 'Board Labels'}
+            {cardModal ? 'Card Labels' : 'Board Labels'}
           </Typography>
 
-          {/* Trường nhập tìm kiếm */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <TextField
               autoFocus
@@ -76,17 +236,17 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
-
-            <LabelAddNewModal boardId={boardId} />
+            <LabelAddNewModal
+              boardId={boardId}
+              handleCreateLabel={handleCreateLabel}
+            />
           </Box>
 
-          {/* Danh sách Labels đã lọc */}
-          {!card ? (
+          {!cardModal ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {filteredLabels.map(label => (
                 <Box key={label._id} sx={{ display: 'flex', gap: 1 }}>
                   <Box
-                    key={label._id}
                     sx={{
                       height: '35px',
                       width: '100%',
@@ -122,6 +282,8 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
                     labelId={label._id}
                     title={label.title}
                     colour={label.colour}
+                    handleChangeLabel={handleChangeLabel}
+                    handleDeleteLabel={handleDeleteLabel}
                   />
                 </Box>
               ))}
@@ -130,9 +292,21 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {filteredLabels.map(label => (
                 <Box key={label._id} sx={{ display: 'flex', gap: 1 }}>
-                  <Checkbox {...label} sx={{ height: '35px', width: '35px' }} />
+                  <Controller
+                    name="selectedLabels"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value.includes(label._id)}
+                        onChange={e =>
+                          handleCheckboxChange(label._id, e.target.checked)
+                        }
+                        sx={{ height: '35px', width: '35px' }}
+                      />
+                    )}
+                  />
+
                   <Box
-                    key={label._id}
                     sx={{
                       height: '35px',
                       width: '100%',
@@ -168,6 +342,8 @@ function LabelModal({ MENU_STYLE, labels, card = null, boardId }) {
                     labelId={label._id}
                     title={label.title}
                     colour={label.colour}
+                    handleChangeLabel={handleChangeLabel}
+                    handleDeleteLabel={handleDeleteLabel}
                   />
                 </Box>
               ))}
