@@ -1,72 +1,50 @@
-import { Box, Grid, Tooltip, Typography } from '@mui/material'
+import { Box, Tooltip, Typography } from '@mui/material'
 import { getTextColor } from '~/utils/formatters'
-import LabelModal from '../Modal/Label/LabelModal'
 
-const LabelGroup = ({ labels, cardModal = false }) => {
-  if (!cardModal) {
-    return (
-      <Box sx={{ p: 0.5, mx: 1, my: 0.5 }}>
-        <Grid container spacing={0.5}>
-          {labels.map((label, index) => (
-            <Grid item xs={2.4} key={index}>
-              {' '}
-              {/* 5 màu mỗi hàng */}
-              <Tooltip title={`${label.title}`}>
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 8,
-                    backgroundColor: label.colour,
-                    borderRadius: 4
-                  }}
-                  key={label._id}
-                />
-              </Tooltip>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    )
-  }
+const LabelGroup = ({ labels }) => {
   return (
-    <>
-      <Grid container spacing={0.5}>
-        {labels.map((label, index) => (
-          <Grid item xs={2.4} key={index}>
-            {' '}
-            {/* 5 màu mỗi hàng */}
-            <Tooltip title={`${label.title}`}>
-              <Box
+    <Box sx={{ p: 0.5, mx: 1, my: 0.5 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 0.5, // Khoảng cách giữa các label
+          alignItems: 'center'
+        }}
+      >
+        {labels.map(label => (
+          <Tooltip key={label._id} title={label.title}>
+            <Box
+              sx={{
+                minWidth: 40,
+                height: 20,
+                backgroundColor: label.colour,
+                borderRadius: 1,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingX: 1,
+                paddingY: '12px'
+              }}
+            >
+              <Typography
+                variant="subtitle2"
                 sx={{
-                  height: 32,
-                  backgroundColor: label.colour,
-                  borderRadius: '3px',
-                  display: 'flex', // Sử dụng flexbox để căn chỉnh nội dung
-                  alignItems: 'center', // Căn giữa theo chiều dọc
-                  justifyContent: 'flex-start', // Dịch trái nội dung
-                  paddingLeft: '8px' // Dịch nội dung sang trái một chút
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '150px',
+                  color: getTextColor(label.colour)
                 }}
-                key={label._id}
               >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    color: getTextColor(label.colour),
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '100px',
-                    display: 'block'
-                  }}
-                >
-                  {label.title}
-                </Typography>
-              </Box>
-            </Tooltip>
-          </Grid>
+                {label.title}
+              </Typography>
+            </Box>
+          </Tooltip>
         ))}
-      </Grid>
-    </>
+      </Box>
+    </Box>
   )
 }
 

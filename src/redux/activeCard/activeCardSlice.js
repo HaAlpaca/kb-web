@@ -1,9 +1,24 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import authorizeAxiosInstance from '~/utils/authorizeAxios'
+import { API_ROOT } from '~/utils/constants'
 
 const initialState = {
   currentActiveCard: null,
   isShowModalActiceCard: false
 }
+
+// goi hanh dong bat dong bo =>
+// middleware createAsyncThunk di kem voi extraReducer
+export const fetchCardDetailsAPI = createAsyncThunk(
+  'activeCard/fetchCardDetailsAPI',
+  async cardId => {
+    const respond = await authorizeAxiosInstance.get(
+      `${API_ROOT}/v1/cards/${cardId}`
+    )
+    return respond.data
+  }
+)
+
 export const activeCardSlice = createSlice({
   name: 'activeCard',
   initialState,
@@ -21,7 +36,15 @@ export const activeCardSlice = createSlice({
     }
   },
   // eslint-disable-next-line no-unused-vars
-  extraReducers: builder => {}
+  // extraReducers: builder => {}
+
+  extraReducers: builder => {
+    builder.addCase(fetchCardDetailsAPI.fulfilled, (state, action) => {
+      // update du lieu currentActiveBoard
+      state.currentActiveCard = action.payload
+      state.isShowModalActiceCard = true
+    })
+  }
 })
 
 export const {

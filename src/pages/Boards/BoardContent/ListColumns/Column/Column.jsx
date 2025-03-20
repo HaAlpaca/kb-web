@@ -131,7 +131,7 @@ function Column({ column }) {
     listeners,
     setNodeRef,
     transform,
-    // transition,
+    transition,
     isDragging
   } = useSortable({ id: column._id, data: { ...column } })
 
@@ -142,7 +142,7 @@ function Column({ column }) {
   const dndKitColumnStyle = {
     // touchAction: 'none',
     transform: CSS.Translate.toString(transform),
-    // transition,
+    transition,
     height: '100%',
     opacity: isDragging ? 0.5 : undefined
   }
