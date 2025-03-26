@@ -2,7 +2,7 @@ import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
 import { useState } from 'react'
 // import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import DashboardIcon from '@mui/icons-material/Dashboard'
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
 import {
   Chip,
   Divider,
@@ -48,7 +48,11 @@ function BoardMenuGroup({ board, boardId, MENU_STYLE }) {
           <ListItem key={text} disablePadding>
             <ListItemButton>
               <ListItemIcon>
-                {index % 2 === 0 ? <DashboardIcon /> : <DashboardIcon />}
+                {index % 2 === 0 ? (
+                  <DashboardOutlinedIcon />
+                ) : (
+                  <DashboardOutlinedIcon />
+                )}
               </ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
@@ -61,7 +65,11 @@ function BoardMenuGroup({ board, boardId, MENU_STYLE }) {
           <ListItem key={text} disablePadding>
             <ListItemButton>
               <ListItemIcon>
-                {index % 2 === 0 ? <DashboardIcon /> : <DashboardIcon />}
+                {index % 2 === 0 ? (
+                  <DashboardOutlinedIcon />
+                ) : (
+                  <DashboardOutlinedIcon />
+                )}
               </ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
@@ -76,7 +84,7 @@ function BoardMenuGroup({ board, boardId, MENU_STYLE }) {
       <Tooltip title={board?.description}>
         <Chip
           sx={MENU_STYLE}
-          icon={<DashboardIcon />}
+          icon={<DashboardOutlinedIcon />}
           label={board?.title}
           onClick={() => {}}
         />

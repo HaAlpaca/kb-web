@@ -8,24 +8,22 @@ import Typography from '@mui/material/Typography'
 import GroupIcon from '@mui/icons-material/Group'
 import CommentIcon from '@mui/icons-material/Comment'
 import AttachmentIcon from '@mui/icons-material/Attachment'
-
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useDispatch } from 'react-redux'
-import {
-  showModalActiveCard,
-  updateCurrentActiveCard
-} from '~/redux/activeCard/activeCardSlice'
+
 import LabelGroup from '~/components/Label/LabelGroup'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 // import { useEffect, useState } from 'react'
 // import { getBoardLabelsAPI } from '~/apis'
 
 function Card({ card }) {
-  const dispatch = useDispatch()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const setActiveCard = () => {
-    dispatch(updateCurrentActiveCard(card))
     // show modal active card
-    dispatch(showModalActiveCard())
+    searchParams.set('cardModal', card._id)
+    navigate(`?${searchParams.toString()}`, { replace: false })
   }
   const {
     attributes,
@@ -39,18 +37,19 @@ function Card({ card }) {
   // https://github.com/clauderic/dnd-kit/issues/117
   // The items are stretched because you're using CSS.Transform.toString(),
   // use CSS.Translate.toString() if you don't want to have the scale transformation applied.
+  // tạm tắt transition vì lag
   const dndKitCardStyle = {
     // touchAction: 'none',
     transform: CSS.Translate.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : undefined,
-    border: isDragging ? '2px solid #B1F0F7' : undefined
+    opacity: isDragging ? 0.5 : undefined
+    // border: isDragging ? '2px solid #B1F0F7' : undefined
   }
   const shouldShowCardActions = () => {
     return (
       !!card?.memberIds?.length ||
       !!card?.comments?.length ||
-      !!card?.attachments?.length
+      !!card?.cardAttachmentIds?.length
     )
   }
   return (
@@ -77,6 +76,7 @@ function Card({ card }) {
         // height: card?.FE_PlaceholderCard ? '0px' : 'unset'
       }}
     >
+      {/* COVER */}
       {card?.cover && (
         <CardMedia
           sx={{
@@ -85,41 +85,48 @@ function Card({ card }) {
             borderTopRightRadius: '8px'
           }}
           image={card.cover}
-          title="green iguana"
+          title={card?.title}
         />
       )}
-      {card.labels?.length > 0 ? (
-        <>
-          <LabelGroup labels={card.labels} cardModal={false} />
-          <CardContent sx={{ px: 1.5, py: 0.5 }}>
-            <Typography variant="subtitle2">{card?.title}</Typography>
-          </CardContent>
-        </>
-      ) : (
-        <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
-          <Typography variant="subtitle2">{card?.title}</Typography>
-        </CardContent>
-      )}
-
+      {/* LABELs */}
+      {card.labels?.length > 0 && <LabelGroup labels={card.labels} />}
+      {/* TITLE */}
+      <CardContent sx={{ px: 1.5, py: 0.5 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: '600' }}>
+          {card?.title}
+        </Typography>
+      </CardContent>
       {shouldShowCardActions() && (
-        <CardActions sx={{ p: '0 4px 8px 4px' }}>
-          {/* !! kiem tra gt boolean */}
-          {!!card?.memberIds?.length && (
-            <Button size="small" startIcon={<GroupIcon />}>
-              {card.memberIds.length}
+        <>
+          <CardActions
+            sx={{
+              p: '0 4px 8px 4px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '4px'
+            }}
+          >
+            {/* !! kiem tra gt boolean */}
+            {!!card?.memberIds?.length && (
+              <Button size="small" startIcon={<GroupIcon />}>
+                {card.memberIds.length}
+              </Button>
+            )}
+            {!!card?.comments?.length && (
+              <Button size="small" startIcon={<CommentIcon />}>
+                {card.comments.length}
+              </Button>
+            )}
+            {!!card?.cardAttachmentIds?.length && (
+              <Button size="small" startIcon={<AttachmentIcon />}>
+                {card.cardAttachmentIds.length}
+              </Button>
+            )}
+            <Button size="small" startIcon={<CheckBoxOutlinedIcon />}>
+              1/10 (test ui)
             </Button>
-          )}
-          {!!card?.comments?.length && (
-            <Button size="small" startIcon={<CommentIcon />}>
-              {card.comments.length}
-            </Button>
-          )}
-          {!!card?.attachments?.length && (
-            <Button size="small" startIcon={<AttachmentIcon />}>
-              {card.attachments.length}
-            </Button>
-          )}
-        </CardActions>
+          </CardActions>
+        </>
       )}
     </MuiCard>
   )

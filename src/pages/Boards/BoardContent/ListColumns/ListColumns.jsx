@@ -80,9 +80,9 @@ function ListColumns({ columns }) {
           width: '100%',
           height: '100%',
           display: 'flex',
-          overflowX: 'auto',
+          overflowX: 'scroll',
           overflowY: 'hidden',
-          '&::-webkit-scrollbar-track': { margin: 2 }
+          '&::-webkit-scrollbar-track': { margin: 1 }
         }}
       >
         {columns?.map(column => {

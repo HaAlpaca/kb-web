@@ -1,7 +1,7 @@
 // board details
 
 import Container from '@mui/material/Container'
-import { clone, cloneDeep } from 'lodash'
+import { cloneDeep } from 'lodash'
 import AppBar from '~/components/AppBar/AppBar'
 
 import BoardBar from './BoardBar/BoardBar'
@@ -113,7 +113,7 @@ function Board() {
     columnId
   ) => {
     // update state board
-    const newBoard = clone(board)
+    const newBoard = cloneDeep(board)
     const columnToUpdate = newBoard.columns.find(
       column => column._id === columnId
     )

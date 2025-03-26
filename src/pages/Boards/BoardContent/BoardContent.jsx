@@ -463,7 +463,9 @@ function BoardContent({
               <Column column={activeDragItemData} />
             )}
             {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD && (
-              <Card card={activeDragItemData} />
+              <div>
+                <Card card={activeDragItemData} />
+              </div>
             )}
           </DragOverlay>
         </Box>
