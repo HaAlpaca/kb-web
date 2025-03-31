@@ -17,18 +17,16 @@ const theme = extendTheme({
     columnFooterHeight: COLUMN_FOOTER_HEIGHT
   },
   // colorSchemes: {
-  //   // light: {
-  //   //   palette: {
-  //   //     primary: teal,
-  //   //     secondary: deepOrange
-  //   //   }
-  //   // },
-  //   // dark: {
-  //   //   palette: {
-  //   //     primary: cyan,
-  //   //     secondary: orange
-  //   //   }
-  //   // }
+  //   light: {
+  //     palette: {
+  //       buttonblue: 'blue[500]'
+  //     }
+  //   },
+  //   dark: {
+  //     palette: {
+  //       buttonblue: 'blue[400]'
+  //     }
+  //   }
   // },
   components: {
     MuiCssBaseline: {

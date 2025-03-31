@@ -36,8 +36,8 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
   const boardLabels = board?.labels || []
   const boardId = board?._id
   const dispatch = useDispatch()
-  const confirmDeleteLabel = useConfirm()
   const activeCardModal = useSelector(selectCurrentActiveCard)
+  const confirmDeleteLabel = useConfirm()
 
   // react-hook-form
   const { control, setValue, watch } = useForm({
@@ -209,17 +209,21 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
         open={isOpenPopover}
         anchorEl={anchorPopoverElement}
         onClose={handleTogglePopover}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{
+          vertical: cardModal ? 'top' : 'bottom',
+          horizontal: cardModal ? 'left' : 'right'
+        }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         sx={{ height: '600px' }}
       >
         <Box
           sx={{
-            width: '400px',
-            p: 3,
+            width: '350px',
+            px: 1,
+            py: 1.5,
             display: 'flex',
             flexDirection: 'column',
-            gap: 2
+            gap: 1
           }}
         >
           <Typography sx={{ fontWeight: 'bold', fontSize: '24px' }}>

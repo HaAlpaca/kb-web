@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 export const capitalizeFirstLetter = val => {
   if (!val) return ''
   return `${val.charAt(0).toUpperCase()}${val.slice(1)}`
@@ -31,7 +32,6 @@ export const interceptorLoadingElements = calling => {
   }
 }
 
-
 export const getTextColor = hexColor => {
   // https://gist.github.com/jfsiii/5641126
   // Chuyển từ HEX sang RGB
@@ -49,4 +49,35 @@ export const getTextColor = hexColor => {
 
   // Nếu màu quá sáng, đổi chữ sang đen, ngược lại là trắng
   return luminance > 0.5 ? 'black' : 'white'
+}
+
+export const getFaviconUrl = url => {
+  const domain = new URL(url).origin
+  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`
+}
+
+export const generateDownloadURL = originalURL => {
+  if (!originalURL.includes('/upload/')) return originalURL
+
+  // Thêm `fl_attachment` vào URL
+  let downloadURL = originalURL.replace('/upload/', '/upload/fl_attachment/')
+
+  return downloadURL
+}
+
+export const downloadFile = async (fileUrl, fileName) => {
+  try {
+    const response = await fetch(fileUrl)
+    const blob = await response.blob()
+
+    // Tạo một link ẩn để tải file
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = fileName // Đặt tên file từ attachment.name
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (error) {
+    console.error('Lỗi khi tải file:', error)
+  }
 }

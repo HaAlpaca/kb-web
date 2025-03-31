@@ -36,7 +36,7 @@ import {
   deleteColumnDetailsAPI,
   updateColumnDetailsAPI
 } from '~/apis'
-import { clone, cloneDeep } from 'lodash'
+import { cloneDeep } from 'lodash'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import { socketIoInstance } from '~/socket-client'
 function Column({ column }) {
@@ -120,7 +120,7 @@ function Column({ column }) {
           toast.success(res?.deleteResult)
           // console.log('🚀 ~ deleteColumnDetails ~ columnId:', columnId)
           socketIoInstance.emit('FE_DELETE_COLUMN', res)
-          console.log('FE_DELETE_COLUMN emit: ', res)
+          // console.log('FE_DELETE_COLUMN emit: ', res)
         })
       })
       .catch(() => {})

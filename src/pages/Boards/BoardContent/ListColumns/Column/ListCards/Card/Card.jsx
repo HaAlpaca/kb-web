@@ -91,11 +91,20 @@ function Card({ card }) {
       {/* LABELs */}
       {card.labels?.length > 0 && <LabelGroup labels={card.labels} />}
       {/* TITLE */}
-      <CardContent sx={{ px: 1.5, py: 0.5 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: '600' }}>
-          {card?.title}
-        </Typography>
-      </CardContent>
+      {shouldShowCardActions() === true ? (
+        <CardContent sx={{ px: 1.5, py: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: '600' }}>
+            {card?.title}
+          </Typography>
+        </CardContent>
+      ) : (
+        <CardContent sx={{ px: 1.5, py: '10px !important' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: '600' }}>
+            {card?.title}
+          </Typography>
+        </CardContent>
+      )}
+
       {shouldShowCardActions() && (
         <>
           <CardActions
@@ -123,7 +132,7 @@ function Card({ card }) {
               </Button>
             )}
             <Button size="small" startIcon={<CheckBoxOutlinedIcon />}>
-              1/10 (test ui)
+              1/10
             </Button>
           </CardActions>
         </>

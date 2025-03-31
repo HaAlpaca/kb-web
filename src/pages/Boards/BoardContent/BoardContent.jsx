@@ -456,7 +456,7 @@ function BoardContent({
           }}
         >
           {/* Board column */}
-          <ListColumns columns={orderedColumns} sx={{ zIndex: 10 }} />
+          <ListColumns columns={orderedColumns} sx={{ zIndex: 500 }} />
           <DragOverlay dropAnimation={customDropAnimation}>
             {!activeDragItemType && null}
             {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN && (
