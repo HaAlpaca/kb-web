@@ -3,15 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Box, Button, Popover, TextField, Typography } from '@mui/material'
 import IconButton from '@mui/material/IconButton'
 import EditIcon from '@mui/icons-material/Edit'
-import { useConfirm } from 'material-ui-confirm'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { useDispatch, useSelector } from 'react-redux'
-import {
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
-} from '~/redux/activeBoard/activeBoardSlice'
-import { handleChangeLabelAPI, handleDeleteLabelAPI } from '~/apis'
-import { cloneDeep } from 'lodash'
 import Circle from '@uiw/react-color-circle'
 
 const colours = [

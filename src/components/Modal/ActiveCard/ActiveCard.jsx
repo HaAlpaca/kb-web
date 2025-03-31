@@ -9,7 +9,6 @@ import Stack from '@mui/material/Stack'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
 import WatchLaterOutlinedIcon from '@mui/icons-material/WatchLaterOutlined'
-import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined'
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 // import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined'
 // import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined'
@@ -21,7 +20,7 @@ import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 // import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 // import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined'
 import SubjectRoundedIcon from '@mui/icons-material/SubjectRounded'
-import FilePresentRoundedIcon from '@mui/icons-material/FilePresentRounded'
+
 import DvrOutlinedIcon from '@mui/icons-material/DvrOutlined'
 
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
@@ -44,10 +43,12 @@ import { updateCardDetailsAPI } from '~/apis'
 import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
-import LabelGroup from '~/components/Label/LabelGroup'
 import LabelModal from '../Label/LabelModal'
 import { useLocation, useNavigate } from 'react-router-dom'
 import LabelGroupModal from '~/components/Label/LabelGroupModal'
+import AttachmentCreateModal from '../Attachment/AttachmentCreateModal'
+
+import CardAttachment from './CardAttachment'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -158,8 +159,8 @@ function ActiveCard() {
           borderRadius: '8px',
           border: 'none',
           outline: 0,
-          padding: '40px 20px 20px',
-          margin: '50px auto',
+          padding: '40px 20px 10px',
+          margin: '20px auto',
           backgroundColor: theme =>
             theme.palette.mode === 'dark' ? '#1A2027' : '#fff'
         }}
@@ -261,71 +262,10 @@ function ActiveCard() {
             </Box>
 
             {activeCard?.attachments?.length > 0 && (
-              <Box sx={{ mb: 3 }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    mb: 2
-                  }}
-                >
-                  <FilePresentRoundedIcon />
-                  <Typography
-                    variant="span"
-                    sx={{ fontWeight: '600', fontSize: '20px' }}
-                  >
-                    Attachment
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  {activeCard.attachments.map((attachment, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        p: 1,
-                        mb: 2,
-                        bgcolor: '#ccc',
-                        display: 'flex',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          backgroundColor: 'green',
-                          width: '45px',
-                          height: '45px',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderRadius: '8px'
-                        }}
-                      >
-                        <Typography
-                          variant="span"
-                          sx={{
-                            fontWeight: '500',
-                            fontSize: '14px',
-                            color: '#fff'
-                          }}
-                        >
-                          {attachment.type}
-                        </Typography>
-                      </Box>
-
-                      <Typography
-                        variant="span"
-                        sx={{ fontWeight: '500', fontSize: '16px' }}
-                      >
-                        {attachment.name}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
+              <CardAttachment attachments={activeCard?.attachments} />
             )}
 
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <DvrOutlinedIcon />
                 <Typography
@@ -388,10 +328,10 @@ function ActiveCard() {
                 <VisuallyHiddenInput type="file" onChange={onUploadCardCover} />
               </SidebarItem>
 
-              <SidebarItem>
-                <AttachFileOutlinedIcon fontSize="small" />
-                Attachment
-              </SidebarItem>
+              <AttachmentCreateModal
+                cardModal={activeCard}
+                SidebarItem={SidebarItem}
+              />
 
               <LabelModal cardModal={activeCard} SidebarItem={SidebarItem} />
 

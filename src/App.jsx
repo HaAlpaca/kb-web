@@ -13,7 +13,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import Settings from '~/pages/Settings/Settings'
 import Boards from './pages/Boards'
-import ActiveCard from './components/Modal/ActiveCard/ActiveCard'
 import { useEffect } from 'react'
 import {
   clearAndHideCurrentActiveCard,
@@ -41,7 +40,7 @@ function App() {
       <Route element={<ProtectedRoute user={currentUser} />}>
         <Route path="/boards/:boardId" element={<BoardWithModal />} />
         <Route path="/boards" element={<Boards />} />
-        <Route path="/cards/:cardId" element={<ActiveCard />} />
+        {/* <Route path="/cards/:cardId" element={<ActiveCard />} /> */}
         {/* User Settings */}
         <Route path="/settings/account" element={<Settings />} />
         <Route path="/settings/security" element={<Settings />} />

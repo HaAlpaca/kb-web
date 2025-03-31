@@ -144,3 +144,25 @@ export const handleUpdateCardLabelAPI = async (cardId, data) => {
   )
   return response.data
 }
+
+export const handleCreateAttachmentAPI = async data => {
+  const response = await authorizeAxiosInstance.post(
+    `${API_ROOT}/v1/attachments`,
+    data
+  )
+  return response.data
+}
+export const handleDeleteAttachmentAPI = async attachmentId => {
+  const response = await authorizeAxiosInstance.delete(
+    `${API_ROOT}/v1/attachments/${attachmentId}`
+  )
+  toast.success('Attachment deleted successfully!')
+  return response.data
+}
+export const handleChangeAttachmentAPI = async (attachmentId, data) => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/attachments/${attachmentId}`,
+    data
+  )
+  return response.data
+}

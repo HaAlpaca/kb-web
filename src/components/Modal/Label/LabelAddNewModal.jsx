@@ -11,13 +11,6 @@ import {
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined'
 import { Circle } from '@uiw/react-color'
-import { handleCreateLabelAPI } from '~/apis'
-import { useDispatch, useSelector } from 'react-redux'
-import {
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
-} from '~/redux/activeBoard/activeBoardSlice'
-import { cloneDeep } from 'lodash'
 
 const colours = [
   '#f44336',

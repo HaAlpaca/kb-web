@@ -7,6 +7,7 @@ import Tooltip from '@mui/material/Tooltip'
 
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import Expandable from '~/components/Expandable/Expandable'
 
 function CardActivitySection({ cardComments = [], onAddCardComment }) {
   const currentUser = useSelector(selectCurrentUser)
@@ -62,45 +63,48 @@ function CardActivitySection({ cardComments = [], onAddCardComment }) {
           No activity found!
         </Typography>
       )}
-      {cardComments.map((comment, index) => (
-        <Box
-          sx={{ display: 'flex', gap: 1, width: '100%', mb: 1.5 }}
-          key={index}
-        >
-          <Tooltip title={comment?.userDisplayName}>
-            <Avatar
-              sx={{ width: 36, height: 36, cursor: 'pointer' }}
-              alt={comment?.userDisplayName}
-              src={comment?.userAvatar}
-            />
-          </Tooltip>
-          <Box sx={{ width: 'inherit' }}>
-            <Typography variant="span" sx={{ fontWeight: 'bold', mr: 1 }}>
-              {comment?.userDisplayName}
-            </Typography>
 
-            <Typography variant="span" sx={{ fontSize: '12px' }}>
-              {moment(comment?.commentedAt).format('llll')}
-            </Typography>
+      <Expandable size={600} buttonBorderRadiusTop={true}>
+        {cardComments.map((comment, index) => (
+          <Box
+            sx={{ display: 'flex', gap: 1, width: '100%', mb: 1.5 }}
+            key={index}
+          >
+            <Tooltip title={comment?.userDisplayName}>
+              <Avatar
+                sx={{ width: 36, height: 36, cursor: 'pointer' }}
+                alt={comment?.userDisplayName}
+                src={comment?.userAvatar}
+              />
+            </Tooltip>
+            <Box sx={{ width: 'inherit' }}>
+              <Typography variant="span" sx={{ fontWeight: 'bold', mr: 1 }}>
+                {comment?.userDisplayName}
+              </Typography>
 
-            <Box
-              sx={{
-                display: 'block',
-                bgcolor: theme =>
-                  theme.palette.mode === 'dark' ? '#33485D' : 'white',
-                p: '8px 12px',
-                mt: '4px',
-                border: '0.5px solid rgba(0, 0, 0, 0.2)',
-                borderRadius: '4px',
-                wordBreak: 'break-word',
-                boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)'
-              }}
-            >
-              {comment?.content}
+              <Typography variant="span" sx={{ fontSize: '12px' }}>
+                {moment(comment?.commentedAt).format('llll')}
+              </Typography>
+
+              <Box
+                sx={{
+                  display: 'block',
+                  bgcolor: theme =>
+                    theme.palette.mode === 'dark' ? '#33485D' : 'white',
+                  p: '8px 12px',
+                  mt: '4px',
+                  border: '0.5px solid rgba(0, 0, 0, 0.2)',
+                  borderRadius: '4px',
+                  wordBreak: 'break-word',
+                  boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                {comment?.content}
+              </Box>
             </Box>
           </Box>
-        </Box>
-      ))}
+        ))}
+      </Expandable>
     </Box>
   )
 }

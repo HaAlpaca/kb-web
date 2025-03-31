@@ -5,7 +5,7 @@ import rehypeSanitize from 'rehype-sanitize'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import EditNoteIcon from '@mui/icons-material/EditNote'
-
+import Expandable from '~/components/Expandable/Expandable'
 
 /**
  * Vài ví dụ Markdown từ lib
@@ -70,17 +70,19 @@ function CardDescriptionMdEditor({
             Edit
           </Button>
           <Box data-color-mode={mode}>
-            <MDEditor.Markdown
-              source={cardDescription}
-              style={{
-                whiteSpace: 'pre-wrap',
-                padding: cardDescription ? '10px' : '0px',
-                border: cardDescription
-                  ? '0.5px solid rgba(0, 0, 0, 0.2)'
-                  : 'none',
-                borderRadius: '8px'
-              }}
-            />
+            <Expandable size={400}>
+              <MDEditor.Markdown
+                source={cardDescription}
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  padding: cardDescription ? '10px' : '0px',
+                  border: cardDescription
+                    ? '0.5px solid rgba(0, 0, 0, 0.2)'
+                    : 'none',
+                  borderRadius: '8px'
+                }}
+              />
+            </Expandable>
           </Box>
         </Box>
       )}

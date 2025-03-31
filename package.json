@@ -29,6 +29,7 @@
     "@uiw/react-md-editor": "^4.0.3",
     "axios": "^1.5.1",
     "cross-env": "^7.0.3",
+    "fast-average-color": "^9.5.0",
     "lodash": "^4.17.21",
     "material-ui-confirm": "^3.0.9",
     "moment": "^2.30.1",
