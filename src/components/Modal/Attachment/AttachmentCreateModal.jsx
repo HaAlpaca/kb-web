@@ -156,10 +156,12 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
               alignItems: 'center',
               justifyContent: 'center',
               paddingY: '10px',
-              backgroundColor: '#dfe6e9',
+              backgroundColor: theme =>
+                theme.palette.mode === 'dark' ? '#33485D' : '#dfe6e9',
               borderRadius: '5px',
               '&:hover': {
-                backgroundColor: '#b2bec3'
+                backgroundColor: theme =>
+                  theme.palette.mode === 'dark' ? '#636e72' : '#b2bec3'
               }
             }}
             onClick={() => fileInput.current.click()}

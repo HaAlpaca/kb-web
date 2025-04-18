@@ -31,6 +31,7 @@ const LabelGroup = ({ labels }) => {
               <Typography
                 variant="subtitle2"
                 sx={{
+                  fontSize: '12px',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',

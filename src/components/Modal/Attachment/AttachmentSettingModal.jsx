@@ -16,6 +16,16 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { downloadFile, generateDownloadURL } from '~/utils/formatters'
+import { ALLOW_COMMON_IMAGE_TYPES } from '~/utils/validators'
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
+import { updateCardDetailsAPI } from '~/apis'
+import {
+  selectCurrentActiveCard,
+  updateCurrentActiveCard
+} from '~/redux/activeCard/activeCardSlice'
+import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import HideImageOutlinedIcon from '@mui/icons-material/HideImageOutlined'
 function AttachmentSettingModal({
   attachment,
   handleDeleteAttachment,
@@ -32,6 +42,9 @@ function AttachmentSettingModal({
       attachmentLink: attachment.link
     }
   })
+
+  const dispatch = useDispatch()
+  const activeCard = useSelector(selectCurrentActiveCard)
 
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [popoverEl, setPopoverEl] = React.useState(null)
@@ -57,7 +70,21 @@ function AttachmentSettingModal({
     reset()
   }
 
+  const callApiUpdateCard = async updateData => {
+    const updatedCard = await updateCardDetailsAPI(activeCard._id, {
+      cover: updateData
+    })
+    // const updatedCardWithLabel = cloneDeep(updatedCard)
+    // updatedCardWithLabel.labels = activeCard.labels
+    // cap nhat nho phai luu vao redux
+    dispatch(updateCurrentActiveCard(updatedCard))
+    // nho cap nhat ca board ns vi card co trong board
+    dispatch(updateCardInBoard(updatedCard))
+    handleMenuClose()
+  }
+
   const onSubmit = data => {
+    handlePopoverClose()
     const updateData = {
       attachmentName: data.attachmentName.trim(),
       attachmentLink: data.attachmentLink.trim()
@@ -66,7 +93,6 @@ function AttachmentSettingModal({
       delete updateData.attachmentLink
     }
     handleChangeAttachment(attachment._id, updateData)
-    handlePopoverClose()
   }
 
   return (
@@ -109,6 +135,27 @@ function AttachmentSettingModal({
             <ListItemText>Download</ListItemText>
           </MenuItem>
         )}
+
+        {ALLOW_COMMON_IMAGE_TYPES.includes(attachment.type) && (
+          <Box>
+            {activeCard?.cover === attachment.link ? (
+              <MenuItem onClick={() => callApiUpdateCard('')}>
+                <ListItemIcon>
+                  <HideImageOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Remove Cover</ListItemText>
+              </MenuItem>
+            ) : (
+              <MenuItem onClick={() => callApiUpdateCard(attachment.link)}>
+                <ListItemIcon>
+                  <ImageOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Make Cover</ListItemText>
+              </MenuItem>
+            )}
+          </Box>
+        )}
+
         <MenuItem onClick={() => handleDeleteAttachment(attachment._id)}>
           <ListItemIcon>
             <DeleteOutlineOutlinedIcon fontSize="small" />

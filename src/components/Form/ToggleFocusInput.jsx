@@ -40,7 +40,6 @@ function ToggleFocusInput({
       }}
       onBlur={triggerBlur}
       {...props}
-      // Magic here :D
       sx={{
         '& label': {},
         '& input': { fontSize: inputFontSize, fontWeight: 'bold' },

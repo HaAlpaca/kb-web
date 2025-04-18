@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux'
 import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
 
-function CardUserGroup({ cardMemberIds = [], onUpdateCardMembers }) {
+function CardUserGroup({ cardMemberIds = [], onUpdateCardMembers, ...props }) {
   /**
    * Xử lý Popover để ẩn hoặc hiện toàn bộ user trên một cái popup, tương tự docs để tham khảo ở đây:
    * https://mui.com/material-ui/react-popover/
@@ -56,6 +56,7 @@ function CardUserGroup({ cardMemberIds = [], onUpdateCardMembers }) {
         <Tooltip title={user.displayName} key={index}>
           <Avatar
             sx={{ width: 34, height: 34, cursor: 'pointer' }}
+            {...props}
             alt={user.displayName}
             src={user.avatar}
           />
@@ -90,6 +91,7 @@ function CardUserGroup({ cardMemberIds = [], onUpdateCardMembers }) {
                 theme.palette.mode === 'dark' ? '#90caf9' : '#e9f2ff'
             }
           }}
+          {...props}
         >
           <AddIcon fontSize="small" />
         </Box>
