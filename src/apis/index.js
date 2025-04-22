@@ -166,3 +166,29 @@ export const handleChangeAttachmentAPI = async (attachmentId, data) => {
   )
   return response.data
 }
+export const handleToggleCompleteCardAPI = async cardId => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/cards/complete/${cardId}`
+  )
+  return response.data
+}
+export const handleCreateChecklistAPI = async data => {
+  const response = await authorizeAxiosInstance.post(
+    `${API_ROOT}/v1/checklists`,
+    data
+  )
+  return response.data
+}
+export const handleUpdateChecklistAPI = async (checklistId, data) => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/checklists/${checklistId}`,
+    data
+  )
+  return response.data
+}
+export const handleDeleteChecklistAPI = async checklistId => {
+  const response = await authorizeAxiosInstance.delete(
+    `${API_ROOT}/v1/checklists/${checklistId}`
+  )
+  return response.data
+}

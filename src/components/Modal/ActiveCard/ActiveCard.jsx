@@ -7,8 +7,7 @@ import Grid from '@mui/material/Unstable_Grid2'
 import Stack from '@mui/material/Stack'
 // import Divider from '@mui/material/Divider'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
-import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
-import WatchLaterOutlinedIcon from '@mui/icons-material/WatchLaterOutlined'
+
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 // import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined'
 // import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined'
@@ -48,7 +47,12 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import LabelGroupModal from '~/components/Label/LabelGroupModal'
 import AttachmentCreateModal from '../Attachment/AttachmentCreateModal'
 
-import CardAttachment from './CardAttachment'
+import CardAttachment from '../Attachment/CardAttachment'
+import DateModal from '../Date/DateModal'
+import { useState } from 'react'
+import moment from 'moment'
+import CardCheckList from '../Checklist/CardChecklist'
+import CreateChecklistModal from '../Checklist/CreateChecklistModal'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -84,6 +88,12 @@ function ActiveCard() {
   // khong dung state de check modal vi state board  _id.jsx la lam roi
   // const [isOpen, setIsOpen] = useState(true)
   // const handleOpenModal = () => setIsOpen(true)
+
+  const [isPortrait, setIsPortrait] = useState(false)
+  const handleImageLoad = event => {
+    const img = event.currentTarget
+    setIsPortrait(img.naturalHeight > img.naturalWidth)
+  }
 
   const handleCloseModal = () => {
     dispatch(clearAndHideCurrentActiveCard())
@@ -179,7 +189,7 @@ function ActiveCard() {
             onClick={handleCloseModal}
           />
         </Box>
-        {activeCard?.cover && (
+        {/* {activeCard?.cover && (
           <Box sx={{ mb: 4 }}>
             <img
               style={{
@@ -190,6 +200,30 @@ function ActiveCard() {
               }}
               src={activeCard.cover}
               alt="card-cover"
+            />
+          </Box>
+        )} */}
+
+        {activeCard?.cover && (
+          <Box
+            sx={{
+              mb: 4,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <img
+              style={{
+                width: isPortrait ? 'auto' : '100%',
+                height: isPortrait ? '320px' : 'auto',
+                maxHeight: '320px',
+                borderRadius: '6px',
+                objectFit: 'cover'
+              }}
+              src={activeCard.cover}
+              alt="card-cover"
+              onLoad={handleImageLoad}
             />
           </Box>
         )}
@@ -242,6 +276,32 @@ function ActiveCard() {
                 onUpdateCardMembers={onUpdateCardMembers}
               />
             </Box>
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
+              >
+                Due Date
+              </Typography>
+
+              <Box sx={{ ml: 2 }}>
+                <Typography sx={{ fontWeight: '600', mb: 1 }}>
+                  Start Date:{' '}
+                  {moment(activeCard?.startDate).format(
+                    'HH:mm dddd MM/DD/YYYY '
+                  )}
+                </Typography>
+                <Typography sx={{ fontWeight: '600', mb: 1 }}>
+                  Due Date:{' '}
+                  {moment(activeCard?.dueDate).format('HH:mm dddd MM/DD/YYYY ')}
+                </Typography>
+                <Typography sx={{ fontWeight: '600', mb: 1 }}>
+                  reminder Date:{' '}
+                  {moment(activeCard?.reminder).format(
+                    'HH:mm dddd MM/DD/YYYY '
+                  )}
+                </Typography>
+              </Box>
+            </Box>
 
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -260,6 +320,13 @@ function ActiveCard() {
                 handleUpdateCardDescription={onUpdateCardDescription}
               />
             </Box>
+
+            {activeCard?.checklists?.length > 0 && (
+              <CardCheckList
+                checklists={activeCard?.checklists}
+                cardChecklistIds={activeCard?.cardChecklistIds}
+              />
+            )}
 
             {activeCard?.attachments?.length > 0 && (
               <CardAttachment attachments={activeCard?.attachments} />
@@ -335,14 +402,14 @@ function ActiveCard() {
 
               <LabelModal cardModal={activeCard} SidebarItem={SidebarItem} />
 
-              <SidebarItem>
-                <TaskAltOutlinedIcon fontSize="small" />
-                Checklist
-              </SidebarItem>
-              <SidebarItem>
-                <WatchLaterOutlinedIcon fontSize="small" />
-                Dates
-              </SidebarItem>
+              <CreateChecklistModal
+                card={activeCard}
+                SidebarItem={SidebarItem}
+              />
+
+              {/* Date */}
+              <DateModal SidebarItem={SidebarItem} card={activeCard} />
+
               {/* <SidebarItem>
                 <AutoFixHighOutlinedIcon fontSize="small" />
                 Custom Fields
