@@ -316,28 +316,30 @@ function CardCheckList({ checklists, cardChecklistIds }) {
                     />
                   </Box>
                 </Box>
+                {checklist.items.length > 0 && (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ width: '100%', mr: 1 }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={progress}
+                        sx={{
+                          '.MuiLinearProgress-bar': {
+                            transition: 'transform 0.2s ease-in-out'
+                          }
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ minWidth: 35 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: 'text.secondary' }}
+                      >
+                        {`${Math.round(progress)}%`}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{ width: '100%', mr: 1 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={progress}
-                      sx={{
-                        '.MuiLinearProgress-bar': {
-                          transition: 'transform 0.2s ease-in-out'
-                        }
-                      }}
-                    />
-                  </Box>
-                  <Box sx={{ minWidth: 35 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: 'text.secondary' }}
-                    >
-                      {`${Math.round(progress)}%`}
-                    </Typography>
-                  </Box>
-                </Box>
                 <CardCheckitem
                   checklist={checklist}
                   onUpdateCheckitemTitle={onUpdateCheckitemTitle}
@@ -345,6 +347,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
                   onCreateNewCheckItem={onCreateNewCheckItem}
                   onUpdateCheckitemMembers={onUpdateCheckitemMembers}
                   onUpdateCheckitemDueDate={onUpdateCheckitemDueDate}
+                  onDeleteCheckitem={onDeleteCheckitem}
                 />
               </Box>
             </Grid>

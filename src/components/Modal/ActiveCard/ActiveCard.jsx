@@ -276,32 +276,74 @@ function ActiveCard() {
                 onUpdateCardMembers={onUpdateCardMembers}
               />
             </Box>
-            <Box sx={{ mb: 3 }}>
-              <Typography
-                sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
-              >
-                Due Date
-              </Typography>
 
-              <Box sx={{ ml: 2 }}>
-                <Typography sx={{ fontWeight: '600', mb: 1 }}>
-                  Start Date:{' '}
-                  {moment(activeCard?.startDate).format(
-                    'HH:mm dddd MM/DD/YYYY '
-                  )}
+            {activeCard?.dueDate && (
+              <Box sx={{ mb: 3 }}>
+                <Typography
+                  sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
+                >
+                  Due Date
                 </Typography>
-                <Typography sx={{ fontWeight: '600', mb: 1 }}>
-                  Due Date:{' '}
-                  {moment(activeCard?.dueDate).format('HH:mm dddd MM/DD/YYYY ')}
-                </Typography>
-                <Typography sx={{ fontWeight: '600', mb: 1 }}>
-                  reminder Date:{' '}
-                  {moment(activeCard?.reminder).format(
-                    'HH:mm dddd MM/DD/YYYY '
-                  )}
-                </Typography>
+
+                <Box
+                  sx={{
+                    ml: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1
+                  }}
+                >
+                  <Box
+                    sx={{
+                      bgcolor: '#6BCB77',
+                      padding: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: '600', color: 'white' }}>
+                      Start Date:{' '}
+                      {moment(activeCard?.startDate).format(
+                        'HH:mm dddd MM/DD/YYYY '
+                      )}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      bgcolor: '#FF6B6B',
+                      padding: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: '600', color: 'white' }}>
+                      Due Date:{' '}
+                      {moment(activeCard?.dueDate).format(
+                        'HH:mm dddd MM/DD/YYYY '
+                      )}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      bgcolor: '#4D96FF',
+                      padding: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: '600', color: 'white' }}>
+                      reminder Date:{' '}
+                      {moment(activeCard?.reminder).format(
+                        'HH:mm dddd MM/DD/YYYY '
+                      )}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
-            </Box>
+            )}
 
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

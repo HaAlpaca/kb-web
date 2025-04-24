@@ -30,6 +30,8 @@ function AppBar() {
         justifyContent: 'space-between',
         px: 2,
         gap: 2,
+        position: 'sticky', // Đặt AppBar dính trên đầu
+        top: 0,
         overflowX: 'auto',
         bgcolor: theme =>
           theme.palette.mode === 'dark' ? '#2c3e50' : '#493D9E',

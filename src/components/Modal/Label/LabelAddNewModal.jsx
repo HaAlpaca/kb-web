@@ -11,6 +11,7 @@ import {
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined'
 import { Circle } from '@uiw/react-color'
+import { socketIoInstance } from '~/socket-client'
 
 const colours = [
   '#f44336',

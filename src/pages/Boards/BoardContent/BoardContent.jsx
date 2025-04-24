@@ -21,6 +21,9 @@ import { cloneDeep, isEmpty } from 'lodash'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
 import { generatePlaceholderCard } from '~/utils/formatters'
+import { socketIoInstance } from '~/socket-client'
+import { updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch } from 'react-redux'
 // import { socketIoInstance } from '~/socket-client'
 // import { updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 // import { useDispatch } from 'react-redux'
@@ -36,7 +39,7 @@ function BoardContent({
   moveCardInTheSameColumn,
   moveCardToDifferentColumn
 }) {
-  // const dispatch = useDispatch()
+  const dispatch = useDispatch()
 
   // yeu cau chuot di 10px ms active event, fix click goi event
   // const pointerSensor = useSensor(PointerSensor, {
@@ -64,27 +67,27 @@ function BoardContent({
     setOrderedColumns(board.columns)
   }, [board])
 
-  // // WEBSOCKET EVENT RECEIVE MOVE COLUMN
-  // useEffect(() => {
-  //   socketIoInstance.on('BE_MOVE_COLUMN', moveColumn => {
-  //     console.log('BE MOVE COLUMN: ', moveColumn)
-  //     // thuc ra doan nay ko phai clone deep va dung spreedoperator duoc, vi khong push lam 2 mang merge vs nhau
-  //     const newBoard = { ...board }
-  //     newBoard.columnOrderIds = moveColumn.columnOrderIds
-  //     // // SET BOARD nhu SETSTATE TRONG REDUX
-  //     dispatch(updateCurrentActiveBoard(newBoard))
-  //     console.log(orderedColumns)
-  //     // Move Array trong dnd
-  //     const newOrderedColumns = []
-  //     moveColumn.columnOrderIds.forEach(columnId => {
-  //       newOrderedColumns.push(
-  //         orderedColumns.find(column => column._id === columnId)
-  //       )
-  //     })
-  //     console.log(newOrderedColumns)
-  //     setOrderedColumns(newOrderedColumns)
-  //   })
-  // }, [dispatch, board, orderedColumns])
+  // WEBSOCKET EVENT RECEIVE MOVE COLUMN
+  useEffect(() => {
+    const handleMoveColumn = moveColumn => {
+      // Clone board để tránh thay đổi trực tiếp
+      const newBoard = cloneDeep(board)
+
+      // Cập nhật thứ tự cột trong board
+      newBoard.columnOrderIds = moveColumn.columnOrderIds
+
+      // Cập nhật Redux Store
+      dispatch(updateCurrentActiveBoard(newBoard))
+
+      setOrderedColumns()
+    }
+
+    socketIoInstance.on('BE_MOVE_COLUMN', handleMoveColumn)
+
+    return () => {
+      socketIoInstance.off('BE_MOVE_COLUMN')
+    }
+  }, [dispatch, board])
 
   // function chung xu li cap nhat lai state trong th di chuyen card giua cac khu vuc khac nhau
   const moveCardBetweenDifferentColumns = (
@@ -431,8 +434,10 @@ function BoardContent({
             height: '100%',
             backgroundImage: theme =>
               theme.palette.mode === 'dark'
-                ? 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(/kanban-bg.png)'
-                : 'url(/kanban-bg.png)',
+                ? `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(${
+                    board?.cover ? `${board.cover}` : '/kanban-bg.png'
+                  })`
+                : `url(${board?.cover ? `${board?.cover}` : '/kanban-bg.png'})`,
 
             // filter: 'blur(px)',
             backgroundPosition: 'center',

@@ -8,10 +8,10 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 const CheckItemSetDueDate = ({ checklistId, checkitem, onChangeDate }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedDate, setSelectedDate] = useState(
-    checkitem.dueDate ? moment(checkitem.dueDate) : moment(Date.now())
+    checkitem.dueDate ? moment(checkitem.dueDate) : null
   )
   const [tempDate, setTempDate] = useState(
-    checkitem.dueDate ? moment(checkitem.dueDate) : moment(Date.now())
+    checkitem.dueDate ? moment(checkitem.dueDate) : null
   )
 
   const isOpenPopover = Boolean(anchorEl)
@@ -33,7 +33,7 @@ const CheckItemSetDueDate = ({ checklistId, checkitem, onChangeDate }) => {
     setSelectedDate(null)
     setTempDate(moment())
     if (onChangeDate) {
-      onChangeDate(checkitem._id, null)
+      onChangeDate(checklistId, checkitem._id, null)
     }
     handleTogglePopover()
   }

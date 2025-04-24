@@ -10,7 +10,12 @@ import { useSelector } from 'react-redux'
 import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
 
-function CardUserGroup({ cardMemberIds = [], onUpdateCardMembers, ...props }) {
+function CardUserGroup({
+  cardMemberIds = [],
+  onUpdateCardMembers,
+  isShowAddMember = true,
+  ...props
+}) {
   /**
    * Xử lý Popover để ẩn hoặc hiện toàn bộ user trên một cái popup, tương tự docs để tham khảo ở đây:
    * https://mui.com/material-ui/react-popover/
@@ -63,84 +68,88 @@ function CardUserGroup({ cardMemberIds = [], onUpdateCardMembers, ...props }) {
         </Tooltip>
       ))}
 
-      {/* Nút này để mở popover thêm member */}
-      <Tooltip title="Add new member">
-        <Box
-          aria-describedby={popoverId}
-          onClick={handleTogglePopover}
-          sx={{
-            width: 36,
-            height: 36,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '14px',
-            fontWeight: '600',
-            borderRadius: '50%',
-            color: theme =>
-              theme.palette.mode === 'dark' ? '#90caf9' : '#172b4d',
-            bgcolor: theme =>
-              theme.palette.mode === 'dark'
-                ? '#2f3542'
-                : theme.palette.grey[200],
-            '&:hover': {
-              color: theme =>
-                theme.palette.mode === 'dark' ? '#000000de' : '#0c66e4',
-              bgcolor: theme =>
-                theme.palette.mode === 'dark' ? '#90caf9' : '#e9f2ff'
-            }
-          }}
-          {...props}
-        >
-          <AddIcon fontSize="small" />
-        </Box>
-      </Tooltip>
-
-      {/* Khi Click vào + ở trên thì sẽ mở popover hiện toàn bộ users trong board để người dùng Click chọn thêm vào card  */}
-      <Popover
-        id={popoverId}
-        open={isOpenPopover}
-        anchorEl={anchorPopoverElement}
-        onClose={handleTogglePopover}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      >
-        <Box
-          sx={{
-            p: 2,
-            maxWidth: '260px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 1.5
-          }}
-        >
-          {board.FE_allUsers.map((user, index) => (
-            <Tooltip title={user.displayName} key={index}>
-              {/* Cách làm Avatar kèm badge icon: https://mui.com/material-ui/react-avatar/#with-badge */}
-              <Badge
-                sx={{ cursor: 'pointer' }}
-                overlap="rectangular"
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                badgeContent={
-                  cardMemberIds.includes(user._id) ? (
-                    <CheckCircleIcon
-                      fontSize="small"
-                      sx={{ color: '#27ae60' }}
-                    />
-                  ) : null
+      {isShowAddMember && (
+        <>
+          {/* Nút này để mở popover thêm member */}
+          <Tooltip title="Add new member">
+            <Box
+              aria-describedby={popoverId}
+              onClick={handleTogglePopover}
+              sx={{
+                width: 36,
+                height: 36,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: '600',
+                borderRadius: '50%',
+                color: theme =>
+                  theme.palette.mode === 'dark' ? '#90caf9' : '#172b4d',
+                bgcolor: theme =>
+                  theme.palette.mode === 'dark'
+                    ? '#2f3542'
+                    : theme.palette.grey[200],
+                '&:hover': {
+                  color: theme =>
+                    theme.palette.mode === 'dark' ? '#000000de' : '#0c66e4',
+                  bgcolor: theme =>
+                    theme.palette.mode === 'dark' ? '#90caf9' : '#e9f2ff'
                 }
-                onClick={() => handleUpdateCardMembers(user)}
-              >
-                <Avatar
-                  sx={{ width: 34, height: 34 }}
-                  alt={user.displayName}
-                  src={user.avatar}
-                />
-              </Badge>
-            </Tooltip>
-          ))}
-        </Box>
-      </Popover>
+              }}
+              {...props}
+            >
+              <AddIcon fontSize="small" />
+            </Box>
+          </Tooltip>
+
+          {/* Khi Click vào + ở trên thì sẽ mở popover hiện toàn bộ users trong board để người dùng Click chọn thêm vào card  */}
+          <Popover
+            id={popoverId}
+            open={isOpenPopover}
+            anchorEl={anchorPopoverElement}
+            onClose={handleTogglePopover}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            <Box
+              sx={{
+                p: 2,
+                maxWidth: '260px',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1.5
+              }}
+            >
+              {board.FE_allUsers.map((user, index) => (
+                <Tooltip title={user.displayName} key={index}>
+                  {/* Cách làm Avatar kèm badge icon: https://mui.com/material-ui/react-avatar/#with-badge */}
+                  <Badge
+                    sx={{ cursor: 'pointer' }}
+                    overlap="rectangular"
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    badgeContent={
+                      cardMemberIds.includes(user._id) ? (
+                        <CheckCircleIcon
+                          fontSize="small"
+                          sx={{ color: '#27ae60' }}
+                        />
+                      ) : null
+                    }
+                    onClick={() => handleUpdateCardMembers(user)}
+                  >
+                    <Avatar
+                      sx={{ width: 34, height: 34 }}
+                      alt={user.displayName}
+                      src={user.avatar}
+                    />
+                  </Badge>
+                </Tooltip>
+              ))}
+            </Box>
+          </Popover>
+        </>
+      )}
     </Box>
   )
 }

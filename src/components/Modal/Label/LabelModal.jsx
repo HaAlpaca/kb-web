@@ -14,6 +14,7 @@ import Checkbox from '@mui/material/Checkbox'
 import LabelAddNewModal from './LabelAddNewModal'
 import { useDispatch, useSelector } from 'react-redux'
 import {
+  fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
@@ -25,10 +26,12 @@ import {
 } from '~/apis'
 import { cloneDeep } from 'lodash'
 import {
+  fetchCardDetailsAPI,
   selectCurrentActiveCard,
   updateCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 import { useConfirm } from 'material-ui-confirm'
+import { socketIoInstance } from '~/socket-client'
 
 function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
   // board query
@@ -36,7 +39,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
   const boardLabels = board?.labels || []
   const boardId = board?._id
   const dispatch = useDispatch()
-  const activeCardModal = useSelector(selectCurrentActiveCard)
+  // const activeCardModal = useSelector(selectCurrentActiveCard)
   const confirmDeleteLabel = useConfirm()
 
   // react-hook-form
@@ -71,13 +74,15 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       colour: hex,
       boardId
     }).then(res => {
-      const newBoard = cloneDeep(board)
-      newBoard.labels.push({
-        _id: res._id,
-        title: res.title,
-        colour: res.colour
-      })
-      dispatch(updateCurrentActiveBoard(newBoard))
+      // const newBoard = cloneDeep(board)
+      // newBoard.labels.push({
+      //   _id: res._id,
+      //   title: res.title,
+      //   colour: res.colour
+      // })
+      // dispatch(updateCurrentActiveBoard(newBoard))
+      dispatch(fetchBoardDetailsAPI(boardId))
+      socketIoInstance.emit('FE_CREATE_LABEL', res)
     })
   }
 
@@ -101,28 +106,33 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
     handleUpdateCardLabelAPI(cardModal._id, {
       updateLabels: updatedLabels
     }).then(() => {
-      const newBoard = cloneDeep(board)
-      const labelToUpdate = newBoard.labels
-        .filter(label => updatedLabels.includes(label._id))
-        .sort(
-          (a, b) => updatedLabels.indexOf(a._id) - updatedLabels.indexOf(b._id)
-        )
+      // const newBoard = cloneDeep(board)
+      // const labelToUpdate = newBoard.labels
+      //   .filter(label => updatedLabels.includes(label._id))
+      //   .sort(
+      //     (a, b) => updatedLabels.indexOf(a._id) - updatedLabels.indexOf(b._id)
+      //   )
 
-      // Cập nhật danh sách label trong modal card
-      newBoard.columns.forEach(column => {
-        column.cards.forEach(card => {
-          if (Array.isArray(card.labels) && card._id === cardModal._id) {
-            card.labels = labelToUpdate
-            card.cardLabelIds = updatedLabels
-          }
-        })
-      })
+      // // Cập nhật danh sách label trong modal card
+      // newBoard.columns.forEach(column => {
+      //   column.cards.forEach(card => {
+      //     if (Array.isArray(card.labels) && card._id === cardModal._id) {
+      //       card.labels = labelToUpdate
+      //       card.cardLabelIds = updatedLabels
+      //     }
+      //   })
+      // })
 
-      dispatch(updateCurrentActiveBoard(newBoard))
+      // dispatch(updateCurrentActiveBoard(newBoard))
 
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.labels = labelToUpdate
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
+      dispatch(fetchBoardDetailsAPI(boardId))
+
+      if (cardModal) {
+        dispatch(fetchCardDetailsAPI(cardModal._id))
+      }
+      // const newActiveCardModal = cloneDeep(activeCardModal)
+      // newActiveCardModal.labels = labelToUpdate
+      // dispatch(updateCurrentActiveCard(newActiveCardModal))
     })
   }
 
@@ -134,28 +144,31 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       cancellationText: 'Cancel'
     }).then(
       async () =>
-        await handleDeleteLabelAPI(labelId).then(() => {
+        await handleDeleteLabelAPI(labelId).then(res => {
           // update board label
-          const newBoard = cloneDeep(board)
-          newBoard.labels = newBoard.labels.filter(
-            label => label._id !== labelId
-          )
-          newBoard.columns.forEach(column => {
-            column.cards.forEach(card => {
-              card.labels = card.labels.filter(label => label._id !== labelId)
-              card.cardLabelIds = card.cardLabelIds.filter(id => id !== labelId)
-            })
-          })
-          dispatch(updateCurrentActiveBoard(newBoard))
+          // const newBoard = cloneDeep(board)
+          // newBoard.labels = newBoard.labels.filter(
+          //   label => label._id !== labelId
+          // )
+          // newBoard.columns.forEach(column => {
+          //   column.cards.forEach(card => {
+          //     card.labels = card.labels.filter(label => label._id !== labelId)
+          //     card.cardLabelIds = card.cardLabelIds.filter(id => id !== labelId)
+          //   })
+          // })
+          // dispatch(updateCurrentActiveBoard(newBoard))
+          dispatch(fetchBoardDetailsAPI(boardId))
 
           // update card modal label
           if (cardModal) {
-            const newActiveCardModal = cloneDeep(activeCardModal)
-            newActiveCardModal.labels = newActiveCardModal.labels.filter(
-              label => label._id !== labelId
-            )
-            dispatch(updateCurrentActiveCard(newActiveCardModal))
+            // const newActiveCardModal = cloneDeep(activeCardModal)
+            // newActiveCardModal.labels = newActiveCardModal.labels.filter(
+            //   label => label._id !== labelId
+            // )
+            // dispatch(updateCurrentActiveCard(newActiveCardModal))
+            dispatch(fetchCardDetailsAPI(cardModal._id))
           }
+          socketIoInstance.emit('FE_CREATE_LABEL', res)
         })
     )
   }
@@ -167,23 +180,39 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
     }).then(() => {
       const newBoard = cloneDeep(board)
       const labelToUpdate = newBoard.labels.find(label => label._id === labelId)
-      if (labelToUpdate) {
-        labelToUpdate.title = labelTitle
-        labelToUpdate.colour = hex
-        newBoard.columns.forEach(column => {
-          column.cards.forEach(card => {
-            if (Array.isArray(card.labels)) {
-              card.labels.forEach(label => {
-                if (label._id === labelId) {
-                  label.title = labelTitle
-                  label.colour = hex
-                }
-              })
-            }
-          })
-        })
-        dispatch(updateCurrentActiveBoard(newBoard))
+      // if (labelToUpdate) {
+      //   labelToUpdate.title = labelTitle
+      //   labelToUpdate.colour = hex
+      //   newBoard.columns.forEach(column => {
+      //     column.cards.forEach(card => {
+      //       if (Array.isArray(card.labels)) {
+      //         card.labels.forEach(label => {
+      //           if (label._id === labelId) {
+      //             label.title = labelTitle
+      //             label.colour = hex
+      //           }
+      //         })
+      //       }
+      //     })
+      //   })
+      //   dispatch(updateCurrentActiveBoard(newBoard))
+      // }
+
+      dispatch(fetchBoardDetailsAPI(boardId))
+
+      if (cardModal) {
+        // const newActiveCardModal = cloneDeep(activeCardModal)
+        // newActiveCardModal.labels?.forEach(label => {
+        //   if (label._id === labelId) {
+        //     label.title = labelTitle
+        //     label.colour = hex
+        //   }
+        // })
+        // dispatch(updateCurrentActiveCard(newActiveCardModal))
+        dispatch(fetchCardDetailsAPI(cardModal._id))
       }
+
+      socketIoInstance.emit('FE_UPDATE_LABEL', labelToUpdate)
     })
   }
 
