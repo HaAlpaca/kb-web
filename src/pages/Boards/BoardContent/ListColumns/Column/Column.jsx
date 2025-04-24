@@ -120,7 +120,6 @@ function Column({ column }) {
           toast.success(res?.deleteResult)
           // console.log('🚀 ~ deleteColumnDetails ~ columnId:', columnId)
           socketIoInstance.emit('FE_DELETE_COLUMN', res)
-          // console.log('FE_DELETE_COLUMN emit: ', res)
         })
       })
       .catch(() => {})

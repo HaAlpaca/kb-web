@@ -14,7 +14,7 @@ import HomeIcon from '@mui/icons-material/Home'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-// import CardMedia from '@mui/material/CardMedia'
+import CardMedia from '@mui/material/CardMedia'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import { Link, useLocation } from 'react-router-dom'
@@ -96,21 +96,28 @@ function Boards() {
   return (
     <Container disableGutters maxWidth={false}>
       <AppBar />
-      <Box sx={{ paddingX: 2, my: 4 }}>
+      <Box
+        sx={{
+          paddingX: 2,
+          my: '24px',
+          height: 'calc(100vh - 64px - 48px)', // Chiều cao của AppBar là 64px
+          overflowY: 'auto' // Thêm thanh cuộn dọc nếu nội dung vượt quá chiều cao
+        }}
+      >
         <Grid container spacing={2}>
           <Grid xs={12} sm={3}>
             <Stack direction="column" spacing={1}>
               <SidebarItem className="active">
                 <SpaceDashboardIcon fontSize="small" />
-                Boards
+                All Boards
               </SidebarItem>
               <SidebarItem>
                 <ListAltIcon fontSize="small" />
-                Templates
+                Public Boards
               </SidebarItem>
               <SidebarItem>
                 <HomeIcon fontSize="small" />
-                Home
+                Private Boards
               </SidebarItem>
             </Stack>
             <Divider sx={{ my: 1 }} />
@@ -123,7 +130,7 @@ function Boards() {
 
           <Grid xs={12} sm={9}>
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-              Your boards:
+              All boards:
             </Typography>
 
             {/* Trường hợp gọi API nhưng không tồn tại cái board nào trong Database trả về */}
@@ -139,11 +146,22 @@ function Boards() {
                 {boards.map(b => (
                   <Grid xs={2} sm={3} md={4} key={b._id}>
                     <Card sx={{ width: '250px' }}>
-                      {/* Ý tưởng mở rộng về sau làm ảnh Cover cho board nhé */}
-                      {/* <CardMedia component="img" height="100" image="https://picsum.photos/100" /> */}
-                      <Box
-                        sx={{ height: '50px', backgroundColor: randomColor() }}
-                      ></Box>
+                      {/* Hiển thị ảnh cover cho board */}
+                      {b?.cover ? (
+                        <CardMedia
+                          component="img"
+                          height="100" // Chiều cao ảnh
+                          image={`${b.cover}?w=250`} // URL ảnh
+                          alt={`${b.title} cover`} // Văn bản thay thế
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            height: '100px',
+                            backgroundColor: randomColor()
+                          }}
+                        ></Box>
+                      )}
 
                       <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
                         <Typography gutterBottom variant="h6" component="div">

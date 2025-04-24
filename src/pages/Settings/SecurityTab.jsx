@@ -97,7 +97,7 @@ function SecurityTab() {
         }}
       >
         <Box>
-          <Typography variant="h5">Security Dashboard</Typography>
+          <Typography variant="h5">Change Password</Typography>
         </Box>
         <form onSubmit={handleSubmit(submitChangePassword)}>
           <Box

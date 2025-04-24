@@ -26,7 +26,6 @@ import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 import { socketIoInstance } from '~/socket-client'
-import { generatePlaceholderCard } from '~/utils/formatters'
 function Board() {
   const dispatch = useDispatch()
   // const [board, setBoard] = useState(null)
@@ -40,52 +39,123 @@ function Board() {
     dispatch(fetchBoardDetailsAPI(boardId))
   }, [dispatch, boardId])
 
-  // WEBSOCKET EVENT RECEIVE DELETE COLUMN
+  // WEBSOCKET EVENT DELETE COLUMN
   useEffect(() => {
-    // const boardId = '671210d38975d009e2a50179'
-    //call api
-    // dispatch(fetchBoardDetailsAPI(boardId))
-    // socketIoInstance.on('BE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN', move => {
-    //   console.log('BE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN on: ', move)
-    // })
-    socketIoInstance.on('BE_DELETE_COLUMN', deletedColumn => {
-      const newBoard = { ...board }
-      // console.log(newBoard)
-      newBoard.columns = newBoard.columns?.filter(
-        c => c._id !== deletedColumn.columnId
-      )
-      newBoard.columnOrderIds = newBoard.columnOrderIds?.filter(
-        _id => _id !== deletedColumn.columnId
-      )
-      // setBoard(newBoard)
-      // SET BOARD nhu SETSTATE TRONG REDUX
-      dispatch(updateCurrentActiveBoard(newBoard))
-      // console.log('BE_DELETE_COLUMN on: ', deletedColumn)
-    })
+    const handleDeleteColumn = deletedColumn => {
+      // const newBoard = cloneDeep(board)
+      // newBoard.columns = newBoard.columns.filter(
+      //   column => column._id !== deletedColumn.columnId
+      // )
+      // newBoard.columnOrderIds = newBoard.columnOrderIds.filter(
+      //   columnId => columnId !== deletedColumn.columnId
+      // )
+      // dispatch(updateCurrentActiveBoard(newBoard))
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+    socketIoInstance.on('BE_DELETE_COLUMN', handleDeleteColumn)
+
+    return () => {
+      socketIoInstance.off('BE_DELETE_COLUMN', handleDeleteColumn)
+    }
   }, [dispatch, board])
-  // WEBSOCKET EVENT RECEIVE CREATECOLUMN
+
+  // WEBSOCKET EVENT CREATE COLUMN
   useEffect(() => {
-    socketIoInstance.on('BE_CREATE_COLUMN', createdColumn => {
-      // console.log('BE_CREATE_COLUMN on: ', createdColumn)
-      createdColumn.cards = [generatePlaceholderCard(createdColumn)]
-      createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
-      // cap nhat state board
-      // tu lam dung thay vi fetch lai api
-      const newBoard = {
-        ...board
-      }
-      newBoard.columns = newBoard.columns?.concat(createdColumn)
-      newBoard.columnOrderIds = newBoard.columnOrderIds?.concat(
-        createdColumn._id
-      )
-      // console.log('NewBoard: ', newBoard)
+    const handleDeleteColumn = createdColumn => {
+      // createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+      // createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+      // // cap nhat state board
+      // // tu lam dung thay vi fetch lai api
+      // const newBoard = cloneDeep(board)
       // newBoard.columns.push(createdColumn)
       // newBoard.columnOrderIds.push(createdColumn._id)
-      // setBoard(newBoard)
-      // // // se co loi khi shallow copy => dung clonedeep hoac chuyen sang concat (concat tao mang moi va gan ngc lai) (push se bi loi vi no la merge 2 mang)
-      // // // https://redux-toolkit.js.org/usage/immer-reducers
-      dispatch(updateCurrentActiveBoard(newBoard))
-    })
+
+      // dispatch(updateCurrentActiveBoard(newBoard))
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_CREATE_COLUMN', handleDeleteColumn)
+
+    return () => {
+      socketIoInstance.off('BE_CREATE_COLUMN', handleDeleteColumn)
+    }
+  }, [dispatch, board])
+
+  // WEBSOCKET EVENT MOVE COLUMN
+  useEffect(() => {
+    const handleMoveColumn = () => {
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_MOVE_COLUMN', handleMoveColumn)
+
+    return () => {
+      socketIoInstance.off('BE_MOVE_COLUMN')
+    }
+  }, [dispatch, board])
+  // WEBSOCKET EVENT MOVE CARD
+  useEffect(() => {
+    const handleMoveCard = () => {
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_MOVE_CARD', handleMoveCard)
+
+    return () => {
+      socketIoInstance.off('BE_MOVE_CARD')
+    }
+  }, [dispatch, board])
+
+  // update board details
+  useEffect(() => {
+    const handleUpdateBoard = () => {
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_UPDATE_BOARD', handleUpdateBoard)
+
+    return () => {
+      socketIoInstance.off('BE_UPDATE_BOARD', handleUpdateBoard)
+    }
+  }, [dispatch, board])
+
+  // update label
+  useEffect(() => {
+    const handleUpdateLabel = () => {
+      console.log('BE_CREATE_LABEL')
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_CREATE_LABEL', handleUpdateLabel)
+
+    return () => {
+      socketIoInstance.off('BE_CREATE_LABEL', handleUpdateLabel)
+    }
+  }, [dispatch, board])
+
+  useEffect(() => {
+    const handleUpdateLabel = () => {
+      console.log('BE_DELETE_LABEL')
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_DELETE_LABEL', handleUpdateLabel)
+
+    return () => {
+      socketIoInstance.off('BE_DELETE_LABEL', handleUpdateLabel)
+    }
+  }, [dispatch, board])
+
+  useEffect(() => {
+    const handleUpdateLabel = () => {
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_UPDATE_LABEL', handleUpdateLabel)
+
+    return () => {
+      socketIoInstance.off('BE_UPDATE_LABEL', handleUpdateLabel)
+    }
   }, [dispatch, board])
 
   // goi api khi xu ly xong keo tha
@@ -124,7 +194,9 @@ function Board() {
     // setBoard(newBoard)
     // SET BOARD nhu SETSTATE TRONG REDUX
     dispatch(updateCurrentActiveBoard(newBoard))
-    updateColumnDetailsAPI(columnId, { cardOrderIds: dndOrderedCardIds })
+    updateColumnDetailsAPI(columnId, { cardOrderIds: dndOrderedCardIds }).then(
+      res => socketIoInstance.emit('FE_MOVE_CARD', res)
+    )
   }
   const moveCardToDifferentColumn = (
     currentCardId,
@@ -163,10 +235,7 @@ function Board() {
       nextColumnId,
       nextCardOrderIds: dndOrderedColumns.find(c => c._id === nextColumnId)
         ?.cardOrderIds
-    }).then(res => {
-      socketIoInstance.emit('FE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN', res)
-      // console.log('FE_USER_MOVE_CARD_TO_DIFFERENT_COLUMN emit: ', res)
-    })
+    }).then(res => socketIoInstance.emit('FE_MOVE_CARD', res))
   }
 
   if (!board) {

@@ -45,7 +45,7 @@ function ListColumns({ columns }) {
     }).then(res => {
       // socket emit
       socketIoInstance.emit('FE_CREATE_COLUMN', res)
-      return res
+
     })
     // handle column
     createdColumn.cards = [generatePlaceholderCard(createdColumn)]
@@ -76,6 +76,7 @@ function ListColumns({ columns }) {
     >
       <Box
         sx={{
+          backfaceVisibility: 'hidden',
           bgcolor: 'inherit',
           width: '100%',
           height: '100%',

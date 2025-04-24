@@ -120,12 +120,12 @@ function Card({ card }) {
           sx={{
             width: isPortrait ? 'auto' : '100%',
             height: isPortrait ? 200 : 140,
-            borderTopLeftRadius: '8px',
-            borderTopRightRadius: '8px',
+            borderTopLeftRadius: isPortrait ? '0px' : '8px',
+            borderTopRightRadius: isPortrait ? '0px' : '8px',
             marginTop: isPortrait && '8px',
             objectFit: 'cover',
             display: 'block',
-            margin: isPortrait ? '8px auto' : '0 auto'
+            margin: '0 auto'
           }}
           image={card.cover}
           title={card?.title}

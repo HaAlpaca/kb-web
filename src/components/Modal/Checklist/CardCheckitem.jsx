@@ -22,7 +22,8 @@ function CardCheckitem({
   onToggleCheckitemStatus,
   onCreateNewCheckItem,
   onUpdateCheckitemDueDate,
-  onUpdateCheckitemMembers
+  onUpdateCheckitemMembers,
+  onDeleteCheckitem
 }) {
   const [openNewCheckItemForm, setOpenNewCheckItemForm] = useState(false)
 
@@ -106,7 +107,9 @@ function CardCheckitem({
                 }
               />
 
-              <IconButton>
+              <IconButton
+                onClick={() => onDeleteCheckitem(checklist._id, checkitem._id)}
+              >
                 <DeleteIcon />
               </IconButton>
             </Box>
