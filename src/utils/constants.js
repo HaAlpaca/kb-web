@@ -27,3 +27,15 @@ export const BOARD_TYPES = {
   PUBLIC: 'public',
   PRIVATE: 'private'
 }
+
+export const ACTION_TYPES = {
+  ASSIGN_CHECKLIST: 'assign_checklist',
+  ASSIGN_CARD: 'assign_card',
+  UPDATE_DUEDATE: 'update_dueDate'
+}
+
+export const OWNER_ACTION_TARGET = {
+  CARD: 'cards',
+  COLUMN: 'columns',
+  BOARD: 'boards'
+}

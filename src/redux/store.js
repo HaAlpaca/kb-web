@@ -14,6 +14,7 @@ import { activeBoardReducer } from './activeBoard/activeBoardSlice'
 import { activeCardReducer } from './activeCard/activeCardSlice'
 import { userReducer } from './user/userSlice'
 import { notificationsReducer } from './notifications/notificationsSlice'
+import { notificationActionsReducer } from './notifications/notificationsActionSlice'
 //
 const rootPersistConfig = {
   key: 'root', // key chi dinh , de mac dinh la root
@@ -28,7 +29,8 @@ export const reducers = combineReducers({
   activeBoard: activeBoardReducer,
   user: userReducer,
   activeCard: activeCardReducer,
-  notifications: notificationsReducer
+  notifications: notificationsReducer,
+  notificationActions: notificationActionsReducer
 })
 
 const persistReducers = persistReducer(rootPersistConfig, reducers)

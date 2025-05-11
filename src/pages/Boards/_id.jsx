@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // board details
 
 import Container from '@mui/material/Container'
@@ -21,17 +22,24 @@ import {
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 import { socketIoInstance } from '~/socket-client'
+import {
+  fetchCardDetailsAPI,
+  selectCurrentActiveCard
+} from '~/redux/activeCard/activeCardSlice'
 function Board() {
   const dispatch = useDispatch()
   // const [board, setBoard] = useState(null)
+  const activeCard = useSelector(selectCurrentActiveCard)
   const board = useSelector(selectCurrentActiveBoard)
   const { boardId } = useParams()
 
+  const [searchParams] = useSearchParams()
+  const cardId = searchParams.get('cardModal')
   // FETCH BOARD
   useEffect(() => {
     // const boardId = '671210d38975d009e2a50179'
@@ -42,14 +50,6 @@ function Board() {
   // WEBSOCKET EVENT DELETE COLUMN
   useEffect(() => {
     const handleDeleteColumn = deletedColumn => {
-      // const newBoard = cloneDeep(board)
-      // newBoard.columns = newBoard.columns.filter(
-      //   column => column._id !== deletedColumn.columnId
-      // )
-      // newBoard.columnOrderIds = newBoard.columnOrderIds.filter(
-      //   columnId => columnId !== deletedColumn.columnId
-      // )
-      // dispatch(updateCurrentActiveBoard(newBoard))
       dispatch(fetchBoardDetailsAPI(boardId))
     }
     socketIoInstance.on('BE_DELETE_COLUMN', handleDeleteColumn)
@@ -62,15 +62,6 @@ function Board() {
   // WEBSOCKET EVENT CREATE COLUMN
   useEffect(() => {
     const handleDeleteColumn = createdColumn => {
-      // createdColumn.cards = [generatePlaceholderCard(createdColumn)]
-      // createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
-      // // cap nhat state board
-      // // tu lam dung thay vi fetch lai api
-      // const newBoard = cloneDeep(board)
-      // newBoard.columns.push(createdColumn)
-      // newBoard.columnOrderIds.push(createdColumn._id)
-
-      // dispatch(updateCurrentActiveBoard(newBoard))
       dispatch(fetchBoardDetailsAPI(boardId))
     }
 
@@ -93,6 +84,7 @@ function Board() {
       socketIoInstance.off('BE_MOVE_COLUMN')
     }
   }, [dispatch, board])
+
   // WEBSOCKET EVENT MOVE CARD
   useEffect(() => {
     const handleMoveCard = () => {
@@ -105,8 +97,20 @@ function Board() {
       socketIoInstance.off('BE_MOVE_CARD')
     }
   }, [dispatch, board])
+  // WEBSOCKET EVENT UPDATE CARD
+  useEffect(() => {
+    const handleUpdateCard = () => {
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
 
-  // update board details
+    socketIoInstance.on('BE_UPDATE_CARD', handleUpdateCard)
+
+    return () => {
+      socketIoInstance.off('BE_UPDATE_CARD')
+    }
+  }, [dispatch, board])
+
+  // WEBSOCKET UPDATE BOARD DETAILS
   useEffect(() => {
     const handleUpdateBoard = () => {
       dispatch(fetchBoardDetailsAPI(boardId))
@@ -119,35 +123,41 @@ function Board() {
     }
   }, [dispatch, board])
 
-  // update label
+  // WEBSOCKET LABELS EVENT
   useEffect(() => {
-    const handleUpdateLabel = () => {
-      console.log('BE_CREATE_LABEL')
+    const handleCreatedLabel = createdLabel => {
+      // if (cardId === createdLabel.cardId) {
+      //   dispatch(fetchCardDetailsAPI(cardId))
+      // }
       dispatch(fetchBoardDetailsAPI(boardId))
     }
 
-    socketIoInstance.on('BE_CREATE_LABEL', handleUpdateLabel)
+    socketIoInstance.on('BE_CREATE_LABEL', handleCreatedLabel)
 
     return () => {
-      socketIoInstance.off('BE_CREATE_LABEL', handleUpdateLabel)
+      socketIoInstance.off('BE_CREATE_LABEL', handleCreatedLabel)
     }
   }, [dispatch, board])
 
   useEffect(() => {
-    const handleUpdateLabel = () => {
-      console.log('BE_DELETE_LABEL')
+    const handleDeletedLabel = deletedLabel => {
+      // if (cardId === deletedLabel.cardId) {
+      //   dispatch(fetchCardDetailsAPI(cardId))
+      // }
       dispatch(fetchBoardDetailsAPI(boardId))
     }
-
-    socketIoInstance.on('BE_DELETE_LABEL', handleUpdateLabel)
+    socketIoInstance.on('BE_DELETE_LABEL', handleDeletedLabel)
 
     return () => {
-      socketIoInstance.off('BE_DELETE_LABEL', handleUpdateLabel)
+      socketIoInstance.off('BE_DELETE_LABEL', handleDeletedLabel)
     }
   }, [dispatch, board])
 
   useEffect(() => {
-    const handleUpdateLabel = () => {
+    const handleUpdateLabel = updatedLabel => {
+      // if (cardId === updatedLabel.cardId) {
+      //   dispatch(fetchCardDetailsAPI(cardId))
+      // }
       dispatch(fetchBoardDetailsAPI(boardId))
     }
 
@@ -155,6 +165,51 @@ function Board() {
 
     return () => {
       socketIoInstance.off('BE_UPDATE_LABEL', handleUpdateLabel)
+    }
+  }, [dispatch, board])
+
+  // WEBSOCKET ATTACHMENT EVENT
+  useEffect(() => {
+    const handleCreatedAttachment = Attachment => {
+      // if (cardId === createdLabel.cardId) {
+      //   dispatch(fetchCardDetailsAPI(cardId))
+      // }
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_CREATE_ATTACHMENT', handleCreatedAttachment)
+
+    return () => {
+      socketIoInstance.off('BE_CREATE_ATTACHMENT', handleCreatedAttachment)
+    }
+  }, [dispatch, board])
+
+  useEffect(() => {
+    const handleDeletedAttachment = Attachment => {
+      // if (cardId === deletedLabel.cardId) {
+      //   dispatch(fetchCardDetailsAPI(cardId))
+      // }
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+    socketIoInstance.on('BE_DELETE_ATTACHMENT', handleDeletedAttachment)
+
+    return () => {
+      socketIoInstance.off('BE_DELETE_ATTACHMENT', handleDeletedAttachment)
+    }
+  }, [dispatch, board])
+
+  useEffect(() => {
+    const handleUpdateAttachment = Attachment => {
+      // if (cardId === updatedLabel.cardId) {
+      //   dispatch(fetchCardDetailsAPI(cardId))
+      // }
+      dispatch(fetchBoardDetailsAPI(boardId))
+    }
+
+    socketIoInstance.on('BE_UPDATE_ATTACHMENT', handleUpdateAttachment)
+
+    return () => {
+      socketIoInstance.off('BE_UPDATE_ATTACHMENT', handleUpdateAttachment)
     }
   }, [dispatch, board])
 

@@ -53,6 +53,7 @@ import { useState } from 'react'
 import moment from 'moment'
 import CardCheckList from '../Checklist/CardChecklist'
 import CreateChecklistModal from '../Checklist/CreateChecklistModal'
+import { socketIoInstance } from '~/socket-client'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -119,9 +120,15 @@ function ActiveCard() {
 
   const onUpdateCardTitle = newTitle => {
     callApiUpdateCard({ title: newTitle.trim() })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
   }
   const onUpdateCardDescription = newDescription => {
     callApiUpdateCard({ description: newDescription })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
   }
 
   const onUploadCardCover = event => {
@@ -135,21 +142,33 @@ function ActiveCard() {
     reqData.append('cardCover', event.target?.files[0])
 
     // Gọi API...
-    toast.promise(
-      callApiUpdateCard(reqData).finally(() => (event.target.value = '')),
-      {
-        pending: 'uploading...'
-      }
-    )
+    toast
+      .promise(
+        callApiUpdateCard(reqData).finally(() => (event.target.value = '')),
+        {
+          pending: 'uploading...'
+        }
+      )
+      .finally(() => {
+        socketIoInstance.emit('FE_UPDATE_CARD', {
+          cardId: activeCard._id
+        })
+      })
   }
 
   const onAddCardComment = async commentToAdd => {
     await callApiUpdateCard({ commentToAdd })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
   }
 
   const onUpdateCardMembers = incomingMemberInfo => {
     // console.log(incomingMemberInfo)
     callApiUpdateCard({ incomingMemberInfo })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
   }
 
   return (

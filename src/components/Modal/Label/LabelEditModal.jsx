@@ -5,7 +5,6 @@ import IconButton from '@mui/material/IconButton'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Circle from '@uiw/react-color-circle'
-import { socketIoInstance } from '~/socket-client'
 
 const colours = [
   '#f44336',

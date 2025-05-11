@@ -23,7 +23,11 @@ import SidebarCreateBoardModal from './create'
 
 import { styled } from '@mui/material/styles'
 import { fetchBoardAPI } from '~/apis'
-import { DEFAULT_ITEM_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
+import {
+  BOARD_TYPES,
+  DEFAULT_ITEM_PER_PAGE,
+  DEFAULT_PAGE
+} from '~/utils/constants'
 // Styles của mấy cái Sidebar item menu, anh gom lại ra đây cho gọn.
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -179,18 +183,37 @@ function Boards() {
                           {b?.description}
                         </Typography>
                         <Box
-                          component={Link}
-                          to={`/boards/${b._id}`}
                           sx={{
                             mt: 1,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            color: 'primary.main',
-                            '&:hover': { color: 'primary.light' }
+                            justifyContent: 'space-between'
                           }}
                         >
-                          Go to board <ArrowRightIcon fontSize="small" />
+                          <Typography
+                            variant="subtitle1"
+                            color={
+                              b?.type === BOARD_TYPES.PRIVATE
+                                ? 'error.main'
+                                : 'success.main'
+                            }
+                          >
+                            {b?.type === BOARD_TYPES.PRIVATE
+                              ? 'Private Board'
+                              : 'Public Board'}
+                          </Typography>
+                          <Box
+                            component={Link}
+                            to={`/boards/${b._id}`}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              color: 'primary.main',
+                              '&:hover': { color: 'primary.light' }
+                            }}
+                          >
+                            Go to board <ArrowRightIcon fontSize="small" />
+                          </Box>
                         </Box>
                       </CardContent>
                     </Card>

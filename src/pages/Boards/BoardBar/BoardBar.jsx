@@ -1,23 +1,13 @@
 import Box from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
-// import MenuIcon from '@mui/icons-material/Menu'
-// import Button from '@mui/material/Button'
-// import Avatar from '@mui/material/Avatar'
-// import AvatarGroup from '@mui/material/AvatarGroup'
-// import { Tooltip } from '@mui/material'
-
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
-// import DashboardIcon from '@mui/icons-material/Dashboard'
-import VpnLockIcon from '@mui/icons-material/VpnLock'
-// import AddToDriveIcon from '@mui/icons-material/AddToDrive'
-// import BoltIcon from '@mui/icons-material/Bolt'
-import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined'
-// import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import { capitalizeFirstLetter } from '~/utils/formatters'
+import LabelModal from '~/components/Modal/Label/LabelModal'
+import BoardAnalystic from './BoardAnalystic'
+import BoardAutomation from './BoardAutomation'
+import BoardMenuGroup from './BoardMenuGroup'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
-import BoardMenuGroup from './BoardMenuGroup'
-import LabelModal from '~/components/Modal/Label/LabelModal'
+import BoardFilter from './BoardFilter'
 const MENU_STYLE = {
   color: 'white',
   bgcolor: 'transparent',
@@ -50,7 +40,7 @@ function BoardBar({ board }) {
           theme.palette.mode === 'dark' ? '#34495e' : '#493D9EE6'
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         {/* <Tooltip title={board?.description}>
           <Chip
             sx={MENU_STYLE}
@@ -60,36 +50,18 @@ function BoardBar({ board }) {
           />
         </Tooltip> */}
         {/* Menu in Board */}
-        <BoardMenuGroup
-          board={board}
-          boardId={board?._id}
-          MENU_STYLE={MENU_STYLE}
-        />
+        <BoardMenuGroup board={board} MENU_STYLE={MENU_STYLE} />
 
-        <Chip
-          sx={MENU_STYLE}
-          icon={<VpnLockIcon />}
-          label={capitalizeFirstLetter(board?.type)}
-          onClick={() => {}}
-        />
+        <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />
+        <BoardAutomation board={board} MENU_STYLE={MENU_STYLE} />
+
         {/* <Chip
           sx={MENU_STYLE}
           icon={<AddToDriveIcon />}
           label="Add to Google Drive"
           onClick={() => {}}
         /> */}
-        {/* <Chip
-          sx={MENU_STYLE}
-          icon={<BoltIcon />}
-          label="Automation"
-          onClick={() => {}}
-        /> */}
-        <Chip
-          sx={MENU_STYLE}
-          icon={<TuneOutlinedIcon />}
-          label="Filters"
-          onClick={() => {}}
-        />
+        <BoardFilter board={board} MENU_STYLE={MENU_STYLE} />
 
         <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />
 
@@ -102,7 +74,9 @@ function BoardBar({ board }) {
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <InviteBoardUser boardId={board?._id} />
-        <BoardUserGroup boardUsers={board?.FE_allUsers} />
+        <BoardUserGroup boardUsers={board?.FE_allUsers} limit={5} />
+
+        {/* <VoiceRTC boardId={board._id} userId="" /> */}
       </Box>
     </Box>
   )

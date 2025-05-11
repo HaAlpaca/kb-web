@@ -16,6 +16,7 @@ import Column from './Column/Column'
 
 import { useDispatch, useSelector } from 'react-redux'
 import {
+  fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
@@ -43,9 +44,9 @@ function ListColumns({ columns }) {
       ...newColumnData,
       boardId: board._id
     }).then(res => {
+      dispatch(fetchBoardDetailsAPI(board._id))
       // socket emit
       socketIoInstance.emit('FE_CREATE_COLUMN', res)
-
     })
     // handle column
     createdColumn.cards = [generatePlaceholderCard(createdColumn)]

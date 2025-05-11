@@ -10,19 +10,21 @@ import {
   handleUpdateChecklistAPI
 } from '~/apis'
 import {
+  fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
+  fetchCardDetailsAPI,
   selectCurrentActiveCard,
   updateCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 
-import { LinearProgress } from '@mui/material'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import CardCheckitem from './CardCheckitem'
 import ChecklistSettingModal from './ChecklistSettingModal'
-
+import CardUserGroup from '../ActiveCard/CardUserGroup'
+import ChecklistSetDueDate from './ChecklistSetDueDate'
 function CardCheckList({ checklists, cardChecklistIds }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
@@ -33,13 +35,8 @@ function CardCheckList({ checklists, cardChecklistIds }) {
     await handleUpdateChecklistAPI(checklistId, {
       title: newTitle.trim()
     })
-    const newActiveCardModal = cloneDeep(activeCardModal)
-    newActiveCardModal.checklists.forEach(checklist => {
-      if (checklist._id === checklistId) {
-        checklist.title = newTitle
-      }
-    })
-    dispatch(updateCurrentActiveCard(newActiveCardModal))
+    dispatch(fetchBoardDetailsAPI(board._id))
+    dispatch(fetchCardDetailsAPI(activeCardModal._id))
   }
 
   const onUpdateCheckitemTitle = async (checklistId, checkitemId, newTitle) => {
@@ -49,121 +46,52 @@ function CardCheckList({ checklists, cardChecklistIds }) {
         content: newTitle
       }
     })
-    const newActiveCardModal = cloneDeep(activeCardModal)
-    newActiveCardModal.checklists.forEach(checklist => {
-      if (checklist._id === checklistId) {
-        checklist.items.forEach(item => {
-          if (item._id === checkitemId) {
-            item.content = newTitle
-          }
-        })
-      }
-    })
-    dispatch(updateCurrentActiveCard(newActiveCardModal))
+    dispatch(fetchBoardDetailsAPI(board._id))
+    dispatch(fetchCardDetailsAPI(activeCardModal._id))
   }
 
   // delete
   const onDeleteChecklist = async checklistId => {
-    await handleDeleteChecklistAPI(checklistId).then(res => {
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.checklists = newActiveCardModal.checklists.filter(
-        checklist => checklist._id !== checklistId
-      )
-      newActiveCardModal.cardChecklistIds =
-        newActiveCardModal.cardChecklistIds.filter(
-          checklist => checklist._id !== checklistId
-        )
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
-
-      const newBoard = cloneDeep(board)
-      newBoard.columns.forEach(column => {
-        column.cards.forEach(card => {
-          if (card._id === res.cardId) {
-            card.checklists = card.checklists.filter(
-              checklist => checklist._id !== checklistId
-            )
-            card.cardChecklistIds = card.cardChecklistIds.filter(
-              _id => _id !== checklistId
-            )
-          }
-        })
-      })
-      dispatch(updateCurrentActiveBoard(newBoard))
+    await handleDeleteChecklistAPI(checklistId).then(() => {
+      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchBoardDetailsAPI(board._id))
     })
   }
 
   const onUpdateCheckitemMembers = async (
     checklistId,
-    checkItemId,
-    incomingMemberInfo
+    incomingMemberInfo,
+    dueDate
   ) => {
     // console.log(incomingMemberInfo)
     await handleUpdateChecklistAPI(checklistId, {
       updateIncomingAssignedUser: {
-        _id: checkItemId,
-        incomingInfo: incomingMemberInfo
+        ...incomingMemberInfo,
+        cardId: activeCardModal._id,
+        boardId: board._id,
+        dueDate: dueDate
       }
-    }).then(res => {
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.checklists = newActiveCardModal.checklists.map(cl => {
-        if (cl._id === checklistId) return res
-        return cl
-      })
-
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
+    }).then(() => {
+      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchBoardDetailsAPI(board._id))
     })
   }
 
-  const onUpdateCheckitemDueDate = async (
-    checklistId,
-    checkitemId,
-    dueDate
-  ) => {
+  const onUpdateCheckitemDueDate = async (checklistId, dueDate) => {
     await handleUpdateChecklistAPI(checklistId, {
-      updateCheckItem: {
-        _id: checkitemId,
-        dueDate
-      }
-    }).then(res => {
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.checklists = newActiveCardModal.checklists.map(cl => {
-        if (cl._id === checklistId) return res
-        return cl
-      })
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
+      dueDate
+    }).then(() => {
+      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchBoardDetailsAPI(board._id))
     })
   }
 
   const onDeleteCheckitem = async (checklistId, checkitemId) => {
     await handleUpdateChecklistAPI(checklistId, {
       deleteCheckItemId: checkitemId
-    }).then(res => {
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.checklists.forEach(checklist => {
-        if (checklist._id === checklistId) {
-          checklist.items = checklist.items.filter(
-            item => item._id !== checkitemId
-          )
-        }
-      })
-
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
-
-      const newBoard = cloneDeep(board)
-      newBoard.columns.forEach(column => {
-        column.cards.forEach(card => {
-          if (card._id === res.cardId) {
-            card.checklists.forEach(checklist => {
-              if (checklist._id === checklistId) {
-                checklist.items = checklist.items.filter(
-                  item => item._id !== checkitemId
-                )
-              }
-            })
-          }
-        })
-      })
-      dispatch(updateCurrentActiveBoard(newBoard))
+    }).then(() => {
+      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchBoardDetailsAPI(board._id))
     })
   }
 
@@ -178,62 +106,17 @@ function CardCheckList({ checklists, cardChecklistIds }) {
         isCompleted
       }
     })
-    const newActiveCardModal = cloneDeep(activeCardModal)
-    newActiveCardModal.checklists.forEach(checklist => {
-      checklist.items.forEach(item => {
-        if (item._id === checkitemId) {
-          item.isCompleted = isCompleted
-        }
-      })
-    })
-
-    dispatch(updateCurrentActiveCard(newActiveCardModal))
-
-    const newBoard = cloneDeep(board)
-    newBoard.columns.forEach(column => {
-      column.cards.forEach(card => {
-        if (card._id === activeCardModal._id) {
-          card.checklists.forEach(checklist => {
-            checklist.items.forEach(item => {
-              if (item._id === checkitemId) {
-                item.isCompleted = isCompleted
-              }
-            })
-          })
-        }
-      })
-    })
-    dispatch(updateCurrentActiveBoard(newBoard))
+    dispatch(fetchCardDetailsAPI(activeCardModal._id))
+    dispatch(fetchBoardDetailsAPI(board._id))
   }
   const onCreateNewCheckItem = (checklistId, content) => {
     handleUpdateChecklistAPI(checklistId, {
       createCheckItem: {
         content
       }
-    }).then(res => {
-      // Cập nhật checklist trong activeCardModal
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.checklists = newActiveCardModal.checklists.map(cl => {
-        if (cl._id === checklistId) return res
-        return cl
-      })
-
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
-
-      // Cập nhật checklist trong board
-      const newBoard = cloneDeep(board)
-      newBoard.columns.forEach(column => {
-        column.cards.forEach(card => {
-          if (card._id === activeCardModal._id) {
-            card.checklists = card.checklists.map(cl => {
-              if (cl._id === checklistId) return res
-              return cl
-            })
-          }
-        })
-      })
-
-      dispatch(updateCurrentActiveBoard(newBoard))
+    }).then(() => {
+      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchBoardDetailsAPI(board._id))
     })
   }
 
@@ -308,6 +191,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
                       onUpdateChecklistTitle(checklist._id, newTitle)
                     }
                   />
+
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <ChecklistSettingModal
                       cardChecklistIds={cardChecklistIds}
@@ -316,10 +200,26 @@ function CardCheckList({ checklists, cardChecklistIds }) {
                     />
                   </Box>
                 </Box>
-                {checklist.items.length > 0 && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box sx={{ width: '100%', mr: 1 }}>
-                      <LinearProgress
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                    paddingLeft: '2px',
+                    paddingRight: '6px'
+                  }}
+                >
+                  <ChecklistSetDueDate
+                    checklist={checklist}
+                    progress={progress}
+                    onChangeDate={onUpdateCheckitemDueDate}
+                  />
+
+                  {checklist.items.length > 0 && (
+                    <Box>
+                      {/* <LinearProgress
                         variant="determinate"
                         value={progress}
                         sx={{
@@ -327,26 +227,35 @@ function CardCheckList({ checklists, cardChecklistIds }) {
                             transition: 'transform 0.2s ease-in-out'
                           }
                         }}
-                      />
+                      /> */}
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: 'text.secondary' }}
+                        >
+                          {`${Math.round(progress)}%`}
+                        </Typography>
+                      </Box>
                     </Box>
-                    <Box sx={{ minWidth: 35 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: 'text.secondary' }}
-                      >
-                        {`${Math.round(progress)}%`}
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
+                  )}
+
+                  <CardUserGroup
+                    cardMemberIds={checklist.assignedUserIds}
+                    onUpdateCardMembers={incomingMemberInfo =>
+                      onUpdateCheckitemMembers(
+                        checklist._id,
+                        incomingMemberInfo,
+                        checklist.dueDate
+                      )
+                    }
+                  />
+                </Box>
 
                 <CardCheckitem
                   checklist={checklist}
                   onUpdateCheckitemTitle={onUpdateCheckitemTitle}
                   onToggleCheckitemStatus={onToggleCheckitemStatus}
                   onCreateNewCheckItem={onCreateNewCheckItem}
-                  onUpdateCheckitemMembers={onUpdateCheckitemMembers}
-                  onUpdateCheckitemDueDate={onUpdateCheckitemDueDate}
                   onDeleteCheckitem={onDeleteCheckitem}
                 />
               </Box>

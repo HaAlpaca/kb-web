@@ -198,3 +198,10 @@ export const handleDeleteChecklistAPI = async checklistId => {
   )
   return response.data
 }
+
+export const handleGetBoardAnalystics = async boardId => {
+  const response = await authorizeAxiosInstance.get(
+    `${API_ROOT}/v1/boards/analytics/${boardId}`
+  )
+  return response.data
+}

@@ -14,20 +14,29 @@ import { ALLOW_COMMON_IMAGE_TYPES } from '~/utils/validators'
 import Grid from '@mui/material/Unstable_Grid2'
 import AttachmentSettingModal from './AttachmentSettingModal'
 import { useConfirm } from 'material-ui-confirm'
-import { handleChangeAttachmentAPI, handleDeleteAttachmentAPI } from '~/apis'
+import {
+  handleChangeAttachmentAPI,
+  handleDeleteAttachmentAPI,
+  updateCardDetailsAPI
+} from '~/apis'
 import { useDispatch, useSelector } from 'react-redux'
 import {
+  fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
+  fetchCardDetailsAPI,
   selectCurrentActiveCard,
   updateCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 import { cloneDeep } from 'lodash'
 import moment from 'moment'
+import { useParams } from 'react-router-dom'
+import { socketIoInstance } from '~/socket-client'
 function CardAttachment({ attachments }) {
   const board = useSelector(selectCurrentActiveBoard)
+  const { boardId } = useParams()
   const dispatch = useDispatch()
   const activeCardModal = useSelector(selectCurrentActiveCard)
   let linkAttachment = attachments.filter(
@@ -37,7 +46,7 @@ function CardAttachment({ attachments }) {
     attachment => attachment.type !== 'link'
   )
   const confirmDeleteAttachment = useConfirm()
-  const handleDeleteAttachment = async attachmentId => {
+  const handleDeleteAttachment = async attachment => {
     await confirmDeleteAttachment({
       title: 'Delete this Attachment',
       description: 'Are you sure?',
@@ -45,32 +54,47 @@ function CardAttachment({ attachments }) {
       cancellationText: 'No'
     }).then(
       async () =>
-        await handleDeleteAttachmentAPI(attachmentId).then(() => {
-          // update board attachment
-          // update board label
-          const newBoard = cloneDeep(board)
-          newBoard.columns.forEach(column => {
-            column.cards.forEach(card => {
-              if (card.cardAttachmentIds) {
-                card.cardAttachmentIds = card.cardAttachmentIds.filter(
-                  _id => _id !== attachmentId
-                )
-              }
+        await handleDeleteAttachmentAPI(attachment._id)
+          .then(async () => {
+            // update board attachment
+            // update board label
+            // const newBoard = cloneDeep(board)
+            // newBoard.columns.forEach(column => {
+            //   column.cards.forEach(card => {
+            //     if (card.cardAttachmentIds) {
+            //       card.cardAttachmentIds = card.cardAttachmentIds.filter(
+            //         _id => _id !== attachmentId
+            //       )
+            //     }
+            //   })
+            // })
+            // dispatch(updateCurrentActiveBoard(newBoard))
+
+            // update card modal
+            // const newActiveCardModal = cloneDeep(activeCardModal)
+            // newActiveCardModal.attachments =
+            //   newActiveCardModal.attachments.filter(
+            //     attachment => attachment._id !== attachmentId
+            //   )
+            // newActiveCardModal.cardAttachmentIds =
+            //   newActiveCardModal.cardAttachmentIds.filter(
+            //     attachment => attachment._id !== attachmentId
+            //   )
+            // dispatch(updateCurrentActiveCard(newActiveCardModal))
+            if (activeCardModal?.cover === attachment.link) {
+              updateCardDetailsAPI(activeCardModal._id, {
+                cover: null
+              })
+            }
+          })
+          .finally(res => {
+            dispatch(fetchBoardDetailsAPI(boardId))
+            dispatch(fetchCardDetailsAPI(activeCardModal._id))
+            socketIoInstance.emit('FE_DELETE_ATTACHMENT', {
+              ...res,
+              cardId: activeCardModal._id
             })
           })
-          dispatch(updateCurrentActiveBoard(newBoard))
-          // update card modal
-          const newActiveCardModal = cloneDeep(activeCardModal)
-          newActiveCardModal.attachments =
-            newActiveCardModal.attachments.filter(
-              attachment => attachment._id !== attachmentId
-            )
-          newActiveCardModal.cardAttachmentIds =
-            newActiveCardModal.cardAttachmentIds.filter(
-              attachment => attachment._id !== attachmentId
-            )
-          dispatch(updateCurrentActiveCard(newActiveCardModal))
-        })
     )
   }
   const handleChangeAttachment = async (attachmentId, data) => {
@@ -81,21 +105,28 @@ function CardAttachment({ attachments }) {
     if (data.attachmentLink) {
       updatedAttachment.link = data.attachmentLink
     }
-    await handleChangeAttachmentAPI(attachmentId, updatedAttachment).then(
-      () => {
+    await handleChangeAttachmentAPI(attachmentId, updatedAttachment)
+      .then(() => {
         // update board attachment
-        const newActiveCardModal = cloneDeep(activeCardModal)
-        newActiveCardModal.attachments.forEach(attachment => {
-          if (attachment._id === attachmentId) {
-            attachment.name = data.attachmentName
-            if (data.attachmentLink) {
-              attachment.link = data.attachmentLink
-            }
-          }
+        // const newActiveCardModal = cloneDeep(activeCardModal)
+        // newActiveCardModal.attachments.forEach(attachment => {
+        //   if (attachment._id === attachmentId) {
+        //     attachment.name = data.attachmentName
+        //     if (data.attachmentLink) {
+        //       attachment.link = data.attachmentLink
+        //     }
+        //   }
+        // })
+        // dispatch(updateCurrentActiveCard(newActiveCardModal))
+        dispatch(fetchBoardDetailsAPI(boardId))
+        dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      })
+      .finally(res => {
+        socketIoInstance.emit('FE_UPDATE_ATTACHMENT', {
+          ...res,
+          cardId: activeCardModal._id
         })
-        dispatch(updateCurrentActiveCard(newActiveCardModal))
-      }
-    )
+      })
   }
 
   return (

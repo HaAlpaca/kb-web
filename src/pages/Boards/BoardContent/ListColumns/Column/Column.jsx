@@ -272,7 +272,6 @@ function Column({ column }) {
                   </ListItemIcon>
                   <ListItemText>Paste</ListItemText>
                 </MenuItem>
-
                 <Divider />
                 <MenuItem
                   onClick={handleDeleteColumn}
@@ -293,12 +292,12 @@ function Column({ column }) {
                   </ListItemIcon>
                   <ListItemText>Delete this column</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                {/* <MenuItem>
                   <ListItemIcon>
                     <Cloud fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Archive this column</ListItemText>
-                </MenuItem>
+                </MenuItem> */}
               </Menu>
             </Box>
           </Box>

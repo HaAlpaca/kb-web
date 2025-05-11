@@ -1,26 +1,24 @@
 import { Checkbox, Card as MuiCard } from '@mui/material'
+import Button from '@mui/material/Button'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
-import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 
-import GroupIcon from '@mui/icons-material/Group'
-import CommentIcon from '@mui/icons-material/Comment'
-import AttachmentIcon from '@mui/icons-material/Attachment'
-import EventIcon from '@mui/icons-material/Event'
-import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined'
-import EventAvailableIcon from '@mui/icons-material/EventAvailable'
-import EventBusyIcon from '@mui/icons-material/EventBusy'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import AttachmentIcon from '@mui/icons-material/Attachment'
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined'
+import CommentIcon from '@mui/icons-material/Comment'
+import EventIcon from '@mui/icons-material/Event'
+import GroupIcon from '@mui/icons-material/Group'
 
-import LabelGroup from '~/components/Label/LabelGroup'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Controller, useForm } from 'react-hook-form'
-import { handleToggleCompleteCardAPI } from '~/apis'
-import { useState } from 'react'
 import moment from 'moment'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { handleToggleCompleteCardAPI } from '~/apis'
+import LabelGroup from '~/components/Label/LabelGroup'
 // import { useEffect, useState } from 'react'
 // import { getBoardLabelsAPI } from '~/apis'
 const calculateChecklistCompletion = checklists => {
@@ -85,6 +83,9 @@ function Card({ card }) {
 
   const shouldShowCardActions = () => {
     return (
+      !!card?.checklists?.length ||
+      !!card?.dueDate ||
+      !!card?.labels?.length ||
       !!card?.memberIds?.length ||
       !!card?.comments?.length ||
       !!card?.cardAttachmentIds?.length
@@ -138,7 +139,7 @@ function Card({ card }) {
       <CardContent
         sx={{
           px: 1.5,
-          py: shouldShowCardActions() ? 0.5 : '10px !important',
+          py: shouldShowCardActions() ? '2px !important' : '10px !important',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-start',
