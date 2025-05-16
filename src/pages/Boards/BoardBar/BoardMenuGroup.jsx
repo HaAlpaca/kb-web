@@ -29,6 +29,7 @@ import CardUserGroup from '~/components/Modal/ActiveCard/CardUserGroup'
 import { BOARD_TYPES, CARD_MEMBER_ACTION } from '~/utils/constants'
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard'
 import { socketIoInstance } from '~/socket-client'
+import BoardUserRole from './BoardUserRole'
 const boardCoverImages = [
   'https://images.unsplash.com/photo-1741926376117-85ec2cef9714',
   'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5',
@@ -48,11 +49,6 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
   const [loadedImages, setLoadedImages] = useState(
     Array(boardCoverImages.length).fill(false)
   )
-
-  const [permissions, setPermissions] = useState({
-    allowComment: false,
-    allMembersManageMembers: false
-  })
 
   const toggleDrawer = newOpen => event => {
     if (
@@ -230,6 +226,8 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
         </Grid>
       </Box>
 
+      <Divider />
+
       <Box
         sx={{
           display: 'flex',
@@ -272,58 +270,21 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
         </Box>
       </Box>
 
+      <Divider />
       <Box
         sx={{
           display: 'flex',
           alignItems: 'start',
           flexDirection: 'column',
           gap: 0.5,
-          py: 0.5
+          py: 1
         }}
       >
         <Typography sx={{ fontSize: '32px', fontWeight: 600 }}>
-          Permissions:
+          User Role:
         </Typography>
+        <BoardUserRole currentUserId={board?.ownerIds[0]} />
 
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={permissions.allowComment}
-                onChange={e =>
-                  setPermissions(prev => ({
-                    ...prev,
-                    allowComment: e.target.checked
-                  }))
-                }
-              />
-            }
-            label={
-              permissions.allowComment
-                ? 'Allow owners and members to comment'
-                : 'No one can comment'
-            }
-          />
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={permissions.allMembersManageMembers}
-                onChange={e =>
-                  setPermissions(prev => ({
-                    ...prev,
-                    allMembersManageMembers: e.target.checked
-                  }))
-                }
-              />
-            }
-            label={
-              permissions.allMembersManageMembers
-                ? 'Allow all members to add/remove members'
-                : 'Only owners can manage members'
-            }
-          />
-        </FormGroup>
       </Box>
     </Box>
   )

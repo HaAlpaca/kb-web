@@ -23,6 +23,11 @@ authorizeAxiosInstance.defaults.withCredentials = true
 authorizeAxiosInstance.interceptors.request.use(
   config => {
     // Do something before request is sent
+    // lấy boardId từ localStorage
+    if (window.location.pathname.match(/\/boards\/([a-f0-9]{24})/)) {
+      const match = window.location.pathname.match(/\/boards\/([a-f0-9]{24})/)
+      config.headers['x-board-id'] = match[1]
+    }
     // danh chan spam click
     interceptorLoadingElements(true)
     return config

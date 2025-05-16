@@ -205,3 +205,11 @@ export const handleGetBoardAnalystics = async boardId => {
   )
   return response.data
 }
+
+export const handleUpdateUserRole = async (boardId, data) => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/boards/roles/${boardId}`,
+    data
+  )
+  return response.data
+}

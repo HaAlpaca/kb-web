@@ -28,7 +28,6 @@ import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 import { socketIoInstance } from '~/socket-client'
 import {
-  fetchCardDetailsAPI,
   selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 function Board() {

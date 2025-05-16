@@ -17,6 +17,7 @@ export const fetchBoardDetailsAPI = createAsyncThunk(
     const respond = await authorizeAxiosInstance.get(
       `${API_ROOT}/v1/boards/${boardId}`
     )
+    // return data
     return respond.data
   }
 )
