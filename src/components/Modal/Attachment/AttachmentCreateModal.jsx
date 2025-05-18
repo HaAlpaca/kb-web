@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Popover from '@mui/material/Popover'
-import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined'
+import AttachmentIcon from '@mui/icons-material/Attachment'
 import { Button, TextField } from '@mui/material'
 import { toast } from 'react-toastify'
 import { handleCreateAttachmentAPI } from '~/apis'
@@ -145,7 +145,7 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
   return (
     <>
       <SidebarItem aria-describedby={popoverId} onClick={handleTogglePopover}>
-        <AttachFileOutlinedIcon fontSize="small" />
+        <AttachmentIcon fontSize="small" />
         Attachment
       </SidebarItem>
 

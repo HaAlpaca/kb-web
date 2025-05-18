@@ -22,6 +22,22 @@ export const fetchBoardDetailsAPI = createAsyncThunk(
   }
 )
 
+export const fetchFilteredBoardDetailsAPI = createAsyncThunk(
+  'activeBoard/fetchFilteredBoardDetailsAPI',
+  async ({ boardId, queryParams }) => {
+    // Gọi API với params
+    const response = await authorizeAxiosInstance.get(
+      `${API_ROOT}/v1/boards/${boardId}`,
+      {
+        params: queryParams // Axios sẽ tự động chuyển đổi queryParams thành chuỗi query string
+      }
+    )
+
+    // Trả về dữ liệu
+    return response.data
+  }
+)
+
 // khoi tao Slice trong store Redux
 export const activeBoardSlice = createSlice({
   name: 'activeBoard',
@@ -57,30 +73,34 @@ export const activeBoardSlice = createSlice({
   },
   // extraReducers: noi xu li du lieu bat dong bo
   extraReducers: builder => {
-    builder.addCase(fetchBoardDetailsAPI.fulfilled, (state, action) => {
-      // action.payload chinh la cai response.data tra ve o tren
-      let board = action.payload
-
-      // gộp cả owner và member
-      board.FE_allUsers = board.owners.concat(board.members)
-
-      // xu li du lieu truoc khi luu vao redux -> giong xu li truoc ki setState
-      // sap xep luon column khong phai doi component con map lai
-      board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
-      // xu li keo tha khi vao column rong generatePlaceholderCard
-      board.columns.forEach(column => {
-        if (isEmpty(column.cards)) {
-          column.cards = [generatePlaceholderCard(column)]
-          column.cardOrderIds = [generatePlaceholderCard(column)._id]
-        } else {
-          // sap xep luon card khong phai doi component con map lai
-          column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
-        }
+    builder
+      .addCase(fetchBoardDetailsAPI.fulfilled, (state, action) => {
+        let board = action.payload
+        board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
+        board.columns.forEach(column => {
+          if (isEmpty(column.cards)) {
+            column.cards = [generatePlaceholderCard(column)]
+            column.cardOrderIds = [generatePlaceholderCard(column)._id]
+          } else {
+            column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
+          }
+        })
+        state.currentActiveBoard = board
       })
-      // .......
-      // update du lieu currentActiveBoard
-      state.currentActiveBoard = board
-    })
+      .addCase(fetchFilteredBoardDetailsAPI.fulfilled, (state, action) => {
+        // Xử lý dữ liệu trả về từ API khi có bộ lọc
+        let board = action.payload
+        board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
+        board.columns.forEach(column => {
+          if (isEmpty(column.cards)) {
+            column.cards = [generatePlaceholderCard(column)]
+            column.cardOrderIds = [generatePlaceholderCard(column)._id]
+          } else {
+            column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
+          }
+        })
+        state.currentActiveBoard = board
+      })
   }
 })
 

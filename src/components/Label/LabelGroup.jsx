@@ -24,14 +24,14 @@ const LabelGroup = ({ labels }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                paddingX: 1,
+                paddingX: '8px',
                 paddingY: '12px'
               }}
             >
               <Typography
                 variant="subtitle2"
                 sx={{
-                  fontSize: '12px',
+                  textAlign: 'center',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',

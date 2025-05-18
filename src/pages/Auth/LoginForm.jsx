@@ -65,19 +65,16 @@ function LoginForm() {
             <Avatar sx={{ bgcolor: 'primary.main' }}>
               <LockIcon />
             </Avatar>
-            <Avatar sx={{ bgcolor: 'primary.main' }}>
-              <TrelloIcon />
-            </Avatar>
           </Box>
           <Box
             sx={{
               marginTop: '1em',
               display: 'flex',
               justifyContent: 'center',
-              color: theme => theme.palette.grey[500]
+              color: theme => theme.palette.grey[600]
             }}
           >
-            HaAlpaca
+            Kb Workspace
           </Box>
           <Box
             sx={{
@@ -170,7 +167,7 @@ function LoginForm() {
             </Button>
           </CardActions>
           <Box sx={{ padding: '0 1em 1em 1em', textAlign: 'center' }}>
-            <Typography>New to Trello MERN Stack Advanced?</Typography>
+            <Typography>New to Kb Workspace?</Typography>
             <Link to="/register" style={{ textDecoration: 'none' }}>
               <Typography
                 sx={{ color: 'primary.main', '&:hover': { color: '#ffbb39' } }}

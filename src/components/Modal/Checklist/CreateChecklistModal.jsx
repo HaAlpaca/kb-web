@@ -2,21 +2,19 @@ import Box from '@mui/material/Box'
 import Popover from '@mui/material/Popover'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
-import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
 import { Button, TextField } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  fetchBoardDetailsAPI,
+  selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
-  selectCurrentActiveCard,
-  updateCurrentActiveCard
+  fetchCardDetailsAPI,
+  selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 import { useForm, Controller } from 'react-hook-form'
 import { handleCreateChecklistAPI } from '~/apis'
-import { cloneDeep } from 'lodash'
-
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined'
 function CreateChecklistModal({ SidebarItem, card }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
@@ -44,21 +42,23 @@ function CreateChecklistModal({ SidebarItem, card }) {
   const onSubmit = async data => {
     const title = data.checklistTitle
     await handleCreateChecklistAPI({ title, cardId: card._id }).then(res => {
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.cardChecklistIds.push(res._id)
-      newActiveCardModal.checklists.push(res)
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
-      // update board checklist
-      const newBoard = cloneDeep(board)
-      newBoard.columns.forEach(column => {
-        column.cards.forEach(card => {
-          if (card._id === card._id) {
-            card.cardChecklistIds?.push(res._id)
-            card.checklists?.push(res)
-          }
-        })
-      })
-      dispatch(updateCurrentActiveBoard(newBoard))
+      // const newActiveCardModal = cloneDeep(activeCardModal)
+      // newActiveCardModal.cardChecklistIds.push(res._id)
+      // newActiveCardModal.checklists.push(res)
+      // dispatch(updateCurrentActiveCard(newActiveCardModal))
+      // // update board checklist
+      // const newBoard = cloneDeep(board)
+      // newBoard.columns.forEach(column => {
+      //   column.cards.forEach(card => {
+      //     if (card._id === card._id) {
+      //       card.cardChecklistIds?.push(res._id)
+      //       card.checklists?.push(res)
+      //     }
+      //   })
+      // })
+      // dispatch(updateCurrentActiveBoard(newBoard))
+      dispatch(fetchBoardDetailsAPI(board._id))
+      dispatch(fetchCardDetailsAPI(card._id))
     })
 
     // TODO: Dispatch redux or call API to create checklist here
@@ -70,7 +70,7 @@ function CreateChecklistModal({ SidebarItem, card }) {
   return (
     <>
       <SidebarItem aria-describedby={popoverId} onClick={handleTogglePopover}>
-        <TaskAltOutlinedIcon fontSize="small" />
+        <CheckBoxOutlinedIcon fontSize="small" />
         Checklist
       </SidebarItem>
 

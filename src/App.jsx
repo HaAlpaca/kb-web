@@ -18,10 +18,11 @@ import {
   clearAndHideCurrentActiveCard,
   fetchCardDetailsAPI
 } from './redux/activeCard/activeCardSlice'
+import Home from './pages/Home/home'
 
 // https://www.robinwieruch.de/react-router-private-routes/
 const ProtectedRoute = ({ user }) => {
-  if (!user) return <Navigate to="/login" replace={true} />
+  if (!user) return <Navigate to="/home" replace={true} />
   return <Outlet />
 }
 function App() {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/settings/security" element={<Settings />} />
       </Route>
       {/* AUTH */}
+      <Route path="/home" element={<Home />} />
       <Route path="/login" element={<Auth />} />
       <Route path="/register" element={<Auth />} />
       <Route path="/account/verification" element={<AccountVerification />} />

@@ -15,34 +15,33 @@ import GroupIcon from '@mui/icons-material/Group'
 
 import moment from 'moment'
 import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { handleToggleCompleteCardAPI } from '~/apis'
 import LabelGroup from '~/components/Label/LabelGroup'
-// import { useEffect, useState } from 'react'
-// import { getBoardLabelsAPI } from '~/apis'
+import { fetchBoardDetailsAPI } from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch } from 'react-redux'
+import { socketIoInstance } from '~/socket-client'
+
 const calculateChecklistCompletion = checklists => {
   return checklists.reduce(
     (acc, checklist) => {
-      const totalItems = checklist.items.length // Tổng số phần tử trong checklist
+      const totalItems = checklist.items.length
       const completedItems = checklist.items.filter(
         item => item.isCompleted
-      ).length // Số phần tử đã hoàn thành
-
-      // Cộng vào accumulator
+      ).length
       acc.total += totalItems
       acc.completed += completedItems
-
       return acc
     },
-    { total: 0, completed: 0 } // Giá trị khởi tạo cho accumulator
+    { total: 0, completed: 0 }
   )
 }
 
 function Card({ card }) {
+  const dispatch = useDispatch()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-
   const [isPortrait, setIsPortrait] = useState(false)
   const handleImageLoad = event => {
     const img = event.currentTarget
@@ -55,13 +54,12 @@ function Card({ card }) {
     }
   })
 
-  // Tính toán tổng số phần tử và số phần tử hoàn thành
+  const watchIsComplete = useWatch({ control, name: 'isComplete' })
   const { total, completed } = calculateChecklistCompletion(
     card?.checklists || []
   )
 
   const setActiveCard = () => {
-    // show modal active card
     searchParams.set('cardModal', card._id)
     navigate(`?${searchParams.toString()}`, { replace: false })
   }
@@ -78,7 +76,7 @@ function Card({ card }) {
   const dndKitCardStyle = {
     transform: CSS.Translate.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : control._formValues.isComplete ? 0.7 : 1
+    opacity: isDragging ? 0.5 : watchIsComplete ? 0.8 : 1
   }
 
   const shouldShowCardActions = () => {
@@ -101,17 +99,17 @@ function Card({ card }) {
       {...listeners}
       sx={{
         cursor: 'pointer',
-        boxShadow: '0 1px 1px rgba(0,0,0,0.2)',
+        boxShadow: watchIsComplete ? 'none' : '0 1px 1px rgba(0,0,0,0.15)',
         overflow: 'unset',
         display: card?.FE_PlaceholderCard ? 'none' : 'block',
         borderRadius: '8px',
-        '&:focus': {
-          outline: 'none'
+        '&:focus': { outline: 'none' },
+        '&:hover .animated-checkbox': {
+          opacity: 1,
+          transform: 'translateX(0)'
         },
-        '&:hover': {
-          borderColor: theme => {
-            theme.palette.primary.main
-          }
+        '&:hover .animated-title': {
+          transform: 'translateX(0)'
         }
       }}
     >
@@ -123,7 +121,6 @@ function Card({ card }) {
             height: isPortrait ? 200 : 140,
             borderTopLeftRadius: isPortrait ? '0px' : '8px',
             borderTopRightRadius: isPortrait ? '0px' : '8px',
-            marginTop: isPortrait && '8px',
             objectFit: 'cover',
             display: 'block',
             margin: '0 auto'
@@ -142,14 +139,7 @@ function Card({ card }) {
           py: shouldShowCardActions() ? '2px !important' : '10px !important',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          '&:hover .animated-checkbox': {
-            opacity: 1,
-            transform: 'translateX(0)'
-          },
-          '&:hover .animated-title': {
-            transform: 'translateX(0)'
-          }
+          justifyContent: 'flex-start'
         }}
       >
         <Controller
@@ -162,17 +152,21 @@ function Card({ card }) {
               size="small"
               sx={{
                 p: 0.5,
-                opacity: field.value ? 1 : 0,
-                transform: field.value ? 'translateX(0)' : 'translateX(-20px)',
+                opacity: watchIsComplete ? 1 : 0,
+                transform: watchIsComplete
+                  ? 'translateX(0)'
+                  : 'translateX(-20px)',
                 transition: 'opacity 0.3s ease, transform 0.3s ease'
               }}
               {...field}
-              checked={field.value}
+              checked={watchIsComplete}
+              onClick={e => e.stopPropagation()}
               onChange={async event => {
-                event.preventDefault()
-                event.stopPropagation()
                 field.onChange(event.target.checked)
-                await handleToggleCompleteCardAPI(card._id)
+                await handleToggleCompleteCardAPI(card._id).then(() => {
+                  dispatch(fetchBoardDetailsAPI(card.boardId))
+                  socketIoInstance.emit('FE_UPDATE_CARD', 'ping')
+                })
               }}
             />
           )}
@@ -183,11 +177,8 @@ function Card({ card }) {
           sx={{
             fontWeight: '600',
             opacity: 1,
-            transform: 'translateX(-20px)',
-            transition: 'transform 0.3s ease',
-            ...(control._formValues.isComplete && {
-              transform: 'translateX(0)'
-            })
+            transform: watchIsComplete ? 'translateX(0)' : 'translateX(-20px)',
+            transition: 'transform 0.3s ease'
           }}
         >
           {card?.title}
@@ -201,8 +192,8 @@ function Card({ card }) {
             display: 'flex',
             flexWrap: 'wrap',
             gap: '4px',
-            justifyContent: 'flex-start', // Căn trái để các nút xuống dòng từ trái sang phải
-            alignItems: 'center' // Căn giữa các nút theo chiều dọc
+            justifyContent: 'flex-start',
+            alignItems: 'center'
           }}
         >
           {!!card?.memberIds?.length && (
@@ -224,7 +215,7 @@ function Card({ card }) {
             <Button size="small" startIcon={<CheckBoxOutlinedIcon />}>
               {completed}/{total}{' '}
               {card?.checklists?.length > 1
-                ? `(${card?.checklists?.length} checklist)`
+                ? `(${card?.checklists?.length} checklists)`
                 : ''}
             </Button>
           )}

@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 // import Typography from '@mui/material/Typography'
 import AddCardIcon from '@mui/icons-material/AddCard'
-import Cloud from '@mui/icons-material/Cloud'
+// import Cloud from '@mui/icons-material/Cloud'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import ContentCut from '@mui/icons-material/ContentCut'
 import ContentPaste from '@mui/icons-material/ContentPaste'
@@ -253,7 +253,7 @@ function Column({ column }) {
                   </ListItemIcon>
                   <ListItemText>Add new card</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                {/* <MenuItem>
                   <ListItemIcon>
                     <ContentCut fontSize="small" />
                   </ListItemIcon>
@@ -265,13 +265,12 @@ function Column({ column }) {
                   </ListItemIcon>
                   <ListItemText>Copy</ListItemText>
                 </MenuItem>
-
                 <MenuItem>
                   <ListItemIcon>
                     <ContentPaste fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Paste</ListItemText>
-                </MenuItem>
+                </MenuItem> */}
                 <Divider />
                 <MenuItem
                   onClick={handleDeleteColumn}

@@ -1,6 +1,4 @@
 import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
 import LabelModal from '~/components/Modal/Label/LabelModal'
 import BoardAnalystic from './BoardAnalystic'
 import BoardAutomation from './BoardAutomation'
@@ -65,17 +63,27 @@ function BoardBar({ board }) {
 
         <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />
 
-        <Chip
+        {/* <Chip
           sx={MENU_STYLE}
           icon={<ChatBubbleOutlineOutlinedIcon />}
           label="Teams"
           onClick={() => {}}
-        />
+        /> */}
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {/* <Button
+          variant="outlined"
+          // startIcon={<PersonAddIcon />}
+          sx={{
+            color: 'white',
+            borderColor: 'white',
+            '&:hover': { borderColor: 'white' }
+          }}
+        >
+          Ask admin to change role
+        </Button> */}
         <InviteBoardUser boardId={board?._id} />
-        <BoardUserGroup boardUsers={board?.FE_allUsers} limit={5} />
-
+        <BoardUserGroup boardUsers={board?.allMembers} limit={5} />
         {/* <VoiceRTC boardId={board._id} userId="" /> */}
       </Box>
     </Box>

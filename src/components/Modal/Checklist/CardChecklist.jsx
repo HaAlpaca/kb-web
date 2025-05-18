@@ -19,7 +19,8 @@ import {
   selectCurrentActiveCard,
   updateCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
-
+import Button from '@mui/material/Button'
+import EditNoteIcon from '@mui/icons-material/EditNote'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import CardCheckitem from './CardCheckitem'
 import ChecklistSettingModal from './ChecklistSettingModal'
@@ -63,7 +64,6 @@ function CardCheckList({ checklists, cardChecklistIds }) {
     incomingMemberInfo,
     dueDate
   ) => {
-    // console.log(incomingMemberInfo)
     await handleUpdateChecklistAPI(checklistId, {
       updateIncomingAssignedUser: {
         ...incomingMemberInfo,
@@ -148,7 +148,14 @@ function CardCheckList({ checklists, cardChecklistIds }) {
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          mb: 2
+        }}
+      >
         <CheckBoxOutlinedIcon />
         <Typography variant="span" sx={{ fontWeight: '600', fontSize: '20px' }}>
           Checklist
@@ -165,7 +172,9 @@ function CardCheckList({ checklists, cardChecklistIds }) {
               key={index}
               sx={{
                 borderRadius: '8px',
-                padding: '10px'
+                padding: '10px',
+                bgcolor: theme =>
+                  theme.palette.mode === 'dark' ? '#33485d' : '#ebecf0'
               }}
             >
               <Box

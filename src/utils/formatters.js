@@ -1,3 +1,4 @@
+
 /* eslint-disable no-console */
 export const capitalizeFirstLetter = val => {
   if (!val) return ''

@@ -28,12 +28,11 @@ function CardUserGroup({
   const board = useSelector(selectCurrentActiveBoard)
   // thành viên trong card là tập con thành viên trong board,
   // dựa vào thành viên của board để hiển thị và có các option thêm xoá user trong card
-  const FE_CardMembers = board.FE_allUsers?.filter(user =>
+  const FE_CardMembers = board.allMembers?.filter(user =>
     cardMemberIds.includes(user._id)
   )
   // console.log('FE_CardMembers: ', FE_CardMembers)
   // console.log('cardMemberIds', cardMemberIds)
-  // console.log(board.FE_allUsers)
 
   const handleUpdateCardMembers = user => {
     // console.log(user)
@@ -58,7 +57,7 @@ function CardUserGroup({
     <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
       {/* Hiển thị các user là thành viên của card */}
       {FE_CardMembers.map((user, index) => (
-        <Tooltip title="Đổi sang moderator" key={index}>
+        <Tooltip title={user.displayName} key={index}>
           <Avatar
             sx={{ width: 34, height: 34 }}
             alt={user.displayName}
@@ -120,7 +119,7 @@ function CardUserGroup({
                 gap: 1.5
               }}
             >
-              {board.FE_allUsers.map((user, index) => (
+              {board.allMembers.map((user, index) => (
                 <Tooltip title={user.displayName} key={index}>
                   {/* Cách làm Avatar kèm badge icon: https://mui.com/material-ui/react-avatar/#with-badge */}
                   <Badge

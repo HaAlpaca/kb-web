@@ -5,10 +5,10 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
-import Typography from '@mui/material/Typography'
-import ContentCut from '@mui/icons-material/ContentCut'
-import ContentCopy from '@mui/icons-material/ContentCopy'
-import ContentPaste from '@mui/icons-material/ContentPaste'
+// import Typography from '@mui/material/Typography'
+// import ContentCut from '@mui/icons-material/ContentCut'
+// import ContentCopy from '@mui/icons-material/ContentCopy'
+// import ContentPaste from '@mui/icons-material/ContentPaste'
 
 import Cloud from '@mui/icons-material/Cloud'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -47,7 +47,7 @@ function Workspaces() {
           'aria-labelledby': 'basic-button-workspaces'
         }}
       >
-        <MenuItem>
+        {/* <MenuItem>
           <ListItemIcon>
             <ContentCut fontSize="small" />
           </ListItemIcon>
@@ -73,7 +73,7 @@ function Workspaces() {
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             ⌘V
           </Typography>
-        </MenuItem>
+        </MenuItem> */}
         <Divider />
         <MenuItem>
           <ListItemIcon>

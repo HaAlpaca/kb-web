@@ -56,9 +56,6 @@ function RegisterForm() {
             <Avatar sx={{ bgcolor: 'primary.main' }}>
               <LockIcon />
             </Avatar>
-            <Avatar sx={{ bgcolor: 'primary.main' }}>
-              <TrelloIcon />
-            </Avatar>
           </Box>
           <Box
             sx={{
@@ -68,7 +65,7 @@ function RegisterForm() {
               color: theme => theme.palette.grey[500]
             }}
           >
-            REGISTER
+            Kb Workspace
           </Box>
           <Box sx={{ padding: '0 1em 1em 1em' }}>
             <Box sx={{ marginTop: '1em' }}>

@@ -5,6 +5,9 @@ import CreditCardIcon from '@mui/icons-material/CreditCard'
 import CancelIcon from '@mui/icons-material/Cancel'
 import Grid from '@mui/material/Unstable_Grid2'
 import Stack from '@mui/material/Stack'
+
+import Button from '@mui/material/Button'
+import EditNoteIcon from '@mui/icons-material/EditNote'
 // import Divider from '@mui/material/Divider'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 
@@ -413,7 +416,15 @@ function ActiveCard() {
           </Grid>
 
           {/* Right side */}
-          <Grid xs={12} sm={3}>
+          <Grid
+            xs={12}
+            sm={3}
+            sx={{
+              position: 'sticky',
+              top: '20px', // hoặc bao nhiêu px bạn muốn cách từ đỉnh
+              alignSelf: 'flex-start'
+            }}
+          >
             <Typography
               sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
             >

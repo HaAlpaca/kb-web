@@ -1,34 +1,30 @@
-import Box from '@mui/material/Box'
-import Tooltip from '@mui/material/Tooltip'
-import { useState } from 'react'
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
 import CancelIcon from '@mui/icons-material/Cancel'
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard'
 import {
   Chip,
+  CircularProgress,
   Divider,
   Drawer,
-  Typography,
-  RadioGroup,
   FormControlLabel,
   Radio,
-  CircularProgress,
-  Switch,
-  FormGroup
+  RadioGroup,
+  Typography
 } from '@mui/material'
-import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
+import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import { updateBoardDetailsAPI } from '~/apis'
+import Tooltip from '@mui/material/Tooltip'
+import { cloneDeep } from 'lodash'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { updateBoardDetailsAPI } from '~/apis'
+import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import {
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
-import { cloneDeep } from 'lodash'
-import BoardUserGroup from './BoardUserGroup'
-import CardUserGroup from '~/components/Modal/ActiveCard/CardUserGroup'
-import { BOARD_TYPES, CARD_MEMBER_ACTION } from '~/utils/constants'
-import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard'
+import { selectCurrentUser } from '~/redux/user/userSlice'
 import { socketIoInstance } from '~/socket-client'
+import { BOARD_TYPES } from '~/utils/constants'
 import BoardUserRole from './BoardUserRole'
 const boardCoverImages = [
   'https://images.unsplash.com/photo-1741926376117-85ec2cef9714',
@@ -37,12 +33,12 @@ const boardCoverImages = [
   'https://images.unsplash.com/photo-1703146893334-5bd85e47108e',
   'https://images.unsplash.com/photo-1673187446875-d3149449953b',
   'https://images.unsplash.com/photo-1669236712949-b58f9758898d',
-  'https://images.unsplash.com/photo-1655955086611-47f6d063c763',
   'https://images.unsplash.com/photo-1712743586807-93f857693f3f'
 ]
 
 function BoardMenuGroup({ board, MENU_STYLE }) {
   const boardRedux = useSelector(selectCurrentActiveBoard)
+  const user = useSelector(selectCurrentUser)
   const dispatch = useDispatch()
   const [open, setOpen] = useState(false)
   const [boardType, setBoardType] = useState(board?.type || 'private')
@@ -227,7 +223,6 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
       </Box>
 
       <Divider />
-
       <Box
         sx={{
           display: 'flex',
@@ -237,54 +232,7 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
           py: 1
         }}
       >
-        <Typography sx={{ fontSize: '32px', fontWeight: 600 }}>
-          Members:
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
-            Owners:
-          </Typography>
-          <CardUserGroup
-            cardMemberIds={board?.ownerIds}
-            onUpdateCardMembers={incomingMemberInfo => {
-              onUpdateBoardMembers(incomingMemberInfo)
-            }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
-            Members:
-          </Typography>
-          <CardUserGroup
-            cardMemberIds={board?.memberIds}
-            onUpdateCardMembers={incomingMemberInfo =>
-              onUpdateBoardMembers({
-                userId: incomingMemberInfo._id,
-                action: CARD_MEMBER_ACTION.ADD
-              })
-            }
-            isShowAddMember={false}
-          />
-          {/* <BoardUserGroup boardUsers={board?.members} limit={8} /> */}
-        </Box>
-      </Box>
-
-      <Divider />
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'start',
-          flexDirection: 'column',
-          gap: 0.5,
-          py: 1
-        }}
-      >
-        <Typography sx={{ fontSize: '32px', fontWeight: 600 }}>
-          User Role:
-        </Typography>
-        <BoardUserRole currentUserId={board?.ownerIds[0]} />
-
+        <BoardUserRole currentUserId={user?._id} />
       </Box>
     </Box>
   )

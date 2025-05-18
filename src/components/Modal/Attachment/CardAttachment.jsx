@@ -263,7 +263,7 @@ function CardAttachment({ attachments }) {
                       sx={{
                         borderRadius: '4px',
                         backgroundColor: theme =>
-                          theme.palette.mode === 'dark' ? '#333643' : '#ebecf0',
+                          theme.palette.mode === 'dark' ? '#33485D' : '#ebecf0',
                         paddingY: '6px',
                         paddingX: '12px',
                         display: 'flex',
