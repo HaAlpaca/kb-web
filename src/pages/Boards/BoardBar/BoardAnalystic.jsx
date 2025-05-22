@@ -10,18 +10,13 @@ import { BarChart } from '@mui/x-charts/BarChart'
 function BoardAnalystic({ board, MENU_STYLE }) {
   const boardRedux = useSelector(selectCurrentActiveBoard)
   const [open, setOpen] = useState(false)
-  const [barData, setBarData] = useState([]) // Dữ liệu cho Stacked Bar Chart
-  const [inCompleteData, setinCompleteData] = useState([]) // Dữ liệu cho Stacked Bar Chart
-  const [completeData, setCompleteData] = useState([]) // Dữ liệu cho Stacked Bar Chart
+  const [analytics, setAnalytics] = useState(null)
+
   // Gọi API khi Drawer mở
   useEffect(() => {
     if (open && boardRedux?._id) {
       handleGetBoardAnalystics(boardRedux._id).then(res => {
-        // Tạo dữ liệu cho Stacked Bar Chart
-        const chartData = res.map(member => member.displayName)
-        setBarData(chartData)
-        setCompleteData(res.map(member => member.totalCompletedCards))
-        setinCompleteData(res.map(member => member.totalIncompleteCards))
+        setAnalytics(res)
       })
     }
   }, [open, boardRedux?._id])
@@ -46,30 +41,69 @@ function BoardAnalystic({ board, MENU_STYLE }) {
           </Typography>
         </Box>
 
+        {/* Tổng số card */}
+        <Typography sx={{ mb: 2 }}>
+          Total Cards: {analytics?.totalCards || 0}
+        </Typography>
+        <Typography sx={{ mb: 2 }}>
+          Completed Cards: {analytics?.totalCompletedCards || 0}
+        </Typography>
+        <Typography sx={{ mb: 2 }}>
+          Incomplete Cards: {analytics?.totalIncompleteCards || 0}
+        </Typography>
+
+        {/* Biểu đồ Stacked Bar Chart */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <BarChart
             height={300}
             series={[
               {
-                data: completeData,
-                label: 'Completed Cards', // Sửa label thành "Completed Cards"
+                data:
+                  analytics?.memberAnalytics?.map(
+                    member => member.totalCompletedCards
+                  ) || [],
+                label: 'Completed Cards',
                 id: 'completedId',
                 stack: 'total'
               },
               {
-                data: inCompleteData,
-                label: 'Incomplete Cards', // Sửa label thành "Incomplete Cards"
+                data:
+                  analytics?.memberAnalytics?.map(
+                    member => member.totalIncompleteCards
+                  ) || [],
+                label: 'Incomplete Cards',
                 id: 'incompleteId',
                 stack: 'total'
               }
             ]}
-            xAxis={[{ data: barData, label: 'Members' }]} // Sửa label trục X thành "Members"
-            yAxis={[{ width: 50, label: 'Number of Cards' }]} // Sửa label trục Y thành "Number of Cards"
+            xAxis={[
+              {
+                data:
+                  analytics?.memberAnalytics?.map(
+                    member => member.displayName
+                  ) || [],
+                label: 'Members'
+              }
+            ]}
+            yAxis={[{ width: 50, label: 'Number of Cards' }]}
           />
         </Box>
-      </Box>
 
-      <Divider />
+        {/* Thống kê theo thành viên */}
+        <Divider sx={{ my: 2 }} />
+        <Typography sx={{ fontWeight: '500', mb: 2 }}>
+          Member Analytics:
+        </Typography>
+        {analytics?.memberAnalytics?.map(member => (
+          <Box key={member.displayName} sx={{ mb: 2 }}>
+            <Typography>
+              {member.displayName}: {member.totalCards} cards (
+              {member.totalCompletedCards} completed,{' '}
+              {member.totalIncompleteCards} incomplete)
+            </Typography>
+          </Box>
+        ))}
+      </Box>
     </Box>
   )
 

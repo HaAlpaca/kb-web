@@ -24,7 +24,7 @@ export const notificationActionsSlice = createSlice({
     updateCurrentNotifications: (state, action) => {
       state.currentNotifications = action.payload
     },
-    addNotification: (state, action) => {
+    addActionNotification: (state, action) => {
       const incomingAction = action.payload
       state.currentNotifications.unshift(incomingAction)
     }
@@ -42,7 +42,7 @@ export const notificationActionsSlice = createSlice({
 export const {
   clearCurrentNotifications,
   updateCurrentNotifications,
-  addNotification
+  addActionNotification
 } = notificationActionsSlice.actions
 
 export const selectCurrentActionNotifications = state => {

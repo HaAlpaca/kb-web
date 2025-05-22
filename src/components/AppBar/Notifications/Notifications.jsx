@@ -29,12 +29,14 @@ import {
   updateBoardInvitationAPI
 } from '~/redux/notifications/notificationsSlice'
 import {
+  addActionNotification,
   fetchActionsAPI,
   selectCurrentActionNotifications
 } from '~/redux/notifications/notificationsActionSlice'
 import { socketIoInstance } from '~/socket-client'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { useNavigate } from 'react-router-dom'
+import Expandable from '~/components/Expandable/Expandable'
 
 function Notifications() {
   const [anchorEl, setAnchorEl] = useState(null)
@@ -80,7 +82,6 @@ function Notifications() {
 
   useEffect(() => {
     dispatch(fetchInvitationsAPI())
-    dispatch(fetchActionsAPI())
 
     const onReceiveNewInvitation = invitation => {
       if (invitation.inviteeId === currentUser._id) {
@@ -93,6 +94,23 @@ function Notifications() {
 
     return () => {
       socketIoInstance.off('BE_USER_INVITED_TO_BOARD', onReceiveNewInvitation)
+    }
+  }, [dispatch, currentUser._id])
+
+  useEffect(() => {
+    dispatch(fetchActionsAPI())
+
+    const onReceiveNewAction = action => {
+      dispatch(fetchActionsAPI())
+      if (action.assigneeId === currentUser._id) {
+        setNewNotifications(true)
+      }
+    }
+
+    socketIoInstance.on('BE_USER_RECEIVED_ACTION', onReceiveNewAction)
+
+    return () => {
+      socketIoInstance.off('BE_USER_RECEIVED_ACTION', onReceiveNewAction)
     }
   }, [dispatch, currentUser._id])
 
@@ -128,7 +146,6 @@ function Notifications() {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
             Board Assignment Notification
           </Typography>
-
           {(!actionNotifications || actionNotifications.length === 0) && (
             <MenuItem
               sx={{
@@ -141,86 +158,89 @@ function Notifications() {
               You do not have any new assignment notifications.
             </MenuItem>
           )}
-
-          {actionNotifications?.map((notification, index) => (
-            <Box key={`action-${index}`}>
-              <MenuItem
-                sx={{ minWidth: 200, maxWidth: 360 }}
-                onClick={() =>
-                  handleNavigateToTask(
-                    notification.boardId,
-                    notification.metadata
-                  )
-                }
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 1,
-                    width: '100%'
-                  }}
+          <Expandable size={300} buttonBorderRadiusTop={true}>
+            {actionNotifications?.map((notification, index) => (
+              <Box key={`action-${index}`}>
+                <MenuItem
+                  sx={{ minWidth: 200, maxWidth: 360 }}
+                  onClick={() =>
+                    handleNavigateToTask(
+                      notification.boardId,
+                      notification.metadata
+                    )
+                  }
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AssignmentIcon fontSize="small" />
-                    {notification.type === ACTION_TYPES.ASSIGN_CARD && (
-                      <Typography variant="body2">
-                        {notification.assignerId === notification.assigneeId ? (
-                          'You have a new card assigned'
-                        ) : (
-                          <>
-                            <strong>
-                              {notification.assigner[0]?.displayName}
-                            </strong>{' '}
-                            assigned you in new card
-                          </>
-                        )}
-                      </Typography>
-                    )}
-                    {notification.type === ACTION_TYPES.ASSIGN_CHECKLIST && (
-                      <Typography variant="body2">
-                        {notification.assignerId === notification.assigneeId ? (
-                          'You have a new checklist assigned'
-                        ) : (
-                          <>
-                            <strong>
-                              {notification.assigner[0]?.displayName}
-                            </strong>{' '}
-                            assigned you in new checklist
-                          </>
-                        )}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  {notification.metadata.dueDate && (
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        sx={{
-                          bgcolor: moment(
-                            notification.metadata.dueDate
-                          ).isBefore(moment())
-                            ? 'error.main'
-                            : 'success.main'
-                        }}
-                      >
-                        {moment(notification.metadata.dueDate).format('llll')}
-                      </Button>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 1,
+                      width: '100%'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <AssignmentIcon fontSize="small" />
+                      {notification.type === ACTION_TYPES.ASSIGN_CARD && (
+                        <Typography variant="body2">
+                          {notification.assignerId ===
+                          notification.assigneeId ? (
+                            'You have a new card assigned'
+                          ) : (
+                            <>
+                              <strong>
+                                {notification.assigner[0]?.displayName}
+                              </strong>{' '}
+                              assigned you in new card
+                            </>
+                          )}
+                        </Typography>
+                      )}
+                      {notification.type === ACTION_TYPES.ASSIGN_CHECKLIST && (
+                        <Typography variant="body2">
+                          {notification.assignerId ===
+                          notification.assigneeId ? (
+                            'You have a new checklist assigned'
+                          ) : (
+                            <>
+                              <strong>
+                                {notification.assigner[0]?.displayName}
+                              </strong>{' '}
+                              assigned you in new checklist
+                            </>
+                          )}
+                        </Typography>
+                      )}
                     </Box>
-                  )}
 
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="caption">
-                      {moment(notification.createAt).format('llll')}
-                    </Typography>
+                    {notification.metadata.dueDate && (
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          sx={{
+                            bgcolor: moment(
+                              notification.metadata.dueDate
+                            ).isBefore(moment())
+                              ? 'error.main'
+                              : 'success.main'
+                          }}
+                        >
+                          {moment(notification.metadata.dueDate).format('llll')}
+                        </Button>
+                      </Box>
+                    )}
+
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption">
+                        {moment(notification.createAt).format('llll')}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              </MenuItem>
-              {index !== actionNotifications.length - 1 && <Divider />}
-            </Box>
-          ))}
+                </MenuItem>
+                {index !== actionNotifications.length - 1 && <Divider />}
+              </Box>
+            ))}
+          </Expandable>
         </Box>
 
         {/* ============================ INVITATION ============================ */}
@@ -241,96 +261,97 @@ function Notifications() {
               You do not have any new invite board notifications.
             </MenuItem>
           )}
-
-          {notifications?.map((notification, index) => (
-            <Box key={`invite-${index}`}>
-              <MenuItem sx={{ minWidth: 200, maxWidth: 360 }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 1,
-                    width: '100%'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <GroupAddIcon fontSize="small" />
-                    <Typography variant="body2">
-                      <strong>{notification.inviter?.displayName}</strong>{' '}
-                      invited you to board{' '}
-                      <strong>{notification.board?.title}</strong>
-                    </Typography>
-                  </Box>
-
-                  {notification.boardInvitation.status ===
-                    BOARD_INVITATION_STATUS.PENDING && (
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: 1
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="success"
-                        size="small"
-                        onClick={() =>
-                          updateBoardInvitation(
-                            BOARD_INVITATION_STATUS.ACCEPTED,
-                            notification._id
-                          )
-                        }
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        size="small"
-                        onClick={() =>
-                          updateBoardInvitation(
-                            BOARD_INVITATION_STATUS.REJECTED,
-                            notification._id
-                          )
-                        }
-                      >
-                        Reject
-                      </Button>
+          <Expandable size={250}>
+            {notifications?.map((notification, index) => (
+              <Box key={`invite-${index}`}>
+                <MenuItem sx={{ minWidth: 200, maxWidth: 360 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 1,
+                      width: '100%'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <GroupAddIcon fontSize="small" />
+                      <Typography variant="body2">
+                        <strong>{notification.inviter?.displayName}</strong>{' '}
+                        invited you to board{' '}
+                        <strong>{notification.board?.title}</strong>
+                      </Typography>
                     </Box>
-                  )}
 
-                  {notification.boardInvitation.status !==
-                    BOARD_INVITATION_STATUS.PENDING && (
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      {notification.boardInvitation.status ===
-                      BOARD_INVITATION_STATUS.ACCEPTED ? (
-                        <Chip
-                          icon={<DoneIcon />}
-                          label="Accepted"
+                    {notification.boardInvitation.status ===
+                      BOARD_INVITATION_STATUS.PENDING && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          gap: 1
+                        }}
+                      >
+                        <Button
+                          variant="contained"
                           color="success"
                           size="small"
-                        />
-                      ) : (
-                        <Chip
-                          icon={<NotInterestedIcon />}
-                          label="Rejected"
+                          onClick={() =>
+                            updateBoardInvitation(
+                              BOARD_INVITATION_STATUS.ACCEPTED,
+                              notification._id
+                            )
+                          }
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
                           size="small"
-                        />
-                      )}
-                    </Box>
-                  )}
+                          onClick={() =>
+                            updateBoardInvitation(
+                              BOARD_INVITATION_STATUS.REJECTED,
+                              notification._id
+                            )
+                          }
+                        >
+                          Reject
+                        </Button>
+                      </Box>
+                    )}
 
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="caption">
-                      {moment(notification.createAt).format('llll')}
-                    </Typography>
+                    {notification.boardInvitation.status !==
+                      BOARD_INVITATION_STATUS.PENDING && (
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        {notification.boardInvitation.status ===
+                        BOARD_INVITATION_STATUS.ACCEPTED ? (
+                          <Chip
+                            icon={<DoneIcon />}
+                            label="Accepted"
+                            color="success"
+                            size="small"
+                          />
+                        ) : (
+                          <Chip
+                            icon={<NotInterestedIcon />}
+                            label="Rejected"
+                            size="small"
+                          />
+                        )}
+                      </Box>
+                    )}
+
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="caption">
+                        {moment(notification.createAt).format('llll')}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              </MenuItem>
-              {index !== notifications.length - 1 && <Divider />}
-            </Box>
-          ))}
+                </MenuItem>
+                {index !== notifications.length - 1 && <Divider />}
+              </Box>
+            ))}
+          </Expandable>
         </Box>
       </Menu>
     </Box>

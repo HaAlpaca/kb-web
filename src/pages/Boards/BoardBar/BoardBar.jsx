@@ -1,11 +1,11 @@
 import Box from '@mui/material/Box'
 import LabelModal from '~/components/Modal/Label/LabelModal'
 import BoardAnalystic from './BoardAnalystic'
-import BoardAutomation from './BoardAutomation'
 import BoardMenuGroup from './BoardMenuGroup'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
 import BoardFilter from './BoardFilter'
+import BoardAutomation from './BoardAutomation'
 const MENU_STYLE = {
   color: 'white',
   bgcolor: 'transparent',

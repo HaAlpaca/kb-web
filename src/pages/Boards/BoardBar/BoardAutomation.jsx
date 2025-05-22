@@ -1,34 +1,52 @@
 import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
-import { useState } from 'react'
 import {
   Chip,
   Divider,
   Drawer,
   Typography,
   Switch,
-  FormGroup,
   FormControlLabel
 } from '@mui/material'
 import CancelIcon from '@mui/icons-material/Cancel'
 import BoltIcon from '@mui/icons-material/Bolt'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import {
+  selectCurrentActiveBoard,
+  fetchBoardDetailsAPI
+} from '~/redux/activeBoard/activeBoardSlice'
+import { handleUpdateBoardAutomationAPI } from '~/apis'
+// import { updateBoardAutomationAPI } from '~/apis/board'
 
-function BoardAutomation({ board, MENU_STYLE }) {
+function BoardAutomation({ MENU_STYLE }) {
   const boardRedux = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
 
   const [open, setOpen] = useState(false)
 
-  // Automation 1: when card is completed
-  const [automationEnabled, setAutomationEnabled] = useState(false)
-  const [selectedColumnId, setSelectedColumnId] = useState('')
+  // Automation states
+  const [automationEnabled, setAutomationEnabled] = useState(
+    boardRedux?.isCompleteCardTrigger || false
+  )
+  const [selectedColumnId, setSelectedColumnId] = useState(
+    boardRedux?.completeCardTriggerColumnId || ''
+  )
 
-  // Automation 2: when dueDate expired
-  const [automationDueDateEnabled, setAutomationDueDateEnabled] =
-    useState(false)
-  const [selectedDueDateColumnId, setSelectedDueDateColumnId] = useState('')
+  const [automationDueDateEnabled, setAutomationDueDateEnabled] = useState(
+    boardRedux?.isOverdueCardTrigger || false
+  )
+  const [selectedDueDateColumnId, setSelectedDueDateColumnId] = useState(
+    boardRedux?.overdueCardColumnId || ''
+  )
+
+  useEffect(() => {
+    // Đồng bộ hóa state với Redux khi boardRedux thay đổi
+    setAutomationEnabled(boardRedux?.isCompleteCardTrigger || false)
+    setSelectedColumnId(boardRedux?.completeCardTriggerColumnId || '')
+    setAutomationDueDateEnabled(boardRedux?.isOverdueCardTrigger || false)
+    setSelectedDueDateColumnId(boardRedux?.overdueCardColumnId || '')
+  }, [boardRedux])
 
   const toggleDrawer = newOpen => event => {
     if (
@@ -39,6 +57,17 @@ function BoardAutomation({ board, MENU_STYLE }) {
       return
     }
     setOpen(newOpen)
+  }
+
+  const handleSaveAutomation = async () => {
+    await handleUpdateBoardAutomationAPI(boardRedux._id, {
+      isCompleteCardTrigger: automationEnabled,
+      completeCardTriggerColumnId: selectedColumnId,
+      isOverdueCardTrigger: automationDueDateEnabled,
+      overdueCardColumnId: selectedDueDateColumnId
+    })
+    dispatch(fetchBoardDetailsAPI(boardRedux._id))
+    setOpen(false)
   }
 
   const getColumnTitleById = id =>
@@ -152,6 +181,23 @@ function BoardAutomation({ board, MENU_STYLE }) {
             <li>No automations enabled</li>
           )}
         </ul>
+      </Box>
+
+      <Box sx={{ mt: 2 }}>
+        <button
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#1976d2',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer'
+          }}
+          onClick={handleSaveAutomation}
+        >
+          Save Automations
+        </button>
       </Box>
     </Box>
   )

@@ -17,24 +17,23 @@ import {
 
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  fetchBoardDetailsAPI,
   fetchFilteredBoardDetailsAPI,
   selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  updateCurrentActiveBoard,
+  selectBoardError
 } from '~/redux/activeBoard/activeBoardSlice'
 
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 import { socketIoInstance } from '~/socket-client'
-import { selectCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
 import useWebSocketEvents from '~/CustomHooks/useWebSocketEvents'
 function Board() {
   const dispatch = useDispatch()
-  // const [board, setBoard] = useState(null)
-  const activeCard = useSelector(selectCurrentActiveCard)
+  const navigate = useNavigate()
   const board = useSelector(selectCurrentActiveBoard)
+  const error = useSelector(selectBoardError)
   const { boardId } = useParams()
   const [searchParams] = useSearchParams()
   // FETCH BOARD
@@ -44,7 +43,13 @@ function Board() {
     dispatch(
       fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
     )
-  }, [dispatch, boardId])
+  }, [dispatch, boardId, searchParams])
+
+  useEffect(() => {
+    if (error === 'Board not found!') {
+      navigate('/not-found')
+    }
+  }, [error, navigate])
 
   useWebSocketEvents()
 
@@ -130,6 +135,10 @@ function Board() {
 
   if (!board) {
     return <PageLoadingSpinner caption="Loading Board..." />
+  }
+  if (error === 'Network error! Please check your connection.') {
+    // Hiển thị spinner với thông báo lỗi mạng
+    return <PageLoadingSpinner caption="Network error! Retrying..." />
   }
   return (
     <>

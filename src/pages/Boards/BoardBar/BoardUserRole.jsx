@@ -24,13 +24,14 @@ function BoardUserRole({ currentUserId }) {
   const allBoardUsers = board.allMembers || []
   const currentUser = allBoardUsers.find(user => user._id === currentUserId)
   const isAdmin = currentUser?.boardRole === 'admin'
+  const isOwner = board.ownerIds[0] === currentUserId // Kiểm tra nếu người dùng là owner đầu tiên
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
   const [open, setOpen] = useState(true) // trạng thái mở/đóng collapse
 
   const handleClick = (event, user) => {
-    if (!isAdmin) return
+    if (!isAdmin || (isOwner && user._id === currentUserId)) return // Không cho phép owner chỉnh sửa vai trò của chính mình
     setAnchorEl(event.currentTarget)
     setSelectedUser(user)
   }
@@ -42,7 +43,7 @@ function BoardUserRole({ currentUserId }) {
 
   const handleChangeRole = async newRole => {
     if (!selectedUser) return
-    const res = await handleUpdateUserRole(board._id, {
+    await handleUpdateUserRole(board._id, {
       userId: selectedUser._id,
       role: newRole
     }).then(() => {
@@ -63,7 +64,7 @@ function BoardUserRole({ currentUserId }) {
           mb: 1
         }}
       >
-        <Typography variant="h6">Board Members</Typography>
+        <Typography variant="h6">Board Role</Typography>
         <IconButton onClick={() => setOpen(prev => !prev)}>
           {open ? <ExpandLess /> : <ExpandMore />}
         </IconButton>
@@ -97,7 +98,11 @@ function BoardUserRole({ currentUserId }) {
 
               <Tooltip
                 title={
-                  isAdmin ? 'Change user role' : 'Only admin can change role'
+                  isAdmin
+                    ? isOwner && user._id === currentUserId
+                      ? 'You cannot change your own role as the owner'
+                      : 'Change user role'
+                    : 'Only admin can change role'
                 }
               >
                 <span>
@@ -105,7 +110,9 @@ function BoardUserRole({ currentUserId }) {
                     size="small"
                     variant="outlined"
                     onClick={e => handleClick(e, user)}
-                    disabled={!isAdmin}
+                    disabled={
+                      !isAdmin || (isOwner && user._id === currentUserId) // Vô hiệu hóa nút nếu là owner và đang chỉnh sửa chính mình
+                    }
                   >
                     {user.boardRole.toUpperCase()}
                   </Button>

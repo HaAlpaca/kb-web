@@ -22,6 +22,7 @@ import LabelGroup from '~/components/Label/LabelGroup'
 import { fetchBoardDetailsAPI } from '~/redux/activeBoard/activeBoardSlice'
 import { useDispatch } from 'react-redux'
 import { socketIoInstance } from '~/socket-client'
+import { getOptimizedImageUrl } from '~/utils/formatters'
 
 const calculateChecklistCompletion = checklists => {
   return checklists.reduce(
@@ -45,7 +46,7 @@ function Card({ card }) {
   const [isPortrait, setIsPortrait] = useState(false)
   const handleImageLoad = event => {
     const img = event.currentTarget
-    setIsPortrait(img.naturalHeight > img.naturalWidth)
+    setIsPortrait(img.naturalHeight > img.naturalWidth) // Xác định ảnh dọc hay ngang
   }
 
   const { control } = useForm({
@@ -117,7 +118,7 @@ function Card({ card }) {
         <CardMedia
           component="img"
           sx={{
-            width: isPortrait ? 'auto' : '100%',
+            width: isPortrait ? 130 : '100%',
             height: isPortrait ? 200 : 140,
             borderTopLeftRadius: isPortrait ? '0px' : '8px',
             borderTopRightRadius: isPortrait ? '0px' : '8px',
@@ -125,7 +126,7 @@ function Card({ card }) {
             display: 'block',
             margin: '0 auto'
           }}
-          image={card.cover}
+          image={getOptimizedImageUrl(card.cover)}
           title={card?.title}
           onLoad={handleImageLoad}
         />

@@ -1,4 +1,3 @@
-
 /* eslint-disable no-console */
 export const capitalizeFirstLetter = val => {
   if (!val) return ''
@@ -81,4 +80,34 @@ export const downloadFile = async (fileUrl, fileName) => {
   } catch (error) {
     console.error('Lỗi khi tải file:', error)
   }
+}
+
+export const getOptimizedImageUrl = (url, options = {}) => {
+  if (!url) return ''
+
+  const {
+    crop = 'fill', // Crop ảnh
+    gravity = 'center', // Crop từ trung tâm
+    quality = 'auto', // Tự động tối ưu chất lượng
+    format = 'auto' // Tự động chọn định dạng tốt nhất
+  } = options
+
+  // Kích thước cố định 500x500
+  const width = 560
+  const height = 280
+
+  // Tìm vị trí "upload/" trong URL để chèn các tham số
+  const uploadIndex = url.indexOf('/upload/')
+  if (uploadIndex === -1) return url // Nếu không phải URL của Cloudinary, trả về URL gốc
+
+  // Chèn các tham số xử lý ảnh
+  const transformation = `c_${crop},g_${gravity},w_${width},h_${height},q_${quality},f_${format}`
+  return `${url.slice(0, uploadIndex + 8)}${transformation}/${url.slice(
+    uploadIndex + 8
+  )}`
+}
+
+export const getOptimizedImageUrlDimensions = (url, options = {}) => {
+  const { width = 300, height = 200 } = options
+  return { width, height }
 }

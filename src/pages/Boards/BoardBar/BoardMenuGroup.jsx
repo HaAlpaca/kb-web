@@ -16,7 +16,7 @@ import Tooltip from '@mui/material/Tooltip'
 import { cloneDeep } from 'lodash'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { updateBoardDetailsAPI } from '~/apis'
+import { updateBoardDetailsAPI, archiveBoardAPI, leaveBoardAPI } from '~/apis' // Import API leave board
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import {
   selectCurrentActiveBoard,
@@ -24,8 +24,12 @@ import {
 } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { socketIoInstance } from '~/socket-client'
-import { BOARD_TYPES } from '~/utils/constants'
+import { BOARD_TYPES, CARD_MEMBER_ACTION } from '~/utils/constants'
 import BoardUserRole from './BoardUserRole'
+import { useNavigate } from 'react-router-dom'
+import { useConfirm } from 'material-ui-confirm' // Import useConfirm
+import CardUserGroup from '~/components/Modal/ActiveCard/CardUserGroup'
+
 const boardCoverImages = [
   'https://images.unsplash.com/photo-1741926376117-85ec2cef9714',
   'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5',
@@ -37,6 +41,7 @@ const boardCoverImages = [
 ]
 
 function BoardMenuGroup({ board, MENU_STYLE }) {
+  const confirm = useConfirm() // Khởi tạo useConfirm
   const boardRedux = useSelector(selectCurrentActiveBoard)
   const user = useSelector(selectCurrentUser)
   const dispatch = useDispatch()
@@ -45,6 +50,7 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
   const [loadedImages, setLoadedImages] = useState(
     Array(boardCoverImages.length).fill(false)
   )
+  const navigate = useNavigate() // Hook để điều hướng sau khi archive
 
   const toggleDrawer = newOpen => event => {
     if (
@@ -95,6 +101,28 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
       dispatch(updateCurrentActiveBoard(newBoard))
       socketIoInstance.emit('FE_UPDATE_BOARD', newBoard)
     })
+  }
+
+  const handleArchiveBoard = async () => {
+    await confirm({
+      title: 'Confirm Archive',
+      description: 'Are you sure you want to archive this board?',
+      confirmationText: 'Yes',
+      cancellationText: 'No'
+    })
+    await archiveBoardAPI(board?._id) // Gọi API archive
+    navigate('/boards')
+  }
+
+  const handleLeaveBoard = async boardId => {
+    await confirm({
+      title: 'Confirm Leave',
+      description: 'Are you sure you want to leave this board?',
+      confirmationText: 'Yes',
+      cancellationText: 'No'
+    })
+    await leaveBoardAPI(boardId) // Gọi API leave board
+    navigate('/boards') // Điều hướng về danh sách boards sau khi rời khỏi
   }
 
   const DrawerList = (
@@ -233,6 +261,86 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
         }}
       >
         <BoardUserRole currentUserId={user?._id} />
+      </Box>
+
+      <Divider />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'start',
+          flexDirection: 'column',
+          gap: 0.5,
+          py: 1
+        }}
+      >
+        <Typography variant="h6">Board Member</Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
+            Owners:
+          </Typography>
+          <CardUserGroup
+            cardMemberIds={board?.ownerIds}
+            onUpdateCardMembers={incomingMemberInfo => {
+              onUpdateBoardMembers(incomingMemberInfo)
+            }}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
+            Members:
+          </Typography>
+          <CardUserGroup
+            cardMemberIds={board?.memberIds}
+            onUpdateCardMembers={incomingMemberInfo =>
+              onUpdateBoardMembers({
+                userId: incomingMemberInfo._id,
+                action: CARD_MEMBER_ACTION.ADD
+              })
+            }
+          />
+          {/* <BoardUserGroup boardUsers={board?.members} limit={8} /> */}
+        </Box>
+      </Box>
+
+      <Divider />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mt: 2
+        }}
+      >
+        <Typography sx={{ fontWeight: 'bold', color: 'error.main' }}>
+          Danger Zone
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Chip
+            label="Leave Board"
+            color="warning"
+            onClick={() => handleLeaveBoard(board?._id)} // Gọi hàm xử lý leave board
+            sx={{
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: 'warning.dark',
+                color: 'white'
+              }
+            }}
+          />
+          <Chip
+            label="Archive Board"
+            color="error"
+            onClick={handleArchiveBoard} // Gọi hàm xử lý archive
+            sx={{
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: 'error.dark',
+                color: 'white'
+              }
+            }}
+          />
+        </Box>
       </Box>
     </Box>
   )
