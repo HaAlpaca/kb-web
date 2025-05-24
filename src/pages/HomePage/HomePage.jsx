@@ -9,7 +9,7 @@ import { ReactComponent as LogoIcon } from '~/assets/logo.svg'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
-function Home() {
+function HomePage() {
   const currentUser = useSelector(selectCurrentUser)
   return (
     <Box
@@ -129,4 +129,4 @@ function Home() {
   )
 }
 
-export default Home
+export default HomePage

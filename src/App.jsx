@@ -12,15 +12,15 @@ import AccountVerification from '~/pages/Auth/AccountVerification'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import Settings from '~/pages/Settings/Settings'
-import Boards from './pages/Boards'
+import Boards from '~/pages/Boards'
 import { useEffect } from 'react'
 import {
   clearAndHideCurrentActiveCard,
   fetchCardDetailsAPI
 } from './redux/activeCard/activeCardSlice'
-import Home from './pages/Home/home'
 import useWindowSize from './CustomHooks/useWindowSize'
 import LowResolutionWarning from './pages/LowResolutionWarning/LowResolutionWarning'
+import HomePage from './pages/HomePage/HomePage'
 
 // https://www.robinwieruch.de/react-router-private-routes/
 const ProtectedRoute = ({ user }) => {
@@ -52,7 +52,7 @@ function App() {
             <Route path="/settings/security" element={<Settings />} />
           </Route>
           {/* AUTH */}
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/register" element={<Auth />} />
           <Route
