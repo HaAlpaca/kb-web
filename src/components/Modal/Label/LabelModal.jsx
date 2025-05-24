@@ -1,32 +1,31 @@
-import { useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined'
+import { Tooltip } from '@mui/material'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
+import Checkbox from '@mui/material/Checkbox'
+import Chip from '@mui/material/Chip'
 import Popover from '@mui/material/Popover'
 import TextField from '@mui/material/TextField'
-import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined'
-import Chip from '@mui/material/Chip'
-import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined'
-import { getTextColor } from '~/utils/formatters'
-import { Tooltip } from '@mui/material'
-import LabelEditModal from './LabelEditModal'
-import Checkbox from '@mui/material/Checkbox'
-import LabelAddNewModal from './LabelAddNewModal'
+import Typography from '@mui/material/Typography'
+import { cloneDeep } from 'lodash'
+import { useConfirm } from 'material-ui-confirm'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  fetchBoardDetailsAPI,
-  selectCurrentActiveBoard
-} from '~/redux/activeBoard/activeBoardSlice'
 import {
   handleChangeLabelAPI,
   handleCreateLabelAPI,
   handleDeleteLabelAPI,
   handleUpdateCardLabelAPI
 } from '~/apis'
-import { cloneDeep } from 'lodash'
+import {
+  fetchBoardDetailsAPI,
+  selectCurrentActiveBoard
+} from '~/redux/activeBoard/activeBoardSlice'
 import { fetchCardDetailsAPI } from '~/redux/activeCard/activeCardSlice'
-import { useConfirm } from 'material-ui-confirm'
 import { socketIoInstance } from '~/socket-client'
+import { getTextColor } from '~/utils/formatters'
+import LabelAddNewModal from './LabelAddNewModal'
+import LabelEditModal from './LabelEditModal'
 
 function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
   // board query
@@ -72,7 +71,8 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       dispatch(fetchBoardDetailsAPI(boardId))
       socketIoInstance.emit('FE_CREATE_LABEL', {
         ...res,
-        cardId: cardModal._id
+        cardId: cardModal._id,
+        boardId: cardModal.boardId
       })
     })
   }
@@ -103,7 +103,8 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       }
       socketIoInstance.emit('FE_UPDATE_LABEL', {
         ...res,
-        cardId: cardModal._id
+        cardId: cardModal._id,
+        boardId: cardModal.boardId
       })
     })
   }
@@ -127,7 +128,8 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
           .finally(res => {
             socketIoInstance.emit('FE_CREATE_LABEL', {
               ...res,
-              cardId: cardModal._id
+              cardId: cardModal._id,
+              boardId: cardModal.boardId
             })
           })
     )
@@ -147,7 +149,8 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       .finally(res => {
         socketIoInstance.emit('FE_UPDATE_LABEL', {
           ...res,
-          cardId: cardModal._id
+          cardId: cardModal._id,
+          boardId: cardModal.boardId
         })
       })
   }

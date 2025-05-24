@@ -1,17 +1,17 @@
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Tooltip from '@mui/material/Tooltip'
+import { useSelector } from 'react-redux'
 import LabelModal from '~/components/Modal/Label/LabelModal'
+import useRoleInfo from '~/CustomHooks/useRoleInfo'
+import { selectCurrentUser } from '~/redux/user/userSlice'
 import BoardAnalystic from './BoardAnalystic'
+import BoardAutomation from './BoardAutomation'
+import BoardFilter from './BoardFilter'
 import BoardMenuGroup from './BoardMenuGroup'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
-import BoardFilter from './BoardFilter'
-import BoardAutomation from './BoardAutomation'
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
-import Typography from '@mui/material/Typography'
-import Tooltip from '@mui/material/Tooltip'
-import Button from '@mui/material/Button'
-import { useSelector } from 'react-redux'
-import { selectCurrentUser } from '~/redux/user/userSlice'
 
 const MENU_STYLE = {
   color: 'white',
@@ -33,6 +33,7 @@ function BoardBar({ board }) {
     board?.usersRole?.find(userRole => userRole.userId === currentUser?._id)
       ?.role || 'user' // Mặc định là 'user' nếu không tìm thấy
 
+  const { isAdmin, isModerator } = useRoleInfo(board, currentUser?._id)
   return (
     <Box
       sx={{
@@ -50,7 +51,9 @@ function BoardBar({ board }) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <BoardMenuGroup board={board} MENU_STYLE={MENU_STYLE} />
-        <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />
+        {(isAdmin || isModerator) && (
+          <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />
+        )}
         <BoardAutomation board={board} MENU_STYLE={MENU_STYLE} />
         <BoardFilter board={board} MENU_STYLE={MENU_STYLE} />
         <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />

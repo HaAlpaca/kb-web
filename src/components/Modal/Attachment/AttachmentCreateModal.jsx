@@ -82,6 +82,7 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
       })
       .finally(res => {
         socketIoInstance.emit('FE_CREATE_ATTACHMENT', {
+          boardId: activeCardModal.boardId,
           ...res,
           cardId: activeCardModal._id
         })
@@ -131,7 +132,8 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
         .finally(res => {
           socketIoInstance.emit('FE_CREATE_ATTACHMENT', {
             ...res,
-            cardId: activeCardModal._id
+            cardId: activeCardModal._id,
+            boardId: activeCardModal.boardId
           })
           setAnchorPopoverElement(null)
           event.target.value = ''

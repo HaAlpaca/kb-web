@@ -83,6 +83,7 @@ function AttachmentSettingModal({
     dispatch(updateCardInBoard(updatedCard))
     handleMenuClose()
     socketIoInstance.emit('FE_UPDATE_ATTACHMENT', {
+      boardId: activeCard.boardId,
       cardId: activeCard._id
     })
   }

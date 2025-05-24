@@ -126,20 +126,24 @@ function ActiveCard() {
   }
 
   const onUpdateCardTitle = newTitle => {
-    callApiUpdateCard({ title: newTitle.trim() })
-    socketIoInstance.emit('FE_UPDATE_CARD', {
-      cardId: activeCard._id
+    callApiUpdateCard({ title: newTitle.trim() }).then(updatedCard => {
+      socketIoInstance.emit('FE_UPDATE_CARD', {
+        boardId: activeCard.boardId, // Gửi kèm boardId
+        updatedCard
+      })
     })
   }
+
   const onUpdateCardDescription = newDescription => {
-    callApiUpdateCard({ description: newDescription })
-    socketIoInstance.emit('FE_UPDATE_CARD', {
-      cardId: activeCard._id
+    callApiUpdateCard({ description: newDescription }).then(updatedCard => {
+      socketIoInstance.emit('FE_UPDATE_CARD', {
+        boardId: activeCard.boardId, // Gửi kèm boardId
+        updatedCard
+      })
     })
   }
 
   const onUploadCardCover = event => {
-    // console.log(event.target?.files[0])
     const error = singleFileValidator(event.target?.files[0])
     if (error) {
       toast.error(error)
@@ -148,7 +152,6 @@ function ActiveCard() {
     let reqData = new FormData()
     reqData.append('cardCover', event.target?.files[0])
 
-    // Gọi API...
     toast
       .promise(
         callApiUpdateCard(reqData).finally(() => (event.target.value = '')),
@@ -156,25 +159,29 @@ function ActiveCard() {
           pending: 'uploading...'
         }
       )
-      .finally(() => {
+      .then(updatedCard => {
         socketIoInstance.emit('FE_UPDATE_CARD', {
-          cardId: activeCard._id
+          boardId: activeCard.boardId, // Gửi kèm boardId
+          updatedCard
         })
       })
   }
 
   const onAddCardComment = async commentToAdd => {
-    await callApiUpdateCard({ commentToAdd })
-    socketIoInstance.emit('FE_UPDATE_CARD', {
-      cardId: activeCard._id
+    await callApiUpdateCard({ commentToAdd }).then(updatedCard => {
+      socketIoInstance.emit('FE_UPDATE_CARD', {
+        boardId: activeCard.boardId, // Gửi kèm boardId
+        updatedCard
+      })
     })
   }
 
   const onUpdateCardMembers = incomingMemberInfo => {
-    // console.log(incomingMemberInfo)
-    callApiUpdateCard({ incomingMemberInfo })
-    socketIoInstance.emit('FE_UPDATE_CARD', {
-      cardId: activeCard._id
+    callApiUpdateCard({ incomingMemberInfo }).then(updatedCard => {
+      socketIoInstance.emit('FE_UPDATE_CARD', {
+        boardId: activeCard.boardId, // Gửi kèm boardId
+        updatedCard
+      })
     })
   }
 
@@ -190,7 +197,10 @@ function ActiveCard() {
     await handleToggleCompleteCardAPI(activeCard._id).then(() => {
       dispatch(fetchBoardDetailsAPI(activeCard.boardId))
       dispatch(fetchCardDetailsAPI(activeCard._id))
-      socketIoInstance.emit('FE_UPDATE_CARD', { cardId: activeCard._id })
+      socketIoInstance.emit('FE_UPDATE_CARD', {
+        boardId: activeCard.boardId, // Gửi kèm boardId
+        cardId: activeCard._id
+      })
     })
   }
 

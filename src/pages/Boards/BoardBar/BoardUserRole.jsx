@@ -17,14 +17,15 @@ import {
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import { handleUpdateUserRole } from '~/apis'
+import useRoleInfo from '~/CustomHooks/useRoleInfo'
+import { socketIoInstance } from '~/socket-client'
 
 function BoardUserRole({ currentUserId }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
   const allBoardUsers = board.allMembers || []
-  const currentUser = allBoardUsers.find(user => user._id === currentUserId)
-  const isAdmin = currentUser?.boardRole === 'admin'
-  const isOwner = board.ownerIds[0] === currentUserId // Kiểm tra nếu người dùng là owner đầu tiên
+  const { isOwner, isAdmin } =
+    useRoleInfo(board, currentUserId)
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
@@ -47,6 +48,7 @@ function BoardUserRole({ currentUserId }) {
       userId: selectedUser._id,
       role: newRole
     }).then(() => {
+      socketIoInstance.emit('FE_UPDATE_BOARD', { boardId: board._id })
       dispatch(fetchBoardDetailsAPI(board._id))
       handleClose()
     })

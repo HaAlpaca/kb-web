@@ -29,6 +29,7 @@ import BoardUserRole from './BoardUserRole'
 import { useNavigate } from 'react-router-dom'
 import { useConfirm } from 'material-ui-confirm' // Import useConfirm
 import CardUserGroup from '~/components/Modal/ActiveCard/CardUserGroup'
+import useRoleInfo from '~/CustomHooks/useRoleInfo'
 
 const boardCoverImages = [
   'https://images.unsplash.com/photo-1741926376117-85ec2cef9714',
@@ -51,6 +52,9 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
     Array(boardCoverImages.length).fill(false)
   )
   const navigate = useNavigate() // Hook để điều hướng sau khi archive
+  const { isAdmin, isOwner, ownerIndex } = useRoleInfo(board, user?._id) // Sử dụng hook để lấy thông tin vai trò
+
+  const isShowAddMember = isAdmin && isOwner && ownerIndex === 0 // Kiểm tra xem có hiển thị nút thêm thành viên hay không
 
   const toggleDrawer = newOpen => event => {
     if (
@@ -78,13 +82,19 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
       const newBoard = cloneDeep(boardRedux)
       newBoard.cover = url
       dispatch(updateCurrentActiveBoard(newBoard))
-      socketIoInstance.emit('FE_UPDATE_BOARD', newBoard)
+      socketIoInstance.emit('FE_UPDATE_BOARD', {
+        boardId: board._id,
+        newBoard
+      })
     })
   }
 
   const handleBoardUpdate = async (field, value) => {
     await updateBoardDetailsAPI(board?._id, { [field]: value }).then(res =>
-      socketIoInstance.emit('FE_UPDATE_BOARD', res)
+      socketIoInstance.emit('FE_UPDATE_BOARD', {
+        boardId: board._id,
+        ...res
+      })
     )
     const newBoard = cloneDeep(boardRedux)
     newBoard[field] = value
@@ -115,72 +125,141 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
   }
 
   const handleLeaveBoard = async boardId => {
-    await confirm({
-      title: 'Confirm Leave',
-      description: 'Are you sure you want to leave this board?',
-      confirmationText: 'Yes',
-      cancellationText: 'No'
-    })
-    await leaveBoardAPI(boardId) // Gọi API leave board
-    navigate('/boards') // Điều hướng về danh sách boards sau khi rời khỏi
+    if (isAdmin && ownerIndex === 0) {
+      // Nếu là admin hiện tại, yêu cầu chọn admin mới
+      const options = board.memberIds.map(memberId => {
+        const member = board.allMembers.find(user => user._id === memberId)
+        return {
+          label: member?.displayName || 'Unknown',
+          value: memberId
+        }
+      })
+
+      const confirmed = await confirm({
+        title: 'Confirm Leave',
+        description:
+          'You are the current admin. Please select a new admin before leaving the board.',
+        // Hiển thị danh sách thành viên để chọn admin mới
+        options: options,
+        confirmationText: 'Leave',
+        cancellationText: 'Cancel'
+      })
+
+      if (!confirmed || !confirmed.value) return // Không làm gì nếu không chọn admin mới
+
+      const newAdminId = confirmed.value
+
+      // Cập nhật admin mới
+      await updateBoardDetailsAPI(boardId, { newAdminId }).then(res => {
+        const newBoard = cloneDeep(boardRedux)
+        newBoard.ownerIds = [newAdminId]
+        newBoard.allMembers = newBoard.allMembers.map(member => {
+          if (member._id === newAdminId) {
+            return { ...member, boardRole: 'admin' }
+          }
+          return member
+        })
+        dispatch(updateCurrentActiveBoard(newBoard))
+        socketIoInstance.emit('FE_UPDATE_BOARD', {
+          boardId: board._id,
+          ...res
+        })
+      })
+    } else {
+      // Nếu không phải admin, chỉ cần xác nhận rời board
+      const confirmed = await confirm({
+        title: 'Confirm Leave',
+        description: 'Are you sure you want to leave this board?',
+        confirmationText: 'Leave',
+        cancellationText: 'Cancel'
+      })
+
+      if (!confirmed) return
+    }
+
+    // Gọi API để rời board
+    await leaveBoardAPI(boardId)
+    navigate('/boards') // Điều hướng về danh sách board
   }
 
   const DrawerList = (
     <Box sx={{ width: 500, padding: 2, paddingTop: 1 }} role="presentation">
       <Box>
+        {/* Board Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
             Board Name:
           </Typography>
-          <ToggleFocusInput
-            value={board?.title}
-            sx={{ fontSize: 12, fontWeight: 500 }}
-            onChangedValue={newTitle => handleBoardUpdate('title', newTitle)}
-          />
+          {isAdmin ? (
+            <ToggleFocusInput
+              value={board?.title}
+              sx={{ fontSize: 12, fontWeight: 500 }}
+              onChangedValue={newTitle => handleBoardUpdate('title', newTitle)}
+            />
+          ) : (
+            <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+              {board?.title}
+            </Typography>
+          )}
         </Box>
 
+        {/* Board Description */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
             Board Description:
           </Typography>
-          <ToggleFocusInput
-            value={board?.description}
-            sx={{ fontSize: 12, fontWeight: 500 }}
-            onChangedValue={newDesc =>
-              handleBoardUpdate('description', newDesc)
-            }
-          />
+          {isAdmin ? (
+            <ToggleFocusInput
+              value={board?.description}
+              sx={{ fontSize: 12, fontWeight: 500 }}
+              onChangedValue={newDesc =>
+                handleBoardUpdate('description', newDesc)
+              }
+            />
+          ) : (
+            <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+              {board?.description || 'No description'}
+            </Typography>
+          )}
         </Box>
 
+        {/* Board Type */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: 500 }}>
             Board Type:
           </Typography>
-          <RadioGroup
-            row
-            value={boardType}
-            onChange={e => {
-              const newType = e.target.value
-              setBoardType(newType)
-              handleBoardUpdate('type', newType)
-            }}
-          >
-            <FormControlLabel
-              value={BOARD_TYPES.PRIVATE}
-              control={<Radio />}
-              label={BOARD_TYPES.PRIVATE}
-            />
-            <FormControlLabel
-              value={BOARD_TYPES.PUBLIC}
-              control={<Radio />}
-              label={BOARD_TYPES.PUBLIC}
-            />
-          </RadioGroup>
+          {isAdmin ? (
+            <RadioGroup
+              row
+              value={boardType}
+              onChange={e => {
+                const newType = e.target.value
+                setBoardType(newType)
+                handleBoardUpdate('type', newType)
+              }}
+            >
+              <FormControlLabel
+                value={BOARD_TYPES.PRIVATE}
+                control={<Radio />}
+                label={BOARD_TYPES.PRIVATE}
+              />
+              <FormControlLabel
+                value={BOARD_TYPES.PUBLIC}
+                control={<Radio />}
+                label={BOARD_TYPES.PUBLIC}
+              />
+            </RadioGroup>
+          ) : (
+            <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+              {boardType}
+            </Typography>
+          )}
         </Box>
       </Box>
 
       <Divider />
 
+      {/* Board Cover */}
       <Box
         sx={{
           display: 'flex',
@@ -197,25 +276,27 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
           {boardCoverImages.map((url, index) => (
             <Grid item xs={3} key={index}>
               <Box
-                onClick={() => handleCoverChange(url)}
+                onClick={() => isAdmin && handleCoverChange(url)}
                 sx={{
                   position: 'relative',
                   width: '100%',
                   paddingTop: '75%',
                   borderRadius: 1,
                   overflow: 'hidden',
-                  cursor: 'pointer',
+                  cursor: isAdmin ? 'pointer' : 'not-allowed',
                   border:
                     board?.cover === url
-                      ? '2px solid #60B5FF'
+                      ? '2px solid #E55050'
                       : '2px solid transparent',
                   boxShadow:
-                    board?.cover === url ? '0 0 0 2px #60B5FF' : 'none',
+                    board?.cover === url ? '0 0 0 2px #E55050' : 'none',
                   transition: 'border 0.3s, box-shadow 0.3s',
-                  '&:hover': {
-                    border: '2px solid #60B5FF',
-                    boxShadow: '0 0 0 2px #60B5FF'
-                  }
+                  '&:hover': isAdmin
+                    ? {
+                        border: '2px solid #E55050',
+                        boxShadow: '0 0 0 2px #E55050'
+                      }
+                    : {}
                 }}
               >
                 {!loadedImages[index] && (
@@ -284,23 +365,26 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
             onUpdateCardMembers={incomingMemberInfo => {
               onUpdateBoardMembers(incomingMemberInfo)
             }}
+            isShowAddMember={isShowAddMember} // Truyền giá trị isShowAddMember
           />
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
-            Members:
-          </Typography>
-          <CardUserGroup
-            cardMemberIds={board?.memberIds}
-            onUpdateCardMembers={incomingMemberInfo =>
-              onUpdateBoardMembers({
-                userId: incomingMemberInfo._id,
-                action: CARD_MEMBER_ACTION.ADD
-              })
-            }
-          />
-          {/* <BoardUserGroup boardUsers={board?.members} limit={8} /> */}
-        </Box>
+        {board?.memberIds?.length > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
+              Members:
+            </Typography>
+            <CardUserGroup
+              cardMemberIds={board?.memberIds}
+              onUpdateCardMembers={incomingMemberInfo =>
+                onUpdateBoardMembers({
+                  userId: incomingMemberInfo._id,
+                  action: CARD_MEMBER_ACTION.ADD
+                })
+              }
+              isShowAddMember={isShowAddMember} // Truyền giá trị isShowAddMember
+            />
+          </Box>
+        )}
       </Box>
 
       <Divider />

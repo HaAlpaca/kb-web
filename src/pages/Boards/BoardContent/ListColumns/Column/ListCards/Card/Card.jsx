@@ -157,7 +157,7 @@ function Card({ card }) {
                 transform: watchIsComplete
                   ? 'translateX(0)'
                   : 'translateX(-20px)',
-                transition: 'opacity 0.3s ease, transform 0.3s ease'
+                // transition: 'opacity 0.3s ease, transform 0.3s ease'
               }}
               {...field}
               checked={watchIsComplete}
@@ -166,7 +166,10 @@ function Card({ card }) {
                 field.onChange(event.target.checked)
                 await handleToggleCompleteCardAPI(card._id).then(() => {
                   dispatch(fetchBoardDetailsAPI(card.boardId))
-                  socketIoInstance.emit('FE_UPDATE_CARD', 'ping')
+                  socketIoInstance.emit('FE_UPDATE_CARD', {
+                    boardId: card.boardId,
+                    updatedCard: card
+                  })
                 })
               }}
             />
@@ -179,7 +182,7 @@ function Card({ card }) {
             fontWeight: '600',
             opacity: 1,
             transform: watchIsComplete ? 'translateX(0)' : 'translateX(-20px)',
-            transition: 'transform 0.3s ease'
+            // transition: 'transform 0.3s ease'
           }}
         >
           {card?.title}

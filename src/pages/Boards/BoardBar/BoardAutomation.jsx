@@ -17,10 +17,14 @@ import {
   fetchBoardDetailsAPI
 } from '~/redux/activeBoard/activeBoardSlice'
 import { handleUpdateBoardAutomationAPI } from '~/apis'
+import useRoleInfo from '~/CustomHooks/useRoleInfo'
+import { selectCurrentUser } from '~/redux/user/userSlice'
 // import { updateBoardAutomationAPI } from '~/apis/board'
 
 function BoardAutomation({ MENU_STYLE }) {
   const boardRedux = useSelector(selectCurrentActiveBoard)
+  const currentUser = useSelector(selectCurrentUser) // Lấy thông tin user hiện tại
+  const { isAdmin, isModerator } = useRoleInfo(boardRedux, currentUser?._id)
   const dispatch = useDispatch()
 
   const [open, setOpen] = useState(false)
@@ -79,87 +83,95 @@ function BoardAutomation({ MENU_STYLE }) {
         Automations:
       </Typography>
 
-      {/* Automation 1: isComplete */}
-      <Box sx={{ mb: 2 }}>
-        <Typography sx={{ fontWeight: 500 }}>
-          When a card is completed:
-        </Typography>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={automationEnabled}
-              onChange={e => setAutomationEnabled(e.target.checked)}
+      {(isAdmin || isModerator) && (
+        <>
+          {/* Automation 1: isComplete */}
+          <Box sx={{ mb: 2 }}>
+            <Typography sx={{ fontWeight: 500 }}>
+              When a card is completed:
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={automationEnabled}
+                  onChange={e => setAutomationEnabled(e.target.checked)}
+                />
+              }
+              label="Enable Completion Automation"
             />
-          }
-          label="Enable Completion Automation"
-        />
-      </Box>
+          </Box>
 
-      {automationEnabled && (
-        <Box sx={{ mb: 2 }}>
-          <Typography sx={{ mb: 1 }}>Move completed card to column:</Typography>
-          <select
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '6px',
-              border: '1px solid #ccc'
-            }}
-            value={selectedColumnId}
-            onChange={e => setSelectedColumnId(e.target.value)}
-          >
-            <option value="">-- Select column --</option>
-            {boardRedux?.columns?.map(column => (
-              <option key={column._id} value={column._id}>
-                {column.title}
-              </option>
-            ))}
-          </select>
-        </Box>
-      )}
+          {automationEnabled && (
+            <Box sx={{ mb: 2 }}>
+              <Typography sx={{ mb: 1 }}>
+                Move completed card to column:
+              </Typography>
+              <select
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc'
+                }}
+                value={selectedColumnId}
+                onChange={e => setSelectedColumnId(e.target.value)}
+              >
+                <option value="">-- Select column --</option>
+                {boardRedux?.columns?.map(column => (
+                  <option key={column._id} value={column._id}>
+                    {column.title}
+                  </option>
+                ))}
+              </select>
+            </Box>
+          )}
 
-      <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2 }} />
 
-      {/* Automation 2: dueDate expired */}
-      <Box sx={{ mb: 2 }}>
-        <Typography sx={{ fontWeight: 500 }}>
-          When a card is overdue (dueDate expired):
-        </Typography>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={automationDueDateEnabled}
-              onChange={e => setAutomationDueDateEnabled(e.target.checked)}
+          {/* Automation 2: dueDate expired */}
+          <Box sx={{ mb: 2 }}>
+            <Typography sx={{ fontWeight: 500 }}>
+              When a card is overdue (dueDate expired):
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={automationDueDateEnabled}
+                  onChange={e => setAutomationDueDateEnabled(e.target.checked)}
+                />
+              }
+              label="Enable Overdue Automation"
             />
-          }
-          label="Enable Overdue Automation"
-        />
-      </Box>
+          </Box>
 
-      {automationDueDateEnabled && (
-        <Box sx={{ mb: 2 }}>
-          <Typography sx={{ mb: 1 }}>Move overdue card to column:</Typography>
-          <select
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '6px',
-              border: '1px solid #ccc'
-            }}
-            value={selectedDueDateColumnId}
-            onChange={e => setSelectedDueDateColumnId(e.target.value)}
-          >
-            <option value="">-- Select column --</option>
-            {boardRedux?.columns?.map(column => (
-              <option key={column._id} value={column._id}>
-                {column.title}
-              </option>
-            ))}
-          </select>
-        </Box>
+          {automationDueDateEnabled && (
+            <Box sx={{ mb: 2 }}>
+              <Typography sx={{ mb: 1 }}>
+                Move overdue card to column:
+              </Typography>
+              <select
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc'
+                }}
+                value={selectedDueDateColumnId}
+                onChange={e => setSelectedDueDateColumnId(e.target.value)}
+              >
+                <option value="">-- Select column --</option>
+                {boardRedux?.columns?.map(column => (
+                  <option key={column._id} value={column._id}>
+                    {column.title}
+                  </option>
+                ))}
+              </select>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 2 }} />
+        </>
       )}
-
-      <Divider sx={{ my: 2 }} />
 
       {/* Danh sách automation đang bật */}
       <Box>
@@ -183,22 +195,24 @@ function BoardAutomation({ MENU_STYLE }) {
         </ul>
       </Box>
 
-      <Box sx={{ mt: 2 }}>
-        <button
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#1976d2',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
-          onClick={handleSaveAutomation}
-        >
-          Save Automations
-        </button>
-      </Box>
+      {(isAdmin || isModerator) && (
+        <Box sx={{ mt: 2 }}>
+          <button
+            style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#1976d2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+            onClick={handleSaveAutomation}
+          >
+            Save Automations
+          </button>
+        </Box>
+      )}
     </Box>
   )
 

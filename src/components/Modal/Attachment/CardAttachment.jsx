@@ -1,39 +1,36 @@
-import Box from '@mui/material/Box'
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined'
-import Tooltip from '@mui/material/Tooltip'
-import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
-import {
-  downloadFile,
-  generateDownloadURL,
-  getFaviconUrl
-} from '~/utils/formatters'
-import Expandable from '~/components/Expandable/Expandable'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
-import { ALLOW_COMMON_IMAGE_TYPES } from '~/utils/validators'
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
+import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Unstable_Grid2'
-import AttachmentSettingModal from './AttachmentSettingModal'
 import { useConfirm } from 'material-ui-confirm'
+import moment from 'moment'
+import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
 import {
   handleChangeAttachmentAPI,
   handleDeleteAttachmentAPI,
   updateCardDetailsAPI
 } from '~/apis'
-import { useDispatch, useSelector } from 'react-redux'
+import Expandable from '~/components/Expandable/Expandable'
 import {
   fetchBoardDetailsAPI,
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
   fetchCardDetailsAPI,
-  selectCurrentActiveCard,
-  updateCurrentActiveCard
+  selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
-import { cloneDeep } from 'lodash'
-import moment from 'moment'
-import { useParams } from 'react-router-dom'
 import { socketIoInstance } from '~/socket-client'
+import {
+  downloadFile,
+  generateDownloadURL,
+  getFaviconUrl
+} from '~/utils/formatters'
+import { ALLOW_COMMON_IMAGE_TYPES } from '~/utils/validators'
+import AttachmentSettingModal from './AttachmentSettingModal'
 function CardAttachment({ attachments }) {
   const board = useSelector(selectCurrentActiveBoard)
   const { boardId } = useParams()
@@ -92,7 +89,8 @@ function CardAttachment({ attachments }) {
             dispatch(fetchCardDetailsAPI(activeCardModal._id))
             socketIoInstance.emit('FE_DELETE_ATTACHMENT', {
               ...res,
-              cardId: activeCardModal._id
+              cardId: activeCardModal._id,
+              boardId: activeCardModal.boardId // Gửi kèm boardId
             })
           })
     )
@@ -124,7 +122,8 @@ function CardAttachment({ attachments }) {
       .finally(res => {
         socketIoInstance.emit('FE_UPDATE_ATTACHMENT', {
           ...res,
-          cardId: activeCardModal._id
+          cardId: activeCardModal._id,
+          boardId: activeCardModal.boardId // Gửi kèm boardId
         })
       })
   }

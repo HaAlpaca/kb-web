@@ -7,18 +7,15 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import { cloneDeep } from 'lodash'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { createNewColumnAPI } from '~/apis'
-import { generatePlaceholderCard } from '~/utils/formatters'
 import Column from './Column/Column'
 
 import { useDispatch, useSelector } from 'react-redux'
 import {
   fetchBoardDetailsAPI,
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import { socketIoInstance } from '~/socket-client'
 function ListColumns({ columns }) {
@@ -47,7 +44,10 @@ function ListColumns({ columns }) {
     }).then(res => {
       dispatch(fetchBoardDetailsAPI(board._id))
       // socket emit
-      socketIoInstance.emit('FE_CREATE_COLUMN', res)
+      socketIoInstance.emit('FE_CREATE_COLUMN', {
+        boardId: board._id,
+        res
+      })
     })
     // handle column
     // createdColumn.cards = [generatePlaceholderCard(createdColumn)]

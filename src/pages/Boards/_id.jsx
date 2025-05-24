@@ -27,7 +27,11 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
-import { socketIoInstance } from '~/socket-client'
+import {
+  socketIoInstance,
+  joinBoardRoom,
+  leaveBoardRoom
+} from '~/socket-client'
 import useWebSocketEvents from '~/CustomHooks/useWebSocketEvents'
 function Board() {
   const dispatch = useDispatch()
@@ -51,6 +55,15 @@ function Board() {
     }
   }, [error, navigate])
 
+  // Join the board room
+  useEffect(() => {
+    joinBoardRoom(boardId)
+
+    return () => {
+      leaveBoardRoom(boardId)
+    }
+  }, [boardId])
+
   useWebSocketEvents()
 
   // goi api khi xu ly xong keo tha
@@ -67,9 +80,18 @@ function Board() {
     // goi api update board
     await updateBoardDetailsAPI(newBoard._id, {
       columnOrderIds: newBoard.columnOrderIds
-    }).then(res => {
-      socketIoInstance.emit('FE_MOVE_COLUMN', res)
     })
+      .then(res => {
+        socketIoInstance.emit('FE_MOVE_COLUMN', {
+          boardId: newBoard._id,
+          ...res
+        })
+      })
+      .catch(() =>
+        dispatch(
+          fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
+        )
+      )
   }
   // cap nhat orderColumnIds
   const moveCardInTheSameColumn = (
@@ -89,9 +111,18 @@ function Board() {
     // setBoard(newBoard)
     // SET BOARD nhu SETSTATE TRONG REDUX
     dispatch(updateCurrentActiveBoard(newBoard))
-    updateColumnDetailsAPI(columnId, { cardOrderIds: dndOrderedCardIds }).then(
-      res => socketIoInstance.emit('FE_MOVE_CARD', res)
-    )
+    updateColumnDetailsAPI(columnId, { cardOrderIds: dndOrderedCardIds })
+      .then(res =>
+        socketIoInstance.emit('FE_MOVE_CARD', {
+          boardId: board._id,
+          ...res
+        })
+      )
+      .catch(() => {
+        dispatch(
+          fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
+        )
+      })
   }
   const moveCardToDifferentColumn = (
     currentCardId,
@@ -130,7 +161,18 @@ function Board() {
       nextColumnId,
       nextCardOrderIds: dndOrderedColumns.find(c => c._id === nextColumnId)
         ?.cardOrderIds
-    }).then(res => socketIoInstance.emit('FE_MOVE_CARD', res))
+    })
+      .then(res =>
+        socketIoInstance.emit('FE_MOVE_CARD', {
+          boardId: board._id,
+          ...res
+        })
+      )
+      .catch(() =>
+        dispatch(
+          fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
+        )
+      )
   }
 
   if (!board) {
