@@ -9,7 +9,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useSelector } from 'react-redux'
 import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
-
 function CardUserGroup({
   cardMemberIds = [],
   onUpdateCardMembers,
@@ -20,6 +19,7 @@ function CardUserGroup({
    * Xử lý Popover để ẩn hoặc hiện toàn bộ user trên một cái popup, tương tự docs để tham khảo ở đây:
    * https://mui.com/material-ui/react-popover/
    */
+
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const isOpenPopover = Boolean(anchorPopoverElement)
   const popoverId = isOpenPopover ? 'card-all-users-popover' : undefined
@@ -28,12 +28,11 @@ function CardUserGroup({
   const board = useSelector(selectCurrentActiveBoard)
   // thành viên trong card là tập con thành viên trong board,
   // dựa vào thành viên của board để hiển thị và có các option thêm xoá user trong card
-  const FE_CardMembers = board.FE_allUsers?.filter(user =>
+  const FE_CardMembers = board.allMembers?.filter(user =>
     cardMemberIds.includes(user._id)
   )
   // console.log('FE_CardMembers: ', FE_CardMembers)
   // console.log('cardMemberIds', cardMemberIds)
-  // console.log(board.FE_allUsers)
 
   const handleUpdateCardMembers = user => {
     // console.log(user)
@@ -60,8 +59,7 @@ function CardUserGroup({
       {FE_CardMembers.map((user, index) => (
         <Tooltip title={user.displayName} key={index}>
           <Avatar
-            sx={{ width: 34, height: 34, cursor: 'pointer' }}
-            {...props}
+            sx={{ width: 34, height: 34 }}
             alt={user.displayName}
             src={user.avatar}
           />
@@ -121,7 +119,7 @@ function CardUserGroup({
                 gap: 1.5
               }}
             >
-              {board.FE_allUsers.map((user, index) => (
+              {board.allMembers.map((user, index) => (
                 <Tooltip title={user.displayName} key={index}>
                   {/* Cách làm Avatar kèm badge icon: https://mui.com/material-ui/react-avatar/#with-badge */}
                   <Badge

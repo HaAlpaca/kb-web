@@ -5,13 +5,13 @@ import moment from 'moment'
 import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
-const CheckItemSetDueDate = ({ checklistId, checkitem, onChangeDate }) => {
+const ChecklistSetDueDate = ({ checklist, progress, onChangeDate }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedDate, setSelectedDate] = useState(
-    checkitem.dueDate ? moment(checkitem.dueDate) : null
+    checklist.dueDate ? moment(checklist.dueDate) : null
   )
   const [tempDate, setTempDate] = useState(
-    checkitem.dueDate ? moment(checkitem.dueDate) : null
+    checklist.dueDate ? moment(checklist.dueDate) : null
   )
 
   const isOpenPopover = Boolean(anchorEl)
@@ -24,7 +24,7 @@ const CheckItemSetDueDate = ({ checklistId, checkitem, onChangeDate }) => {
   const handleAcceptDate = newDate => {
     setSelectedDate(newDate)
     if (onChangeDate && newDate) {
-      onChangeDate(checklistId, checkitem._id, newDate.valueOf()) // <-- timestamp
+      onChangeDate(checklist._id, newDate.valueOf()) // <-- timestamp
     }
     handleTogglePopover()
   }
@@ -33,7 +33,7 @@ const CheckItemSetDueDate = ({ checklistId, checkitem, onChangeDate }) => {
     setSelectedDate(null)
     setTempDate(moment())
     if (onChangeDate) {
-      onChangeDate(checklistId, checkitem._id, null)
+      onChangeDate(checklist._id, null)
     }
     handleTogglePopover()
   }
@@ -44,11 +44,12 @@ const CheckItemSetDueDate = ({ checklistId, checkitem, onChangeDate }) => {
         {selectedDate ? (
           <Box
             sx={{
-              bgcolor: checkitem.isCompleted
-                ? 'success.main'
-                : moment().isAfter(selectedDate)
-                ? 'error.main'
-                : 'info.main',
+              bgcolor:
+                progress === 100
+                  ? 'success.main'
+                  : moment().isAfter(selectedDate)
+                  ? 'error.main'
+                  : 'info.main',
               color: 'white',
               borderRadius: '8px',
               padding: '4px 8px',
@@ -116,4 +117,4 @@ const CheckItemSetDueDate = ({ checklistId, checkitem, onChangeDate }) => {
   )
 }
 
-export default CheckItemSetDueDate
+export default ChecklistSetDueDate

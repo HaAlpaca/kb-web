@@ -12,17 +12,13 @@ import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
-import CardUserGroup from '../ActiveCard/CardUserGroup'
-
-import CheckItemSetDueDate from './CheckItemSetDueDate'
 
 function CardCheckitem({
   checklist,
   onUpdateCheckitemTitle,
   onToggleCheckitemStatus,
   onCreateNewCheckItem,
-  onUpdateCheckitemDueDate,
-  onUpdateCheckitemMembers,
+
   onDeleteCheckitem
 }) {
   const [openNewCheckItemForm, setOpenNewCheckItemForm] = useState(false)
@@ -90,23 +86,6 @@ function CardCheckitem({
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CheckItemSetDueDate
-                checklistId={checklist._id}
-                checkitem={checkitem}
-                onChangeDate={onUpdateCheckitemDueDate}
-              />
-
-              <CardUserGroup
-                cardMemberIds={checkitem.assignedUserIds}
-                onUpdateCardMembers={incomingMemberInfo =>
-                  onUpdateCheckitemMembers(
-                    checklist._id,
-                    checkitem._id,
-                    incomingMemberInfo
-                  )
-                }
-              />
-
               <IconButton
                 onClick={() => onDeleteCheckitem(checklist._id, checkitem._id)}
               >

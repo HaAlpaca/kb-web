@@ -1,30 +1,40 @@
+/* eslint-disable indent */
 import { useState, useEffect } from 'react'
 import AppBar from '~/components/AppBar/AppBar'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-// Grid: https://mui.com/material-ui/react-grid2/#whats-changed
 import Grid from '@mui/material/Unstable_Grid2'
 import Stack from '@mui/material/Stack'
 import Divider from '@mui/material/Divider'
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard'
-import ListAltIcon from '@mui/icons-material/ListAlt'
-import HomeIcon from '@mui/icons-material/Home'
+import ArchiveIcon from '@mui/icons-material/Archive'
+
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import randomColor from 'randomcolor'
 import SidebarCreateBoardModal from './create'
-
+import PublicIcon from '@mui/icons-material/Public'
+import LockOpenIcon from '@mui/icons-material/LockOpen'
 import { styled } from '@mui/material/styles'
-import { fetchBoardAPI } from '~/apis'
+import {
+  fetchBoardAPI,
+  fetchPublicBoardAPI,
+  fetchPrivateBoardAPI,
+  fetchArchivedBoardAPI,
+  joinPublicBoardAPI,
+  unArchiveBoardAPI // Import API unarchive
+} from '~/apis'
 import { DEFAULT_ITEM_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
-// Styles của mấy cái Sidebar item menu, anh gom lại ra đây cho gọn.
+import { useSelector } from 'react-redux'
+import { selectCurrentUser } from '~/redux/user/userSlice'
+
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -44,22 +54,14 @@ const SidebarItem = styled(Box)(({ theme }) => ({
 }))
 
 function Boards() {
-  // Số lượng bản ghi boards hiển thị tối đa trên 1 page tùy dự án (thường sẽ là 12 cái)
   const [boards, setBoards] = useState(null)
-  // Tổng toàn bộ số lượng bản ghi boards có trong Database mà phía BE trả về để FE dùng tính toán phân trang
   const [totalBoards, setTotalBoards] = useState(null)
+  const [boardType, setBoardType] = useState('all') // 'all', 'public', 'private', or 'archived'
 
-  // Xử lý phân trang từ url với MUI: https://mui.com/material-ui/react-pagination/#router-integration
+  const currentUser = useSelector(selectCurrentUser)
   const location = useLocation()
-  /**
-   * Parse chuỗi string search trong location về đối tượng URLSearchParams trong JavaScript
-   * https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/URLSearchParams
-   */
+  const navigate = useNavigate()
   const query = new URLSearchParams(location.search)
-  /**
-   * Lấy giá trị page từ query, default sẽ là 1 nếu không tồn tại page từ url.
-   * Nhắc lại kiến thức cơ bản hàm parseInt cần tham số thứ 2 là Hệ thập phân (hệ đếm cơ số 10) để đảm bảo chuẩn số cho phân trang
-   */
   const page = parseInt(query.get('page') || '1', 10)
 
   const updateStateData = res => {
@@ -68,27 +70,50 @@ function Boards() {
   }
 
   useEffect(() => {
-    // // Fake tạm 16 cái item thay cho boards
-    // // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    // setBoards([...Array(16)].map((_, i) => i))
-    // // Fake tạm giả sử trong Database trả về có tổng 100 bản ghi boards
-    // setTotalBoards(100)
-    // console.log(location.search)
-
-    // use effect thay doi thi location.search thay doi nen useeffect se duoc goi lai
-    // Gọi API lấy danh sách boards ở đây...
-    // ...
-    fetchBoardAPI(location.search).then(res => {
+    const fetchBoards = async () => {
+      let apiCall
+      if (boardType === 'all') {
+        apiCall = fetchBoardAPI
+      } else if (boardType === 'public') {
+        apiCall = fetchPublicBoardAPI
+      } else if (boardType === 'private') {
+        apiCall = fetchPrivateBoardAPI
+      } else if (boardType === 'archived') {
+        apiCall = fetchArchivedBoardAPI
+      }
+      const res = await apiCall(location.search)
       updateStateData(res)
-    })
-  }, [location.search])
+    }
+    fetchBoards()
+  }, [location.search, boardType])
 
   function afterCreateNewBoard() {
-    fetchBoardAPI(location.search).then(res => {
+    const apiCall =
+      boardType === 'all'
+        ? fetchBoardAPI
+        : boardType === 'public'
+        ? fetchPublicBoardAPI
+        : boardType === 'private'
+        ? fetchPrivateBoardAPI
+        : fetchArchivedBoardAPI
+    apiCall(location.search).then(res => {
       updateStateData(res)
     })
   }
-  // Lúc chưa tồn tại boards > đang chờ gọi api thì hiện loading
+
+  const handleJoinBoard = async boardId => {
+    await joinPublicBoardAPI(boardId).then(() => {
+      navigate(`/boards/${boardId}`) // Redirect to the board page after success
+    }) // Call the API to join the board
+  }
+
+  const handleUnarchiveBoard = async boardId => {
+    await unArchiveBoardAPI(boardId).then(() => {
+      setBoards(prevBoards => prevBoards.filter(b => b._id !== boardId)) // Loại bỏ bảng khỏi danh sách archived
+      navigate(`/boards/${boardId}`) // Redirect to the board page after success
+    })
+  }
+
   if (!boards) {
     return <PageLoadingSpinner caption="Loading Boards..." />
   }
@@ -100,24 +125,40 @@ function Boards() {
         sx={{
           paddingX: 2,
           my: '24px',
-          height: 'calc(100vh - 64px - 48px)', // Chiều cao của AppBar là 64px
-          overflowY: 'auto' // Thêm thanh cuộn dọc nếu nội dung vượt quá chiều cao
+          height: 'calc(100vh - 64px - 48px)',
+          overflowY: 'auto'
         }}
       >
         <Grid container spacing={2}>
           <Grid xs={12} sm={3}>
             <Stack direction="column" spacing={1}>
-              <SidebarItem className="active">
+              <SidebarItem
+                className={boardType === 'all' ? 'active' : ''}
+                onClick={() => setBoardType('all')}
+              >
                 <SpaceDashboardIcon fontSize="small" />
-                All Boards
+                All My Boards
               </SidebarItem>
-              <SidebarItem>
-                <ListAltIcon fontSize="small" />
-                Public Boards
-              </SidebarItem>
-              <SidebarItem>
-                <HomeIcon fontSize="small" />
+              <SidebarItem
+                className={boardType === 'private' ? 'active' : ''}
+                onClick={() => setBoardType('private')}
+              >
+                <LockOpenIcon fontSize="small" />
                 Private Boards
+              </SidebarItem>
+              <SidebarItem
+                className={boardType === 'public' ? 'active' : ''}
+                onClick={() => setBoardType('public')}
+              >
+                <PublicIcon fontSize="small" />
+                Public Community Boards
+              </SidebarItem>
+              <SidebarItem
+                className={boardType === 'archived' ? 'active' : ''}
+                onClick={() => setBoardType('archived')}
+              >
+                <ArchiveIcon fontSize="small" />
+                Archived Boards
               </SidebarItem>
             </Stack>
             <Divider sx={{ my: 1 }} />
@@ -130,29 +171,32 @@ function Boards() {
 
           <Grid xs={12} sm={9}>
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-              All boards:
+              {boardType === 'all'
+                ? 'All My Boards:'
+                : boardType === 'public'
+                ? 'Public Community Boards:'
+                : boardType === 'private'
+                ? 'Private Boards:'
+                : 'Archived Boards:'}
             </Typography>
 
-            {/* Trường hợp gọi API nhưng không tồn tại cái board nào trong Database trả về */}
             {boards?.length === 0 && (
               <Typography variant="span" sx={{ fontWeight: 'bold', mb: 3 }}>
                 No result found!
               </Typography>
             )}
 
-            {/* Trường hợp gọi API và có boards trong Database trả về thì render danh sách boards */}
             {boards?.length > 0 && (
               <Grid container spacing={2}>
                 {boards.map(b => (
                   <Grid xs={2} sm={3} md={4} key={b._id}>
                     <Card sx={{ width: '250px' }}>
-                      {/* Hiển thị ảnh cover cho board */}
                       {b?.cover ? (
                         <CardMedia
                           component="img"
-                          height="100" // Chiều cao ảnh
-                          image={`${b.cover}?w=250`} // URL ảnh
-                          alt={`${b.title} cover`} // Văn bản thay thế
+                          height="100"
+                          image={`${b.cover}?w=250`}
+                          alt={`${b.title} cover`}
                         />
                       ) : (
                         <Box
@@ -179,18 +223,54 @@ function Boards() {
                           {b?.description}
                         </Typography>
                         <Box
-                          component={Link}
-                          to={`/boards/${b._id}`}
                           sx={{
                             mt: 1,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            color: 'primary.main',
-                            '&:hover': { color: 'primary.light' }
+                            justifyContent: 'flex-end'
                           }}
                         >
-                          Go to board <ArrowRightIcon fontSize="small" />
+                          {boardType === 'archived' ? (
+                            <Box
+                              onClick={() => handleUnarchiveBoard(b._id)} // Gọi hàm xử lý unarchive
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                color: '#f57c00',
+                                cursor: 'pointer',
+                                '&:hover': { color: '#fb8c00' }
+                              }}
+                            >
+                              Unarchive <ArrowRightIcon fontSize="small" />
+                            </Box>
+                          ) : b.memberIds.includes(currentUser._id) ||
+                            b.ownerIds.includes(currentUser._id) ? (
+                            <Box
+                              component={Link}
+                              to={`/boards/${b._id}`}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                color: 'primary.main',
+                                '&:hover': { color: 'primary.light' }
+                              }}
+                            >
+                              Go to board <ArrowRightIcon fontSize="small" />
+                            </Box>
+                          ) : (
+                            <Box
+                              onClick={() => handleJoinBoard(b._id)}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                color: '#43a047',
+                                cursor: 'pointer',
+                                '&:hover': { color: '#69b36c' }
+                              }}
+                            >
+                              Join board <ArrowRightIcon fontSize="small" />
+                            </Box>
+                          )}
                         </Box>
                       </CardContent>
                     </Card>
@@ -199,7 +279,6 @@ function Boards() {
               </Grid>
             )}
 
-            {/* Trường hợp gọi API và có totalBoards trong Database trả về thì render khu vực phân trang  */}
             {totalBoards > 0 && (
               <Box
                 sx={{
@@ -215,11 +294,8 @@ function Boards() {
                   color="secondary"
                   showFirstButton
                   showLastButton
-                  // Giá trị prop count của component Pagination là để hiển thị tổng số lượng page, công thức là lấy Tổng số lượng bản ghi chia cho số lượng bản ghi muốn hiển thị trên 1 page (ví dụ thường để 12, 24, 26, 48...vv). sau cùng là làm tròn số lên bằng hàm Math.ceil
                   count={Math.ceil(totalBoards / DEFAULT_ITEM_PER_PAGE)}
-                  // Giá trị của page hiện tại đang đứng
                   page={page}
-                  // Render các page item và đồng thời cũng là những cái link để chúng ta click chuyển trang
                   renderItem={item => (
                     <PaginationItem
                       component={Link}

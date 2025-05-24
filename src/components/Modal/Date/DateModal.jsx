@@ -1,4 +1,4 @@
-import WatchLaterOutlinedIcon from '@mui/icons-material/WatchLaterOutlined'
+import EventIcon from '@mui/icons-material/Event'
 import {
   Button,
   FormControl,
@@ -130,7 +130,7 @@ function DateModal({ SidebarItem, card }) {
   return (
     <>
       <SidebarItem aria-describedby={popoverId} onClick={handleTogglePopover}>
-        <WatchLaterOutlinedIcon fontSize="small" />
+        <EventIcon fontSize="small" />
         Dates
       </SidebarItem>
 

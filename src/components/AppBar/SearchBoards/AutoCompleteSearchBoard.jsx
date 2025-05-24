@@ -36,7 +36,7 @@ function AutoCompleteSearchBoard() {
 
     // Dùng createSearchParams của react-router-dom để tạo một cái searchPath chuẩn với q[title] để gọi lên API
     const searchPath = `?${createSearchParams({ 'q[title]': searchValue })}`
-    console.log(searchPath)
+    // console.log(searchPath)
 
     // Gọi API...
     setLoading(true)

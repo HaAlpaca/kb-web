@@ -26,6 +26,7 @@ import {
 import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import HideImageOutlinedIcon from '@mui/icons-material/HideImageOutlined'
+import { socketIoInstance } from '~/socket-client'
 function AttachmentSettingModal({
   attachment,
   handleDeleteAttachment,
@@ -81,6 +82,9 @@ function AttachmentSettingModal({
     // nho cap nhat ca board ns vi card co trong board
     dispatch(updateCardInBoard(updatedCard))
     handleMenuClose()
+    socketIoInstance.emit('FE_UPDATE_ATTACHMENT', {
+      cardId: activeCard._id
+    })
   }
 
   const onSubmit = data => {
@@ -156,7 +160,7 @@ function AttachmentSettingModal({
           </Box>
         )}
 
-        <MenuItem onClick={() => handleDeleteAttachment(attachment._id)}>
+        <MenuItem onClick={() => handleDeleteAttachment(attachment)}>
           <ListItemIcon>
             <DeleteOutlineOutlinedIcon fontSize="small" />
           </ListItemIcon>

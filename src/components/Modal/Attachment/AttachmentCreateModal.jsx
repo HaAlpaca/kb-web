@@ -2,24 +2,29 @@ import { useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Popover from '@mui/material/Popover'
-import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined'
+import AttachmentIcon from '@mui/icons-material/Attachment'
 import { Button, TextField } from '@mui/material'
 import { toast } from 'react-toastify'
 import { handleCreateAttachmentAPI } from '~/apis'
 import { useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import {
+  fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
+  fetchCardDetailsAPI,
   selectCurrentActiveCard,
   updateCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 import { cloneDeep } from 'lodash'
+import { useParams } from 'react-router-dom'
+import { socketIoInstance } from '~/socket-client'
 function AttachmentCreateModal({ cardModal, SidebarItem }) {
   // board query
   const board = useSelector(selectCurrentActiveBoard)
+  const { boardId } = useParams()
   const dispatch = useDispatch()
   const activeCardModal = useSelector(selectCurrentActiveCard)
 
@@ -46,32 +51,41 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
       name: data.displayName,
       cardId: cardModal?._id
     }
-    handleCreateAttachmentAPI(reqData).then(res => {
-      setAnchorPopoverElement(null)
-      const updatedAttachment = {
-        _id: res._id,
-        name: res.name,
-        link: res.link,
-        size: res.size,
-        type: res.type
-      }
-      const newBoard = cloneDeep(board)
-      // update board attachment
-      newBoard.columns.forEach(column => {
-        column.cards.forEach(card => {
-          if (cardModal?._id === card._id) {
-            card.cardAttachmentIds.push(res._id)
-          }
+    handleCreateAttachmentAPI(reqData)
+      .then(res => {
+        // const updatedAttachment = {
+        //   _id: res._id,
+        //   name: res.name,
+        //   link: res.link,
+        //   size: res.size,
+        //   type: res.type
+        // }
+        // const newBoard = cloneDeep(board)
+        // // update board attachment
+        // newBoard.columns.forEach(column => {
+        //   column.cards.forEach(card => {
+        //     if (cardModal?._id === card._id) {
+        //       card.cardAttachmentIds.push(res._id)
+        //     }
+        //   })
+        // })
+        // dispatch(updateCurrentActiveBoard(newBoard))
+        // // update card modal
+        // const newActiveCardModal = cloneDeep(activeCardModal)
+        // newActiveCardModal.attachments.push(updatedAttachment)
+        // newActiveCardModal.cardAttachmentIds.push(res._id)
+        // dispatch(updateCurrentActiveCard(newActiveCardModal))
+        dispatch(fetchBoardDetailsAPI(boardId))
+        dispatch(fetchCardDetailsAPI(activeCardModal._id))
+        setAnchorPopoverElement(null)
+        reset() // Reset form sau khi submit thành công
+      })
+      .finally(res => {
+        socketIoInstance.emit('FE_CREATE_ATTACHMENT', {
+          ...res,
+          cardId: activeCardModal._id
         })
       })
-      dispatch(updateCurrentActiveBoard(newBoard))
-      // update card modal
-      const newActiveCardModal = cloneDeep(activeCardModal)
-      newActiveCardModal.attachments.push(updatedAttachment)
-      newActiveCardModal.cardAttachmentIds.push(res._id)
-      dispatch(updateCurrentActiveCard(newActiveCardModal))
-      reset() // Reset form sau khi submit thành công
-    })
   }
 
   const onUploadAttachment = event => {
@@ -87,31 +101,38 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
     // Gọi API...
     toast.promise(
       handleCreateAttachmentAPI(reqData)
-        .then(res => {
-          const updatedAttachment = {
-            _id: res._id,
-            name: res.name,
-            link: res.link,
-            size: res.size,
-            type: res.type
-          }
-          const newBoard = cloneDeep(board)
-          // update board attachment
-          newBoard.columns.forEach(column => {
-            column.cards.forEach(card => {
-              if (cardModal?._id === card._id) {
-                card.cardAttachmentIds.push(res._id)
-              }
-            })
-          })
-          dispatch(updateCurrentActiveBoard(newBoard))
-          // update card modal
-          const newActiveCardModal = cloneDeep(activeCardModal)
-          newActiveCardModal.attachments.push(updatedAttachment)
-          newActiveCardModal.cardAttachmentIds.push(res._id)
-          dispatch(updateCurrentActiveCard(newActiveCardModal))
+        .then(() => {
+          // const updatedAttachment = {
+          //   _id: res._id,
+          //   name: res.name,
+          //   link: res.link,
+          //   size: res.size,
+          //   type: res.type
+          // }
+          // const newBoard = cloneDeep(board)
+          // // update board attachment
+          // newBoard.columns.forEach(column => {
+          //   column.cards.forEach(card => {
+          //     if (cardModal?._id === card._id) {
+          //       card.cardAttachmentIds.push(res._id)
+          //     }
+          //   })
+          // })
+          // dispatch(updateCurrentActiveBoard(newBoard))
+          // // update card modal
+          // const newActiveCardModal = cloneDeep(activeCardModal)
+          // newActiveCardModal.attachments.push(updatedAttachment)
+          // newActiveCardModal.cardAttachmentIds.push(res._id)
+          // dispatch(updateCurrentActiveCard(newActiveCardModal))
+
+          dispatch(fetchBoardDetailsAPI(boardId))
+          dispatch(fetchCardDetailsAPI(activeCardModal._id))
         })
-        .finally(() => {
+        .finally(res => {
+          socketIoInstance.emit('FE_CREATE_ATTACHMENT', {
+            ...res,
+            cardId: activeCardModal._id
+          })
           setAnchorPopoverElement(null)
           event.target.value = ''
         }),
@@ -124,7 +145,7 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
   return (
     <>
       <SidebarItem aria-describedby={popoverId} onClick={handleTogglePopover}>
-        <AttachFileOutlinedIcon fontSize="small" />
+        <AttachmentIcon fontSize="small" />
         Attachment
       </SidebarItem>
 

@@ -16,6 +16,7 @@ import Column from './Column/Column'
 
 import { useDispatch, useSelector } from 'react-redux'
 import {
+  fetchBoardDetailsAPI,
   selectCurrentActiveBoard,
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
@@ -39,27 +40,28 @@ function ListColumns({ columns }) {
       title: newColumnTitle
     }
     // goi api tao board moi
-    const createdColumn = await createNewColumnAPI({
+    // const createdColumn =
+    await createNewColumnAPI({
       ...newColumnData,
       boardId: board._id
     }).then(res => {
+      dispatch(fetchBoardDetailsAPI(board._id))
       // socket emit
       socketIoInstance.emit('FE_CREATE_COLUMN', res)
-
     })
     // handle column
-    createdColumn.cards = [generatePlaceholderCard(createdColumn)]
-    createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
-    // console.log(createdColumn)
-    // cap nhat state board
-    // tu lam dung thay vi fetch lai api
-    const newBoard = cloneDeep(board)
-    newBoard.columns.push(createdColumn)
-    newBoard.columnOrderIds.push(createdColumn._id)
-    // setBoard(newBoard)
-    // se co loi khi shallow copy => dung clonedeep hoac chuyen sang concat (concat tao mang moi va gan ngc lai) (push se bi loi vi no la merge 2 mang)
-    // https://redux-toolkit.js.org/usage/immer-reducers
-    dispatch(updateCurrentActiveBoard(newBoard))
+    // createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+    // createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+    // // console.log(createdColumn)
+    // // cap nhat state board
+    // // tu lam dung thay vi fetch lai api
+    // const newBoard = cloneDeep(board)
+    // newBoard.columns.push(createdColumn)
+    // newBoard.columnOrderIds.push(createdColumn._id)
+    // // setBoard(newBoard)
+    // // se co loi khi shallow copy => dung clonedeep hoac chuyen sang concat (concat tao mang moi va gan ngc lai) (push se bi loi vi no la merge 2 mang)
+    // // https://redux-toolkit.js.org/usage/immer-reducers
+    // dispatch(updateCurrentActiveBoard(newBoard))
     // dong trang thai
     toggleOpenNewColumnForm()
     setNewColumnTitle('')
@@ -76,7 +78,7 @@ function ListColumns({ columns }) {
     >
       <Box
         sx={{
-          backfaceVisibility: 'hidden',
+          backfaceVisibility: 'hidden', // fix white space flickering when scroll
           bgcolor: 'inherit',
           width: '100%',
           height: '100%',

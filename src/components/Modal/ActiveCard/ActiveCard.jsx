@@ -36,10 +36,14 @@ import {
   clearAndHideCurrentActiveCard,
   selectIsShowModalActiceCard,
   selectCurrentActiveCard,
-  updateCurrentActiveCard
+  updateCurrentActiveCard,
+  fetchCardDetailsAPI
 } from '~/redux/activeCard/activeCardSlice'
 import { updateCardDetailsAPI } from '~/apis'
-import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import {
+  fetchBoardDetailsAPI,
+  updateCardInBoard
+} from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
 import LabelModal from '../Label/LabelModal'
@@ -53,6 +57,10 @@ import { useState } from 'react'
 import moment from 'moment'
 import CardCheckList from '../Checklist/CardChecklist'
 import CreateChecklistModal from '../Checklist/CreateChecklistModal'
+import { socketIoInstance } from '~/socket-client'
+import Checkbox from '@mui/material/Checkbox'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { handleToggleCompleteCardAPI } from '~/apis'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -119,9 +127,15 @@ function ActiveCard() {
 
   const onUpdateCardTitle = newTitle => {
     callApiUpdateCard({ title: newTitle.trim() })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
   }
   const onUpdateCardDescription = newDescription => {
     callApiUpdateCard({ description: newDescription })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
   }
 
   const onUploadCardCover = event => {
@@ -135,21 +149,49 @@ function ActiveCard() {
     reqData.append('cardCover', event.target?.files[0])
 
     // Gọi API...
-    toast.promise(
-      callApiUpdateCard(reqData).finally(() => (event.target.value = '')),
-      {
-        pending: 'uploading...'
-      }
-    )
+    toast
+      .promise(
+        callApiUpdateCard(reqData).finally(() => (event.target.value = '')),
+        {
+          pending: 'uploading...'
+        }
+      )
+      .finally(() => {
+        socketIoInstance.emit('FE_UPDATE_CARD', {
+          cardId: activeCard._id
+        })
+      })
   }
 
   const onAddCardComment = async commentToAdd => {
     await callApiUpdateCard({ commentToAdd })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
   }
 
   const onUpdateCardMembers = incomingMemberInfo => {
     // console.log(incomingMemberInfo)
     callApiUpdateCard({ incomingMemberInfo })
+    socketIoInstance.emit('FE_UPDATE_CARD', {
+      cardId: activeCard._id
+    })
+  }
+
+  const { control } = useForm({
+    defaultValues: {
+      isComplete: activeCard?.isComplete ?? false
+    }
+  })
+
+  const watchIsComplete = useWatch({ control, name: 'isComplete' })
+
+  const handleToggleComplete = async checked => {
+    await handleToggleCompleteCardAPI(activeCard._id).then(() => {
+      dispatch(fetchBoardDetailsAPI(activeCard.boardId))
+      dispatch(fetchCardDetailsAPI(activeCard._id))
+      socketIoInstance.emit('FE_UPDATE_CARD', { cardId: activeCard._id })
+    })
   }
 
   return (
@@ -238,7 +280,21 @@ function ActiveCard() {
             gap: 1
           }}
         >
-          <CreditCardIcon />
+          <Controller
+            name="isComplete"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                color="success"
+                size="small"
+                checked={watchIsComplete}
+                onChange={async event => {
+                  field.onChange(event.target.checked)
+                  await handleToggleComplete(event.target.checked)
+                }}
+              />
+            )}
+          />
 
           {/* Feature 01: Xử lý tiêu đề của Card */}
           <ToggleFocusInput
@@ -394,7 +450,15 @@ function ActiveCard() {
           </Grid>
 
           {/* Right side */}
-          <Grid xs={12} sm={3}>
+          <Grid
+            xs={12}
+            sm={3}
+            sx={{
+              position: 'sticky',
+              top: '20px', // hoặc bao nhiêu px bạn muốn cách từ đỉnh
+              alignSelf: 'flex-start'
+            }}
+          >
             <Typography
               sx={{ fontWeight: '600', color: 'primary.main', mb: 1 }}
             >

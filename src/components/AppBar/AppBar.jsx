@@ -95,11 +95,6 @@ function AppBar() {
             <HelpOutlineIcon sx={{ color: 'white' }} />
           </Badge>
         </Tooltip> */}
-        <Tooltip title="Messages">
-          <Badge color="secondary" sx={{ cursor: 'pointer' }}>
-            <ChatBubbleOutlineOutlinedIcon sx={{ color: 'white' }} />
-          </Badge>
-        </Tooltip>
         <Profiles />
       </Box>
     </Box>

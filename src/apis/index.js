@@ -94,6 +94,37 @@ export const fetchBoardAPI = async searchPath => {
   )
   return response.data
 }
+export const fetchPublicBoardAPI = async searchPath => {
+  const response = await authorizeAxiosInstance.get(
+    `${API_ROOT}/v1/boards/public${searchPath}`
+  )
+  return response.data
+}
+export const fetchPrivateBoardAPI = async searchPath => {
+  const response = await authorizeAxiosInstance.get(
+    `${API_ROOT}/v1/boards/private${searchPath}`
+  )
+  return response.data
+}
+export const fetchArchivedBoardAPI = async searchPath => {
+  const response = await authorizeAxiosInstance.get(
+    `${API_ROOT}/v1/boards/archived${searchPath}`
+  )
+  return response.data
+}
+export const joinPublicBoardAPI = async boardId => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/boards/join_public_board/${boardId}`
+  )
+  return response.data
+}
+export const unArchiveBoardAPI = async boardId => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/boards/unarchive/${boardId}`
+  )
+  toast.success('Board unarchived successfully!')
+  return response.data
+}
 
 export const createNewBoardAPI = async data => {
   const response = await authorizeAxiosInstance.post(
@@ -101,6 +132,21 @@ export const createNewBoardAPI = async data => {
     data
   )
   toast.success('Board created successfully!')
+  return response.data
+}
+export const archiveBoardAPI = async boardId => {
+  const response = await authorizeAxiosInstance.delete(
+    `${API_ROOT}/v1/boards/${boardId}`
+  )
+  toast.success('Board archived successfully!')
+  return response.data
+}
+
+export const leaveBoardAPI = async boardId => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/boards/leave_board/${boardId}`
+  )
+  toast.success('You have left this board successfully!')
   return response.data
 }
 
@@ -195,6 +241,28 @@ export const handleUpdateChecklistAPI = async (checklistId, data) => {
 export const handleDeleteChecklistAPI = async checklistId => {
   const response = await authorizeAxiosInstance.delete(
     `${API_ROOT}/v1/checklists/${checklistId}`
+  )
+  return response.data
+}
+
+export const handleGetBoardAnalystics = async boardId => {
+  const response = await authorizeAxiosInstance.get(
+    `${API_ROOT}/v1/boards/analytics/${boardId}`
+  )
+  return response.data
+}
+
+export const handleUpdateUserRole = async (boardId, data) => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/boards/roles/${boardId}`,
+    data
+  )
+  return response.data
+}
+export const handleUpdateBoardAutomationAPI = async (boardId, data) => {
+  const response = await authorizeAxiosInstance.put(
+    `${API_ROOT}/v1/boards/automations/${boardId}`,
+    data
   )
   return response.data
 }
