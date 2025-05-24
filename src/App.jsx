@@ -19,6 +19,8 @@ import {
   fetchCardDetailsAPI
 } from './redux/activeCard/activeCardSlice'
 import Home from './pages/Home/home'
+import useWindowSize from './CustomHooks/useWindowSize'
+import LowResolutionWarning from './pages/LowResolutionWarning/LowResolutionWarning'
 
 // https://www.robinwieruch.de/react-router-private-routes/
 const ProtectedRoute = ({ user }) => {
@@ -27,33 +29,43 @@ const ProtectedRoute = ({ user }) => {
 }
 function App() {
   const currentUser = useSelector(selectCurrentUser)
+  const { width, height } = useWindowSize()
+
   return (
-    <Routes>
-      {/* Redirect route */}
-      <Route
-        path="/"
-        element={
-          // replace= true de thay cho / neu dung nut go home se khong bi nho lich su minh da sd route / va no se navigate lan nua vao /board/boardId
-          <Navigate to="/boards" replace="true" />
-        }
-      />
-      {/* neu co user se da sang trang board */}
-      <Route element={<ProtectedRoute user={currentUser} />}>
-        <Route path="/boards/:boardId" element={<BoardWithModal />} />
-        <Route path="/boards" element={<Boards />} />
-        {/* <Route path="/cards/:cardId" element={<ActiveCard />} /> */}
-        {/* User Settings */}
-        <Route path="/settings/account" element={<Settings />} />
-        <Route path="/settings/security" element={<Settings />} />
-      </Route>
-      {/* AUTH */}
-      <Route path="/home" element={<Home />} />
-      <Route path="/login" element={<Auth />} />
-      <Route path="/register" element={<Auth />} />
-      <Route path="/account/verification" element={<AccountVerification />} />
-      {/* 404 */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <>
+      {width > 700 && height > 400 ? (
+        <Routes>
+          {/* Redirect route */}
+          <Route
+            path="/"
+            element={
+              // replace= true de thay cho / neu dung nut go home se khong bi nho lich su minh da sd route / va no se navigate lan nua vao /board/boardId
+              <Navigate to="/boards" replace="true" />
+            }
+          />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute user={currentUser} />}>
+            <Route path="/boards/:boardId" element={<BoardWithModal />} />
+            <Route path="/boards" element={<Boards />} />
+            {/* User Settings */}
+            <Route path="/settings/account" element={<Settings />} />
+            <Route path="/settings/security" element={<Settings />} />
+          </Route>
+          {/* AUTH */}
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/register" element={<Auth />} />
+          <Route
+            path="/account/verification"
+            element={<AccountVerification />}
+          />
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      ) : (
+        <LowResolutionWarning />
+      )}
+    </>
   )
 }
 

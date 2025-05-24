@@ -5,9 +5,6 @@ import CreditCardIcon from '@mui/icons-material/CreditCard'
 import CancelIcon from '@mui/icons-material/Cancel'
 import Grid from '@mui/material/Unstable_Grid2'
 import Stack from '@mui/material/Stack'
-
-import Button from '@mui/material/Button'
-import EditNoteIcon from '@mui/icons-material/EditNote'
 // import Divider from '@mui/material/Divider'
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'
 
@@ -39,10 +36,14 @@ import {
   clearAndHideCurrentActiveCard,
   selectIsShowModalActiceCard,
   selectCurrentActiveCard,
-  updateCurrentActiveCard
+  updateCurrentActiveCard,
+  fetchCardDetailsAPI
 } from '~/redux/activeCard/activeCardSlice'
 import { updateCardDetailsAPI } from '~/apis'
-import { updateCardInBoard } from '~/redux/activeBoard/activeBoardSlice'
+import {
+  fetchBoardDetailsAPI,
+  updateCardInBoard
+} from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
 import LabelModal from '../Label/LabelModal'
@@ -57,6 +58,9 @@ import moment from 'moment'
 import CardCheckList from '../Checklist/CardChecklist'
 import CreateChecklistModal from '../Checklist/CreateChecklistModal'
 import { socketIoInstance } from '~/socket-client'
+import Checkbox from '@mui/material/Checkbox'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { handleToggleCompleteCardAPI } from '~/apis'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -174,6 +178,22 @@ function ActiveCard() {
     })
   }
 
+  const { control } = useForm({
+    defaultValues: {
+      isComplete: activeCard?.isComplete ?? false
+    }
+  })
+
+  const watchIsComplete = useWatch({ control, name: 'isComplete' })
+
+  const handleToggleComplete = async checked => {
+    await handleToggleCompleteCardAPI(activeCard._id).then(() => {
+      dispatch(fetchBoardDetailsAPI(activeCard.boardId))
+      dispatch(fetchCardDetailsAPI(activeCard._id))
+      socketIoInstance.emit('FE_UPDATE_CARD', { cardId: activeCard._id })
+    })
+  }
+
   return (
     <Modal
       disableScrollLock
@@ -260,7 +280,21 @@ function ActiveCard() {
             gap: 1
           }}
         >
-          <CreditCardIcon />
+          <Controller
+            name="isComplete"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                color="success"
+                size="small"
+                checked={watchIsComplete}
+                onChange={async event => {
+                  field.onChange(event.target.checked)
+                  await handleToggleComplete(event.target.checked)
+                }}
+              />
+            )}
+          />
 
           {/* Feature 01: Xử lý tiêu đề của Card */}
           <ToggleFocusInput

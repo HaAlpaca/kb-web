@@ -328,18 +328,20 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
               }
             }}
           />
-          <Chip
-            label="Archive Board"
-            color="error"
-            onClick={handleArchiveBoard} // Gọi hàm xử lý archive
-            sx={{
-              cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: 'error.dark',
-                color: 'white'
-              }
-            }}
-          />
+          {board.ownerIds[0] === user?._id && (
+            <Chip
+              label="Archive Board"
+              color="error"
+              onClick={handleArchiveBoard} // Gọi hàm xử lý archive
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'error.dark',
+                  color: 'white'
+                }
+              }}
+            />
+          )}
         </Box>
       </Box>
     </Box>

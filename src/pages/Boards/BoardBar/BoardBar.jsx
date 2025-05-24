@@ -6,6 +6,13 @@ import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
 import BoardFilter from './BoardFilter'
 import BoardAutomation from './BoardAutomation'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import Typography from '@mui/material/Typography'
+import Tooltip from '@mui/material/Tooltip'
+import Button from '@mui/material/Button'
+import { useSelector } from 'react-redux'
+import { selectCurrentUser } from '~/redux/user/userSlice'
+
 const MENU_STYLE = {
   color: 'white',
   bgcolor: 'transparent',
@@ -21,6 +28,11 @@ const MENU_STYLE = {
 }
 
 function BoardBar({ board }) {
+  const currentUser = useSelector(selectCurrentUser) // Lấy thông tin user hiện tại
+  const currentUserRole =
+    board?.usersRole?.find(userRole => userRole.userId === currentUser?._id)
+      ?.role || 'user' // Mặc định là 'user' nếu không tìm thấy
+
   return (
     <Box
       sx={{
@@ -32,59 +44,33 @@ function BoardBar({ board }) {
         gap: 2,
         px: 2,
         overflowX: 'auto',
-        // overflowX: 'scroll',
-        '&::-webkit-scrollbar-track': { margin: 2 },
         bgcolor: theme =>
           theme.palette.mode === 'dark' ? '#34495e' : '#493D9EE6'
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        {/* <Tooltip title={board?.description}>
-          <Chip
-            sx={MENU_STYLE}
-            icon={<DashboardIcon />}
-            label={board?.title}
-            onClick={() => {}}
-          />
-        </Tooltip> */}
-        {/* Menu in Board */}
         <BoardMenuGroup board={board} MENU_STYLE={MENU_STYLE} />
-
         <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />
         <BoardAutomation board={board} MENU_STYLE={MENU_STYLE} />
-
-        {/* <Chip
-          sx={MENU_STYLE}
-          icon={<AddToDriveIcon />}
-          label="Add to Google Drive"
-          onClick={() => {}}
-        /> */}
         <BoardFilter board={board} MENU_STYLE={MENU_STYLE} />
-
         <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />
-
-        {/* <Chip
-          sx={MENU_STYLE}
-          icon={<ChatBubbleOutlineOutlinedIcon />}
-          label="Teams"
-          onClick={() => {}}
-        /> */}
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        {/* <Button
-          variant="outlined"
-          // startIcon={<PersonAddIcon />}
-          sx={{
-            color: 'white',
-            borderColor: 'white',
-            '&:hover': { borderColor: 'white' }
-          }}
-        >
-          Ask admin to change role
-        </Button> */}
+        <Tooltip title={`Role: ${currentUserRole}`}>
+          <Button
+            variant="outlined"
+            startIcon={<AdminPanelSettingsIcon />}
+            sx={{
+              color: 'white',
+              borderColor: 'white',
+              '&:hover': { borderColor: 'white' }
+            }}
+          >
+            {currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)}
+          </Button>
+        </Tooltip>
         <InviteBoardUser boardId={board?._id} />
         <BoardUserGroup boardUsers={board?.allMembers} limit={5} />
-        {/* <VoiceRTC boardId={board._id} userId="" /> */}
       </Box>
     </Box>
   )
