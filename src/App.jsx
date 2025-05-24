@@ -12,13 +12,13 @@ import AccountVerification from '~/pages/Auth/AccountVerification'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import Settings from '~/pages/Settings/Settings'
-import Boards from './pages/Boards'
+import Boards from '~/pages/Boards'
 import { useEffect } from 'react'
 import {
   clearAndHideCurrentActiveCard,
   fetchCardDetailsAPI
 } from './redux/activeCard/activeCardSlice'
-import Home from './pages/Home/home'
+import Home from '~/pages/Home/home'
 import useWindowSize from './CustomHooks/useWindowSize'
 import LowResolutionWarning from './pages/LowResolutionWarning/LowResolutionWarning'
 
