@@ -29,7 +29,6 @@ import {
   updateBoardInvitationAPI
 } from '~/redux/notifications/notificationsSlice'
 import {
-  addActionNotification,
   fetchActionsAPI,
   selectCurrentActionNotifications
 } from '~/redux/notifications/notificationsActionSlice'
@@ -72,7 +71,9 @@ function Notifications() {
   }
 
   const handleNavigateToTask = (boardId, metadata) => {
-    if (metadata.ownerTargetType === OWNER_ACTION_TARGET.CARD) {
+    if (metadata.ownerTargetType === OWNER_ACTION_TARGET.COLUMN) {
+      navigate(`/boards/${boardId}?cardModal=${metadata.targetId}`)
+    } else if (metadata.ownerTargetType === OWNER_ACTION_TARGET.CARD) {
       navigate(`/boards/${boardId}?cardModal=${metadata.ownerTargetId}`)
     } else {
       navigate(`/boards/${boardId}`)
@@ -128,13 +129,23 @@ function Notifications() {
           onClick={handleClickNotificationIcon}
         >
           <NotificationsNoneIcon
-            sx={{ color: newNotifications ? 'yellow' : 'white' }}
+            sx={{
+              color: newNotifications ? 'yellow' : 'white',
+              fontSize: '1.8rem'
+            }}
           />
         </Badge>
       </Tooltip>
 
       <Menu
-        sx={{ mt: 2 }}
+        sx={{
+          mt: 2,
+          '& .MuiPaper-root': {
+            borderRadius: 2,
+            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+            minWidth: 300
+          }
+        }}
         id="basic-notification-drop-down"
         anchorEl={anchorEl}
         open={open}
@@ -142,8 +153,11 @@ function Notifications() {
         MenuListProps={{ 'aria-labelledby': 'basic-button-open-notification' }}
       >
         {/* ============================ ASSIGNMENT ============================ */}
-        <Box sx={{ px: 1.5 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+        <Box sx={{ px: 2, py: 1 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}
+          >
             Board Assignment Notification
           </Typography>
           {(!actionNotifications || actionNotifications.length === 0) && (
@@ -152,7 +166,8 @@ function Notifications() {
                 minWidth: 200,
                 maxWidth: 360,
                 whiteSpace: 'normal',
-                wordBreak: 'break-word'
+                wordBreak: 'break-word',
+                color: 'text.secondary'
               }}
             >
               You do not have any new assignment notifications.
@@ -162,7 +177,13 @@ function Notifications() {
             {actionNotifications?.map((notification, index) => (
               <Box key={`action-${index}`}>
                 <MenuItem
-                  sx={{ minWidth: 200, maxWidth: 360 }}
+                  sx={{
+                    minWidth: 200,
+                    maxWidth: 360,
+                    '&:hover': {
+                      backgroundColor: 'action.hover'
+                    }
+                  }}
                   onClick={() =>
                     handleNavigateToTask(
                       notification.boardId,
@@ -179,60 +200,70 @@ function Notifications() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AssignmentIcon fontSize="small" />
-                      {notification.type === ACTION_TYPES.ASSIGN_CARD && (
-                        <Typography variant="body2">
-                          {notification.assignerId ===
-                          notification.assigneeId ? (
-                            'You have a new card assigned'
+                      <AssignmentIcon fontSize="small" color="primary" />
+                      <Typography
+                        variant="body2"
+                        sx={{ color: 'text.primary' }}
+                      >
+                        {notification.type === ACTION_TYPES.ASSIGN_CARD ? (
+                          notification.assigner[0]?._id === currentUser._id ? (
+                            <>
+                              <strong>You</strong> assigned yourself to a new
+                              card
+                            </>
                           ) : (
                             <>
                               <strong>
                                 {notification.assigner[0]?.displayName}
                               </strong>{' '}
-                              assigned you in new card
+                              assigned you to a new card
                             </>
-                          )}
-                        </Typography>
-                      )}
-                      {notification.type === ACTION_TYPES.ASSIGN_CHECKLIST && (
-                        <Typography variant="body2">
-                          {notification.assignerId ===
-                          notification.assigneeId ? (
-                            'You have a new checklist assigned'
-                          ) : (
-                            <>
-                              <strong>
-                                {notification.assigner[0]?.displayName}
-                              </strong>{' '}
-                              assigned you in new checklist
-                            </>
-                          )}
-                        </Typography>
-                      )}
+                          )
+                        ) : notification.assigner[0]?._id ===
+                          currentUser._id ? (
+                          <>
+                            <strong>You</strong> assigned yourself to a new
+                            checklist
+                          </>
+                        ) : (
+                          <>
+                            <strong>
+                              {notification.assigner[0]?.displayName}
+                            </strong>{' '}
+                            assigned you to a new checklist
+                          </>
+                        )}
+                      </Typography>
                     </Box>
 
                     {notification.metadata.dueDate && (
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button
-                          variant="contained"
-                          size="small"
+                      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Box
                           sx={{
+                            fontSize: '13px',
+                            fontWeight: 'bold',
+                            padding: '4px 8px',
+                            borderRadius: 1,
                             bgcolor: moment(
                               notification.metadata.dueDate
                             ).isBefore(moment())
                               ? 'error.main'
-                              : 'success.main'
+                              : 'success.main',
+                            color: 'white'
                           }}
                         >
+                          Due date:{' '}
                           {moment(notification.metadata.dueDate).format('llll')}
-                        </Button>
+                        </Box>
                       </Box>
                     )}
 
                     <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="caption">
-                        {moment(notification.createAt).format('llll')}
+                      <Typography
+                        variant="caption"
+                        sx={{ color: 'text.secondary' }}
+                      >
+                        {moment(notification.updatedAt).format('llll')}
                       </Typography>
                     </Box>
                   </Box>
@@ -244,8 +275,11 @@ function Notifications() {
         </Box>
 
         {/* ============================ INVITATION ============================ */}
-        <Box sx={{ px: 1.5 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+        <Box sx={{ px: 2, py: 1 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}
+          >
             Board Invite Notification
           </Typography>
 
@@ -255,7 +289,8 @@ function Notifications() {
                 minWidth: 200,
                 maxWidth: 360,
                 whiteSpace: 'normal',
-                wordBreak: 'break-word'
+                wordBreak: 'break-word',
+                color: 'text.secondary'
               }}
             >
               You do not have any new invite board notifications.
@@ -264,7 +299,15 @@ function Notifications() {
           <Expandable size={250}>
             {notifications?.map((notification, index) => (
               <Box key={`invite-${index}`}>
-                <MenuItem sx={{ minWidth: 200, maxWidth: 360 }}>
+                <MenuItem
+                  sx={{
+                    minWidth: 200,
+                    maxWidth: 360,
+                    '&:hover': {
+                      backgroundColor: 'action.hover'
+                    }
+                  }}
+                >
                   <Box
                     sx={{
                       display: 'flex',
@@ -274,8 +317,16 @@ function Notifications() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <GroupAddIcon fontSize="small" />
-                      <Typography variant="body2">
+                      <GroupAddIcon fontSize="small" color="primary" />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.primary',
+                          whiteSpace: 'normal', // Cho phép xuống dòng
+                          wordWrap: 'break-word', // Tự động ngắt dòng khi quá dài
+                          overflowWrap: 'break-word' // Hỗ trợ ngắt dòng cho các từ dài
+                        }}
+                      >
                         <strong>{notification.inviter?.displayName}</strong>{' '}
                         invited you to board{' '}
                         <strong>{notification.board?.title}</strong>
@@ -342,8 +393,11 @@ function Notifications() {
                     )}
 
                     <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="caption">
-                        {moment(notification.createAt).format('llll')}
+                      <Typography
+                        variant="caption"
+                        sx={{ color: 'text.secondary' }}
+                      >
+                        {moment(notification.createdAt).format('llll')}
                       </Typography>
                     </Box>
                   </Box>

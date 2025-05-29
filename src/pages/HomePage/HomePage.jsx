@@ -72,7 +72,7 @@ function HomePage() {
               variant="subtitle1"
               sx={{ color: 'text.secondary', fontStyle: 'italic' }}
             >
-              Turn ideas into action!
+              Streamline Your Kanban Workflow!
             </Typography>
           </Box>
 

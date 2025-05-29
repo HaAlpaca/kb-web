@@ -43,6 +43,10 @@ const SidebarItem = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   padding: '12px 16px',
   borderRadius: '8px',
+  fontSize: '1rem', // Kích thước mặc định
+  '@media (max-width: 992px)': {
+    fontSize: '0.875rem' // Giảm kích thước chữ trên màn hình nhỏ hơn 992px
+  },
   '&:hover': {
     backgroundColor:
       theme.palette.mode === 'dark' ? '#33485D' : theme.palette.grey[300]
@@ -151,7 +155,7 @@ function Boards() {
                 onClick={() => setBoardType('public')}
               >
                 <PublicIcon fontSize="small" />
-                Public Community Boards
+                Public Boards
               </SidebarItem>
               <SidebarItem
                 className={boardType === 'archived' ? 'active' : ''}
@@ -174,7 +178,7 @@ function Boards() {
               {boardType === 'all'
                 ? 'All My Boards:'
                 : boardType === 'public'
-                ? 'Public Community Boards:'
+                ? 'Public Boards:'
                 : boardType === 'private'
                 ? 'Private Boards:'
                 : 'Archived Boards:'}
@@ -190,7 +194,14 @@ function Boards() {
               <Grid container spacing={2}>
                 {boards.map(b => (
                   <Grid xs={2} sm={3} md={4} key={b._id}>
-                    <Card sx={{ width: '250px' }}>
+                    <Card
+                      sx={{
+                        width: '250px', // Chiều rộng mặc định
+                        '@media (max-width: 1100px)': {
+                          width: '230px' // Chiều rộng khi màn hình nhỏ hơn 800px
+                        }
+                      }}
+                    >
                       {b?.cover ? (
                         <CardMedia
                           component="img"
@@ -286,7 +297,7 @@ function Boards() {
                   pr: 5,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'flex-end'
+                  justifyContent: 'flex-start'
                 }}
               >
                 <Pagination

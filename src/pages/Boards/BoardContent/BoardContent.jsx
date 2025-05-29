@@ -42,7 +42,7 @@ function BoardContent({
   })
   const touchSensor = useSensor(TouchSensor, {
     // tolerance la dung sai, tren 500 ms dung duoc but
-    activationConstraint: { delay: 250, tolerance: 500 }
+    activationConstraint: { delay: 300, tolerance: 600 }
   })
   const sensors = useSensors(mouseSensor, touchSensor)
   const [orderedColumns, setOrderedColumns] = useState([])
@@ -405,8 +405,8 @@ function BoardContent({
             backgroundImage: theme =>
               theme.palette.mode === 'dark'
                 ? `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(${
-                    board?.cover ? `${board.cover}` : '/kanban-bg.png'
-                  })`
+                  board?.cover ? `${board.cover}` : '/kanban-bg.png'
+                })`
                 : `url(${board?.cover ? `${board?.cover}` : '/kanban-bg.png'})`,
 
             // filter: 'blur(px)',

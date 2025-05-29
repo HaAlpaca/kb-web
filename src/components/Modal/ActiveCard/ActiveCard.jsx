@@ -214,7 +214,7 @@ function ActiveCard() {
       <Box
         sx={{
           position: 'relative',
-          width: 900,
+          width: '95vw',
           maxWidth: 900,
           bgcolor: 'white',
           boxShadow: 24,

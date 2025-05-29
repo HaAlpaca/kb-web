@@ -43,6 +43,9 @@ const theme = extendTheme({
           },
           '*::-webkit-scrollbar-thumb:hover': {
             backgroundColor: 'white'
+          },
+          '*:focus': {
+            outline: 'none' // Xóa viền focus trên tất cả các phần tử
           }
         }
       }

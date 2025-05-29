@@ -191,12 +191,6 @@ function Board() {
         <BoardBar board={board} />
         <BoardContent
           board={board}
-          // da dung redux
-          // createNewColumn={createNewColumn}
-          // createNewCard={createNewCard}
-          // deleteColumnDetails={deleteColumnDetails}
-
-          // 3 th nay di xuong 1 cap thoi nen khong can thiet dung redux
           moveColumns={moveColumns}
           moveCardInTheSameColumn={moveCardInTheSameColumn}
           moveCardToDifferentColumn={moveCardToDifferentColumn}

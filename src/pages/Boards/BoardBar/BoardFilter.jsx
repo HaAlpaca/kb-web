@@ -5,12 +5,10 @@ import {
   Chip,
   Drawer,
   Typography,
-  Divider,
   TextField,
   Button,
   MenuItem,
   Select,
-  Paper,
   Stack
 } from '@mui/material'
 import CancelIcon from '@mui/icons-material/Cancel'
@@ -33,13 +31,22 @@ function BoardFilter({ MENU_STYLE }) {
   const [open, setOpen] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
   const fetchBoardDetails = useFetchBoardFn()
+  // Lấy giá trị mặc định từ searchParams
+  const defaultValues = {
+    members: searchParams.get('members')?.split(',') || [],
+    startDate: searchParams.get('startDate')
+      ? new Date(searchParams.get('startDate'))
+      : null,
+    endDate: searchParams.get('endDate')
+      ? new Date(searchParams.get('endDate'))
+      : null,
+    isComplete: searchParams.get('isComplete') || '',
+    label: searchParams.get('label')?.split(',') || [],
+    title: searchParams.get('title') || ''
+  }
+
   const { control, handleSubmit, reset } = useForm({
-    defaultValues: {
-      members: [],
-      startDate: null, // Sử dụng null cho DatePicker
-      endDate: null,
-      isComplete: ''
-    }
+    defaultValues
   })
 
   const toggleDrawer = newOpen => event => {
@@ -60,7 +67,9 @@ function BoardFilter({ MENU_STYLE }) {
         startDate: new Date(data.startDate).toISOString()
       }),
       ...(data.endDate && { endDate: new Date(data.endDate).toISOString() }),
-      ...(data.isComplete !== '' && { isComplete: data.isComplete })
+      ...(data.isComplete !== '' && { isComplete: data.isComplete }),
+      ...(data.title && { title: data.title }), // Thêm bộ lọc theo title
+      ...(data.label.length > 0 && { label: data.label.join(',') }) // Thêm bộ lọc theo label
     }
 
     setSearchParams(queryParams)
@@ -70,8 +79,71 @@ function BoardFilter({ MENU_STYLE }) {
 
   const DrawerList = (
     <Box sx={{ width: 400, padding: 2, paddingTop: 1 }} role="presentation">
-      {/* Filter by Members */}
+      <Typography
+        sx={{ whiteSpace: 'nowrap', fontWeight: 500, marginBottom: 1 }}
+      >
+        Label
+      </Typography>
+      <Controller
+        name="label"
+        control={control}
+        render={({ field }) => (
+          <Select
+            {...field}
+            multiple
+            fullWidth
+            size="small"
+            displayEmpty
+            value={field.value || []} // Đảm bảo giá trị là mảng
+            sx={{ mb: 2 }}
+          >
+            {boardRedux?.labels?.map(label => (
+              <MenuItem key={label._id} value={label._id}>
+                <Box
+                  sx={{
+                    display: 'flex', // Căn chỉnh theo chiều ngang
+                    alignItems: 'center', // Căn giữa theo chiều dọc
+                    gap: 1 // Khoảng cách giữa màu và tiêu đề
+                  }}
+                >
+                  {/* Vòng tròn màu */}
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      backgroundColor: label.colour, // Màu của nhãn
+                      borderRadius: '50%' // Tạo hình tròn
+                    }}
+                  />
+                  <Typography variant="body2">{label.title}</Typography>{' '}
+                  {/* Tiêu đề của nhãn */}
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        )}
+      />
 
+      <Typography
+        sx={{ whiteSpace: 'nowrap', fontWeight: 500, marginBottom: 0.5 }}
+      >
+        Title
+      </Typography>
+      <Controller
+        name="title"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            fullWidth
+            size="small"
+            placeholder="Search by title"
+            sx={{ mb: 2 }}
+          />
+        )}
+      />
+
+      {/* Filter by Members */}
       <Typography
         sx={{ whiteSpace: 'nowrap', fontWeight: 500, marginBottom: 1 }}
       >
