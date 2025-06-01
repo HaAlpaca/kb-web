@@ -59,6 +59,9 @@ function Board() {
   useEffect(() => {
     joinBoardRoom(boardId)
 
+    // if (!boardId) {
+    //   leaveBoardRoom(boardId)
+    // }
     return () => {
       leaveBoardRoom(boardId)
     }

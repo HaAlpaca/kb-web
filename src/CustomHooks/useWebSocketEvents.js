@@ -3,16 +3,21 @@ import { useDispatch } from 'react-redux'
 import { fetchFilteredBoardDetailsAPI } from '~/redux/activeBoard/activeBoardSlice'
 import { socketIoInstance } from '~/socket-client'
 import { useParams, useSearchParams } from 'react-router-dom'
+import { fetchCardDetailsAPI } from '~/redux/activeCard/activeCardSlice'
 
 function useWebSocketEvents() {
   const dispatch = useDispatch()
   const { boardId } = useParams()
   const [searchParams] = useSearchParams()
-
+  const cardId = searchParams.get('cardModal')
   useEffect(() => {
     if (!boardId) return
     // Hàm xử lý sự kiện WebSocket
-    const handleWebSocketEvent = () => {
+    const handleWebSocketEvent = action => {
+      console.log(action)
+      if (cardId === action?.cardId) {
+        dispatch(fetchCardDetailsAPI(cardId))
+      }
       dispatch(
         fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
       )
@@ -32,7 +37,10 @@ function useWebSocketEvents() {
       'BE_CREATE_ATTACHMENT',
       'BE_DELETE_ATTACHMENT',
       'BE_UPDATE_ATTACHMENT',
-      'BE_TOGGLE_CARD_COMPLETE'
+      'BE_TOGGLE_CARD_COMPLETE',
+      'BE_CREATE_CHECKLIST',
+      'BE_DELETE_CHECKLIST',
+      'BE_UPDATE_CHECKLIST'
     ]
 
     // Đăng ký tất cả các sự kiện
@@ -46,7 +54,7 @@ function useWebSocketEvents() {
         socketIoInstance.off(event, handleWebSocketEvent)
       })
     }
-  }, [dispatch, boardId, searchParams])
+  }, [dispatch, boardId, searchParams, cardId])
 }
 
 export default useWebSocketEvents

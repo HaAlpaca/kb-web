@@ -33,6 +33,14 @@ function BoardBar({ board }) {
     board?.usersRole?.find(userRole => userRole.userId === currentUser?._id)
       ?.role || 'user' // Mặc định là 'user' nếu không tìm thấy
 
+  // Map role to display-friendly names
+  const roleDisplayName =
+    {
+      admin: 'Manager',
+      moderator: 'Member',
+      user: 'Guest'
+    }[currentUserRole] || 'Guest' // Default to 'Guest' if role is not recognized
+
   const { isAdmin, isModerator } = useRoleInfo(board, currentUser?._id)
   return (
     <Box
@@ -59,7 +67,7 @@ function BoardBar({ board }) {
         <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Tooltip title={`Role: ${currentUserRole}`}>
+        <Tooltip title={`Role: ${roleDisplayName}`}>
           <Button
             variant="outlined"
             startIcon={<AdminPanelSettingsIcon />}
@@ -69,10 +77,12 @@ function BoardBar({ board }) {
               '&:hover': { borderColor: 'white' }
             }}
           >
-            {currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)}
+            {roleDisplayName}
           </Button>
         </Tooltip>
-        <InviteBoardUser boardId={board?._id} />
+
+        {isAdmin && <InviteBoardUser boardId={board?._id} />}
+
         <BoardUserGroup boardUsers={board?.allMembers} limit={5} />
       </Box>
     </Box>

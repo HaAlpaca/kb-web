@@ -14,11 +14,12 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   selectCurrentActiveBoard,
-  fetchBoardDetailsAPI
+  fetchFilteredBoardDetailsAPI
 } from '~/redux/activeBoard/activeBoardSlice'
 import { handleUpdateBoardAutomationAPI } from '~/apis'
 import useRoleInfo from '~/CustomHooks/useRoleInfo'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import { useParams, useSearchParams } from 'react-router-dom'
 // import { updateBoardAutomationAPI } from '~/apis/board'
 
 function BoardAutomation({ MENU_STYLE }) {
@@ -28,6 +29,18 @@ function BoardAutomation({ MENU_STYLE }) {
   const dispatch = useDispatch()
 
   const [open, setOpen] = useState(false)
+
+  const { boardId } = useParams()
+  const [searchParams] = useSearchParams()
+
+  const handleRefreshBoard = () => {
+    dispatch(
+      fetchFilteredBoardDetailsAPI({
+        boardId,
+        queryParams: searchParams
+      })
+    )
+  }
 
   // Automation states
   const [automationEnabled, setAutomationEnabled] = useState(
@@ -70,7 +83,7 @@ function BoardAutomation({ MENU_STYLE }) {
       isOverdueCardTrigger: automationDueDateEnabled,
       overdueCardColumnId: selectedDueDateColumnId
     })
-    dispatch(fetchBoardDetailsAPI(boardRedux._id))
+    handleRefreshBoard()
     setOpen(false)
   }
 

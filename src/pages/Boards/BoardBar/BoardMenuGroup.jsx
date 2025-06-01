@@ -8,7 +8,12 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  Typography
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -35,6 +40,7 @@ const boardCoverImages = [
   'https://images.unsplash.com/photo-1741926376117-85ec2cef9714',
   'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5',
   'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1',
+  'https://images.unsplash.com/photo-1500333070776-343c73e1eb4a',
   'https://images.unsplash.com/photo-1703146893334-5bd85e47108e',
   'https://images.unsplash.com/photo-1673187446875-d3149449953b',
   'https://images.unsplash.com/photo-1669236712949-b58f9758898d',
@@ -55,6 +61,9 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
   const { isAdmin, isOwner, ownerIndex } = useRoleInfo(board, user?._id) // Sử dụng hook để lấy thông tin vai trò
 
   const isShowAddMember = isAdmin && isOwner && ownerIndex === 0 // Kiểm tra xem có hiển thị nút thêm thành viên hay không
+
+  const [openAdminDialog, setOpenAdminDialog] = useState(false) // Trạng thái mở dialog chọn admin mới
+  const [selectedAdmin, setSelectedAdmin] = useState(null) // Admin được chọn
 
   const toggleDrawer = newOpen => event => {
     if (
@@ -124,62 +133,89 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
     navigate('/boards')
   }
 
+  // const handleLeaveBoard = async boardId => {
+  //   // if (isAdmin && ownerIndex === 0) {
+  //   //   // Nếu là admin hiện tại, yêu cầu chọn admin mới
+  //   //   const options = board.memberIds.map(memberId => {
+  //   //     const member = board.allMembers.find(user => user._id === memberId)
+  //   //     return {
+  //   //       label: member?.displayName || 'Unknown',
+  //   //       value: memberId
+  //   //     }
+  //   //   })
+
+  //   //   const confirmed = await confirm({
+  //   //     title: 'Confirm Leave',
+  //   //     description:
+  //   //       'You are the current admin. Please select a new admin before leaving the board.',
+  //   //     // Hiển thị danh sách thành viên để chọn admin mới
+  //   //     options: options,
+  //   //     confirmationText: 'Leave',
+  //   //     cancellationText: 'Cancel'
+  //   //   })
+
+  //   //   if (!confirmed || !confirmed.value) return // Không làm gì nếu không chọn admin mới
+
+  //   //   const newAdminId = confirmed.value
+
+  //   //   // Cập nhật admin mới
+  //   //   await updateBoardDetailsAPI(boardId, { newAdminId }).then(res => {
+  //   //     const newBoard = cloneDeep(boardRedux)
+  //   //     newBoard.ownerIds = [newAdminId]
+  //   //     newBoard.allMembers = newBoard.allMembers.map(member => {
+  //   //       if (member._id === newAdminId) {
+  //   //         return { ...member, boardRole: 'admin' }
+  //   //       }
+  //   //       return member
+  //   //     })
+  //   //     dispatch(updateCurrentActiveBoard(newBoard))
+  //   //     socketIoInstance.emit('FE_UPDATE_BOARD', {
+  //   //       boardId: board._id,
+  //   //       ...res
+  //   //     })
+  //   //   })
+  //   // } else {
+  //   //   // Nếu không phải admin, chỉ cần xác nhận rời board
+  //   //   const confirmed = await confirm({
+  //   //     title: 'Confirm Leave',
+  //   //     description: 'Are you sure you want to leave this board?',
+  //   //     confirmationText: 'Leave',
+  //   //     cancellationText: 'Cancel'
+  //   //   })
+
+  //   //   if (!confirmed) return
+  //   // }
+
+  //   // Gọi API để rời board
+  //   await leaveBoardAPI(boardId, isAdmin ? board.ownerIds[1] : null)
+  //   // navigate('/boards') // Điều hướng về danh sách board
+  // }
+
   const handleLeaveBoard = async boardId => {
     if (isAdmin && ownerIndex === 0) {
-      // Nếu là admin hiện tại, yêu cầu chọn admin mới
-      const options = board.memberIds.map(memberId => {
-        const member = board.allMembers.find(user => user._id === memberId)
-        return {
-          label: member?.displayName || 'Unknown',
-          value: memberId
-        }
-      })
-
-      const confirmed = await confirm({
-        title: 'Confirm Leave',
-        description:
-          'You are the current admin. Please select a new admin before leaving the board.',
-        // Hiển thị danh sách thành viên để chọn admin mới
-        options: options,
-        confirmationText: 'Leave',
-        cancellationText: 'Cancel'
-      })
-
-      if (!confirmed || !confirmed.value) return // Không làm gì nếu không chọn admin mới
-
-      const newAdminId = confirmed.value
-
-      // Cập nhật admin mới
-      await updateBoardDetailsAPI(boardId, { newAdminId }).then(res => {
-        const newBoard = cloneDeep(boardRedux)
-        newBoard.ownerIds = [newAdminId]
-        newBoard.allMembers = newBoard.allMembers.map(member => {
-          if (member._id === newAdminId) {
-            return { ...member, boardRole: 'admin' }
-          }
-          return member
-        })
-        dispatch(updateCurrentActiveBoard(newBoard))
-        socketIoInstance.emit('FE_UPDATE_BOARD', {
-          boardId: board._id,
-          ...res
-        })
-      })
+      // Nếu là Owner[0], mở dialog chọn admin mới
+      handleOpenAdminDialog()
     } else {
-      // Nếu không phải admin, chỉ cần xác nhận rời board
-      const confirmed = await confirm({
+      await confirm({
         title: 'Confirm Leave',
         description: 'Are you sure you want to leave this board?',
-        confirmationText: 'Leave',
-        cancellationText: 'Cancel'
+        confirmationText: 'Yes',
+        cancellationText: 'No'
       })
-
-      if (!confirmed) return
+      await leaveBoardAPI(boardId, { newAdminId: '' }).then(() => {
+        socketIoInstance.emit('FE_UPDATE_BOARD', { boardId: board._id })
+        navigate('/boards') // Điều hướng về danh sách boards sau khi rời khỏi
+      })
     }
+  }
 
-    // Gọi API để rời board
-    await leaveBoardAPI(boardId)
-    navigate('/boards') // Điều hướng về danh sách board
+  const handleOpenAdminDialog = () => {
+    setOpenAdminDialog(true)
+  }
+
+  const handleCloseAdminDialog = () => {
+    setOpenAdminDialog(false)
+    setSelectedAdmin(null)
   }
 
   const DrawerList = (
@@ -358,20 +394,20 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
-            Owners:
+            Owner:
           </Typography>
           <CardUserGroup
             cardMemberIds={board?.ownerIds}
             onUpdateCardMembers={incomingMemberInfo => {
               onUpdateBoardMembers(incomingMemberInfo)
             }}
-            isShowAddMember={isShowAddMember} // Truyền giá trị isShowAddMember
+            isShowAddMember={false} // Truyền giá trị isShowAddMember
           />
         </Box>
         {board?.memberIds?.length > 0 && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
-              Members:
+              {board?.memberIds?.length > 1 ? 'Members:' : 'Member:'}
             </Typography>
             <CardUserGroup
               cardMemberIds={board?.memberIds}
@@ -381,7 +417,7 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
                   action: CARD_MEMBER_ACTION.ADD
                 })
               }
-              isShowAddMember={isShowAddMember} // Truyền giá trị isShowAddMember
+              isShowAddMember={false} // Truyền giá trị isShowAddMember
             />
           </Box>
         )}
@@ -400,18 +436,21 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
           Danger Zone
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Chip
-            label="Leave Board"
-            color="warning"
-            onClick={() => handleLeaveBoard(board?._id)} // Gọi hàm xử lý leave board
-            sx={{
-              cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: 'warning.dark',
-                color: 'white'
-              }
-            }}
-          />
+          {board.allMembers.length > 1 && (
+            <Chip
+              label="Leave Board"
+              color="warning"
+              onClick={() => handleLeaveBoard(board?._id)} // Gọi hàm xử lý leave board
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'warning.dark',
+                  color: 'white'
+                }
+              }}
+            />
+          )}
+
           {board.ownerIds[0] === user?._id && (
             <Chip
               label="Archive Board"
@@ -473,6 +512,67 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
           />
         </Box>
         {DrawerList}
+        {openAdminDialog && (
+          <Dialog open={openAdminDialog} onClose={handleCloseAdminDialog}>
+            <DialogTitle>Select New Admin</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Select a member to assign as the new admin:
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                {board?.memberIds?.map(memberId => {
+                  const member = board.allMembers.find(
+                    user => user._id === memberId
+                  )
+                  return (
+                    <Box
+                      key={memberId}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 1,
+                        padding: 1,
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        '&:hover': { backgroundColor: '#f5f5f5' }
+                      }}
+                      onClick={() => setSelectedAdmin(memberId)} // Chọn admin mới
+                    >
+                      <Typography>
+                        {member?.displayName || 'Unknown'}
+                      </Typography>
+                      {selectedAdmin === memberId && (
+                        <Chip label="Selected" color="primary" size="small" />
+                      )}
+                    </Box>
+                  )
+                })}
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseAdminDialog} color="secondary">
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!selectedAdmin) return
+                  await leaveBoardAPI(board._id, { newAdminId: selectedAdmin }) // Gọi API để rời board
+                  handleCloseAdminDialog()
+                  socketIoInstance.emit('FE_UPDATE_BOARD', {
+                    boardId: board._id
+                  })
+                  navigate('/boards') // Điều hướng về danh sách board
+                }}
+                color="primary"
+                disabled={!selectedAdmin} // Vô hiệu hóa nếu chưa chọn admin
+              >
+                Confirm
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
       </Drawer>
     </Box>
   )

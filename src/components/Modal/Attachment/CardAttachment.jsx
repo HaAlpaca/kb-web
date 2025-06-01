@@ -8,7 +8,7 @@ import Grid from '@mui/material/Unstable_Grid2'
 import { useConfirm } from 'material-ui-confirm'
 import moment from 'moment'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   handleChangeAttachmentAPI,
   handleDeleteAttachmentAPI,
@@ -16,7 +16,7 @@ import {
 } from '~/apis'
 import Expandable from '~/components/Expandable/Expandable'
 import {
-  fetchBoardDetailsAPI,
+  fetchFilteredBoardDetailsAPI,
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
@@ -34,6 +34,8 @@ import AttachmentSettingModal from './AttachmentSettingModal'
 function CardAttachment({ attachments }) {
   const board = useSelector(selectCurrentActiveBoard)
   const { boardId } = useParams()
+  const [searchParams] = useSearchParams()
+
   const dispatch = useDispatch()
   const activeCardModal = useSelector(selectCurrentActiveCard)
   let linkAttachment = attachments.filter(
@@ -85,7 +87,12 @@ function CardAttachment({ attachments }) {
             }
           })
           .finally(res => {
-            dispatch(fetchBoardDetailsAPI(boardId))
+            dispatch(
+              fetchFilteredBoardDetailsAPI({
+                boardId,
+                queryParams: searchParams
+              })
+            )
             dispatch(fetchCardDetailsAPI(activeCardModal._id))
             socketIoInstance.emit('FE_DELETE_ATTACHMENT', {
               ...res,
@@ -104,7 +111,7 @@ function CardAttachment({ attachments }) {
       updatedAttachment.link = data.attachmentLink
     }
     await handleChangeAttachmentAPI(attachmentId, updatedAttachment)
-      .then(() => {
+      .then(res => {
         // update board attachment
         // const newActiveCardModal = cloneDeep(activeCardModal)
         // newActiveCardModal.attachments.forEach(attachment => {
@@ -116,7 +123,9 @@ function CardAttachment({ attachments }) {
         //   }
         // })
         // dispatch(updateCurrentActiveCard(newActiveCardModal))
-        dispatch(fetchBoardDetailsAPI(boardId))
+        dispatch(
+          fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
+        )
         dispatch(fetchCardDetailsAPI(activeCardModal._id))
       })
       .finally(res => {

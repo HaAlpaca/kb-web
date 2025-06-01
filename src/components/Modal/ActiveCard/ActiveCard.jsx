@@ -36,18 +36,22 @@ import {
   clearAndHideCurrentActiveCard,
   selectIsShowModalActiceCard,
   selectCurrentActiveCard,
-  updateCurrentActiveCard,
   fetchCardDetailsAPI
 } from '~/redux/activeCard/activeCardSlice'
 import { updateCardDetailsAPI } from '~/apis'
 import {
-  fetchBoardDetailsAPI,
+  fetchFilteredBoardDetailsAPI,
   updateCardInBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { CARD_MEMBER_ACTION } from '~/utils/constants'
 import LabelModal from '../Label/LabelModal'
-import { useLocation, useNavigate } from 'react-router-dom'
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams
+} from 'react-router-dom'
 import LabelGroupModal from '~/components/Label/LabelGroupModal'
 import AttachmentCreateModal from '../Attachment/AttachmentCreateModal'
 
@@ -61,6 +65,7 @@ import { socketIoInstance } from '~/socket-client'
 import Checkbox from '@mui/material/Checkbox'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { handleToggleCompleteCardAPI } from '~/apis'
+import { Tooltip } from '@mui/material'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -93,6 +98,9 @@ function ActiveCard() {
   const isShowModalActiveCard = useSelector(selectIsShowModalActiceCard)
   const navigate = useNavigate()
   const location = useLocation()
+  const { boardId } = useParams()
+  const [searchParams] = useSearchParams()
+
   // khong dung state de check modal vi state board  _id.jsx la lam roi
   // const [isOpen, setIsOpen] = useState(true)
   // const handleOpenModal = () => setIsOpen(true)
@@ -119,9 +127,12 @@ function ActiveCard() {
     // const updatedCardWithLabel = cloneDeep(updatedCard)
     // updatedCardWithLabel.labels = activeCard.labels
     // cap nhat nho phai luu vao redux
-    dispatch(updateCurrentActiveCard(updatedCard))
-    // nho cap nhat ca board ns vi card co trong board
-    dispatch(updateCardInBoard(updatedCard))
+    dispatch(
+      fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
+    )
+    // // nho cap nhat ca board ns vi card co trong board
+    // dispatch(updateCardInBoard(updatedCard))
+    dispatch(fetchCardDetailsAPI(activeCard._id)) // Cập nhật lại thông tin card sau khi update
     return updatedCard
   }
 
@@ -129,7 +140,8 @@ function ActiveCard() {
     callApiUpdateCard({ title: newTitle.trim() }).then(updatedCard => {
       socketIoInstance.emit('FE_UPDATE_CARD', {
         boardId: activeCard.boardId, // Gửi kèm boardId
-        updatedCard
+        updatedCard,
+        cardId: activeCard._id
       })
     })
   }
@@ -138,7 +150,8 @@ function ActiveCard() {
     callApiUpdateCard({ description: newDescription }).then(updatedCard => {
       socketIoInstance.emit('FE_UPDATE_CARD', {
         boardId: activeCard.boardId, // Gửi kèm boardId
-        updatedCard
+        updatedCard,
+        cardId: activeCard._id
       })
     })
   }
@@ -162,7 +175,8 @@ function ActiveCard() {
       .then(updatedCard => {
         socketIoInstance.emit('FE_UPDATE_CARD', {
           boardId: activeCard.boardId, // Gửi kèm boardId
-          updatedCard
+          updatedCard,
+          cardId: activeCard._id
         })
       })
   }
@@ -171,7 +185,8 @@ function ActiveCard() {
     await callApiUpdateCard({ commentToAdd }).then(updatedCard => {
       socketIoInstance.emit('FE_UPDATE_CARD', {
         boardId: activeCard.boardId, // Gửi kèm boardId
-        updatedCard
+        updatedCard,
+        cardId: activeCard._id
       })
     })
   }
@@ -180,7 +195,8 @@ function ActiveCard() {
     callApiUpdateCard({ incomingMemberInfo }).then(updatedCard => {
       socketIoInstance.emit('FE_UPDATE_CARD', {
         boardId: activeCard.boardId, // Gửi kèm boardId
-        updatedCard
+        updatedCard,
+        cardId: activeCard._id
       })
     })
   }
@@ -193,10 +209,9 @@ function ActiveCard() {
 
   const watchIsComplete = useWatch({ control, name: 'isComplete' })
 
-  const handleToggleComplete = async checked => {
+  const handleToggleComplete = async () => {
     await handleToggleCompleteCardAPI(activeCard._id).then(() => {
-      dispatch(fetchBoardDetailsAPI(activeCard.boardId))
-      dispatch(fetchCardDetailsAPI(activeCard._id))
+      fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
       socketIoInstance.emit('FE_UPDATE_CARD', {
         boardId: activeCard.boardId, // Gửi kèm boardId
         cardId: activeCard._id
@@ -294,15 +309,19 @@ function ActiveCard() {
             name="isComplete"
             control={control}
             render={({ field }) => (
-              <Checkbox
-                color="success"
-                size="small"
-                checked={watchIsComplete}
-                onChange={async event => {
-                  field.onChange(event.target.checked)
-                  await handleToggleComplete(event.target.checked)
-                }}
-              />
+              <Tooltip
+                title={field.value ? 'Mark as incomplete' : 'Mark as complete'}
+              >
+                <Checkbox
+                  color="success"
+                  // size="small"
+                  checked={field.value}
+                  onChange={async event => {
+                    field.onChange(event.target.checked)
+                    await handleToggleComplete(event.target.checked)
+                  }}
+                />
+              </Tooltip>
             )}
           />
 

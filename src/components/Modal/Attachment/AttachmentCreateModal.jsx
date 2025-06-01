@@ -1,25 +1,22 @@
-import { useRef, useState } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Popover from '@mui/material/Popover'
 import AttachmentIcon from '@mui/icons-material/Attachment'
 import { Button, TextField } from '@mui/material'
-import { toast } from 'react-toastify'
-import { handleCreateAttachmentAPI } from '~/apis'
+import Box from '@mui/material/Box'
+import Popover from '@mui/material/Popover'
+import Typography from '@mui/material/Typography'
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
+import { useParams, useSearchParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { handleCreateAttachmentAPI } from '~/apis'
 import {
-  fetchBoardDetailsAPI,
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  fetchFilteredBoardDetailsAPI,
+  selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
   fetchCardDetailsAPI,
-  selectCurrentActiveCard,
-  updateCurrentActiveCard
+  selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
-import { cloneDeep } from 'lodash'
-import { useParams } from 'react-router-dom'
 import { socketIoInstance } from '~/socket-client'
 function AttachmentCreateModal({ cardModal, SidebarItem }) {
   // board query
@@ -27,7 +24,15 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
   const { boardId } = useParams()
   const dispatch = useDispatch()
   const activeCardModal = useSelector(selectCurrentActiveCard)
-
+  const [searchParams] = useSearchParams()
+  const handleRefreshBoard = () => {
+    dispatch(
+      fetchFilteredBoardDetailsAPI({
+        boardId,
+        queryParams: searchParams
+      })
+    )
+  }
   // popover
   const fileInput = useRef()
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
@@ -75,7 +80,7 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
         // newActiveCardModal.attachments.push(updatedAttachment)
         // newActiveCardModal.cardAttachmentIds.push(res._id)
         // dispatch(updateCurrentActiveCard(newActiveCardModal))
-        dispatch(fetchBoardDetailsAPI(boardId))
+        handleRefreshBoard()
         dispatch(fetchCardDetailsAPI(activeCardModal._id))
         setAnchorPopoverElement(null)
         reset() // Reset form sau khi submit thành công
@@ -126,7 +131,7 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
           // newActiveCardModal.cardAttachmentIds.push(res._id)
           // dispatch(updateCurrentActiveCard(newActiveCardModal))
 
-          dispatch(fetchBoardDetailsAPI(boardId))
+          handleRefreshBoard()
           dispatch(fetchCardDetailsAPI(activeCardModal._id))
         })
         .finally(res => {

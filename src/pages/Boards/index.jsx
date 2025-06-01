@@ -34,6 +34,7 @@ import {
 import { DEFAULT_ITEM_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import { socketIoInstance } from '~/socket-client'
 
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -107,6 +108,7 @@ function Boards() {
 
   const handleJoinBoard = async boardId => {
     await joinPublicBoardAPI(boardId).then(() => {
+      socketIoInstance.emit('FE_UPDATE_BOARD', { boardId }) // Emit event to update board
       navigate(`/boards/${boardId}`) // Redirect to the board page after success
     }) // Call the API to join the board
   }

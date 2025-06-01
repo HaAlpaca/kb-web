@@ -18,7 +18,7 @@ import {
   handleUpdateCardLabelAPI
 } from '~/apis'
 import {
-  fetchBoardDetailsAPI,
+  fetchFilteredBoardDetailsAPI,
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import { fetchCardDetailsAPI } from '~/redux/activeCard/activeCardSlice'
@@ -26,6 +26,7 @@ import { socketIoInstance } from '~/socket-client'
 import { getTextColor } from '~/utils/formatters'
 import LabelAddNewModal from './LabelAddNewModal'
 import LabelEditModal from './LabelEditModal'
+import { useSearchParams } from 'react-router-dom'
 
 function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
   // board query
@@ -35,6 +36,15 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
   const dispatch = useDispatch()
   // const activeCardModal = useSelector(selectCurrentActiveCard)
   const confirmDeleteLabel = useConfirm()
+  const { searchParams } = useSearchParams()
+  const handleRefreshBoard = () => {
+    dispatch(
+      fetchFilteredBoardDetailsAPI({
+        boardId,
+        queryParams: searchParams
+      })
+    )
+  }
 
   // react-hook-form
   const { control, setValue, watch } = useForm({
@@ -68,7 +78,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       colour: hex,
       boardId
     }).then(res => {
-      dispatch(fetchBoardDetailsAPI(boardId))
+      handleRefreshBoard()
       socketIoInstance.emit('FE_CREATE_LABEL', {
         ...res,
         cardId: cardModal._id,
@@ -97,7 +107,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
     handleUpdateCardLabelAPI(cardModal._id, {
       updateLabels: updatedLabels
     }).then(res => {
-      dispatch(fetchBoardDetailsAPI(boardId))
+      handleRefreshBoard()
       if (cardModal) {
         dispatch(fetchCardDetailsAPI(cardModal._id))
       }
@@ -119,7 +129,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       async () =>
         await handleDeleteLabelAPI(labelId)
           .then(() => {
-            dispatch(fetchBoardDetailsAPI(boardId))
+            handleRefreshBoard()
 
             if (cardModal) {
               dispatch(fetchCardDetailsAPI(cardModal._id))
@@ -141,7 +151,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       colour: hex
     })
       .then(() => {
-        dispatch(fetchBoardDetailsAPI(boardId))
+        handleRefreshBoard()
         if (cardModal) {
           dispatch(fetchCardDetailsAPI(cardModal._id))
         }

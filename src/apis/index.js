@@ -142,9 +142,10 @@ export const archiveBoardAPI = async boardId => {
   return response.data
 }
 
-export const leaveBoardAPI = async boardId => {
+export const leaveBoardAPI = async (boardId, updateData) => {
   const response = await authorizeAxiosInstance.put(
-    `${API_ROOT}/v1/boards/leave_board/${boardId}`
+    `${API_ROOT}/v1/boards/leave_board/${boardId}`,
+    updateData
   )
   toast.success('You have left this board successfully!')
   return response.data
