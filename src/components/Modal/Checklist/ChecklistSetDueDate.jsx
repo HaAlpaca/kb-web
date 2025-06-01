@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Box, IconButton, Popover, Typography, Button } from '@mui/material'
 import WatchLaterOutlinedIcon from '@mui/icons-material/WatchLaterOutlined'
 import moment from 'moment'
@@ -7,12 +7,18 @@ import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 const ChecklistSetDueDate = ({ checklist, progress, onChangeDate }) => {
   const [anchorEl, setAnchorEl] = useState(null)
+
   const [selectedDate, setSelectedDate] = useState(
     checklist.dueDate ? moment(checklist.dueDate) : null
   )
   const [tempDate, setTempDate] = useState(
     checklist.dueDate ? moment(checklist.dueDate) : null
   )
+
+  useEffect(() => {
+    setSelectedDate(checklist.dueDate ? moment(checklist.dueDate) : null)
+    setTempDate(checklist.dueDate ? moment(checklist.dueDate) : null)
+  }, [checklist.dueDate])
 
   const isOpenPopover = Boolean(anchorEl)
   const popoverId = isOpenPopover ? 'set-due-date-popover' : undefined

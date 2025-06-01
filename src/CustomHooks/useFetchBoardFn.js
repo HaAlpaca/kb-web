@@ -11,7 +11,8 @@ function useFetchBoardFn() {
   // Hàm để fetch dữ liệu, được memoize bằng useCallback
   const fetchBoardDetails = useCallback(() => {
     if (boardId) {
-      const queryParams = Object.fromEntries([...searchParams]) // Chuyển đổi searchParams thành object
+      const queryParams = Object.fromEntries([...searchParams]) // Chuyển
+      // đổi searchParams thành object
       dispatch(fetchFilteredBoardDetailsAPI({ boardId, queryParams }))
     }
   }, [dispatch, boardId, searchParams]) // Chỉ tạo lại hàm khi dispatch, boardId hoặc searchParams thay đổi

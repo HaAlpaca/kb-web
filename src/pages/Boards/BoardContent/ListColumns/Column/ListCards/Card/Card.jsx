@@ -15,13 +15,10 @@ import GroupIcon from '@mui/icons-material/Group'
 
 import moment from 'moment'
 import { useState } from 'react'
-import { Controller, useForm, useWatch } from 'react-hook-form'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { handleToggleCompleteCardAPI } from '~/apis'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import LabelGroup from '~/components/Label/LabelGroup'
-import { fetchBoardDetailsAPI } from '~/redux/activeBoard/activeBoardSlice'
+import { fetchFilteredBoardDetailsAPI } from '~/redux/activeBoard/activeBoardSlice'
 import { useDispatch } from 'react-redux'
-import { socketIoInstance } from '~/socket-client'
 import { getOptimizedImageUrl } from '~/utils/formatters'
 
 const calculateChecklistCompletion = checklists => {
@@ -44,18 +41,23 @@ function Card({ card }) {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [isPortrait, setIsPortrait] = useState(false)
+
+  const { boardId } = useParams()
+
+  const handleRefreshBoard = () => {
+    dispatch(
+      fetchFilteredBoardDetailsAPI({
+        boardId,
+        queryParams: searchParams
+      })
+    )
+  }
+
   const handleImageLoad = event => {
     const img = event.currentTarget
     setIsPortrait(img.naturalHeight > img.naturalWidth) // Xác định ảnh dọc hay ngang
   }
 
-  const { control } = useForm({
-    defaultValues: {
-      isComplete: card.isComplete ?? false
-    }
-  })
-
-  const watchIsComplete = useWatch({ control, name: 'isComplete' })
   const { total, completed } = calculateChecklistCompletion(
     card?.checklists || []
   )
@@ -77,7 +79,7 @@ function Card({ card }) {
   const dndKitCardStyle = {
     transform: CSS.Translate.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : watchIsComplete ? 0.8 : 1
+    opacity: isDragging ? 0.5 : card.isComplete ? 0.8 : 1
   }
 
   const shouldShowCardActions = () => {
@@ -100,7 +102,7 @@ function Card({ card }) {
       {...listeners}
       sx={{
         cursor: 'pointer',
-        boxShadow: watchIsComplete ? 'none' : '0 1px 1px rgba(0,0,0,0.15)',
+        boxShadow: card.isComplete ? 'none' : '0 1px 1px rgba(0,0,0,0.15)',
         overflow: 'unset',
         display: card?.FE_PlaceholderCard ? 'none' : 'block',
         borderRadius: '8px',
@@ -143,43 +145,29 @@ function Card({ card }) {
           justifyContent: 'flex-start'
         }}
       >
-        <Controller
-          name="isComplete"
-          control={control}
-          render={({ field }) => (
-            <Checkbox
-              color="success"
-              className="animated-checkbox"
-              size="small"
-              sx={{
-                p: 0.5,
-                opacity: watchIsComplete ? 1 : 0,
-                transform: watchIsComplete
-                  ? 'translateX(0)'
-                  : 'translateX(-20px)',
-                transition: 'opacity 0.3s ease, transform 0.3s ease'
-              }}
-              {...field}
-              checked={watchIsComplete}
-              onClick={e => e.stopPropagation()}
-              onChange={async event => {
-                field.onChange(event.target.checked)
-                await handleToggleCompleteCardAPI(card._id).then(() => {
-                  dispatch(fetchBoardDetailsAPI(card.boardId))
-                  socketIoInstance.emit('FE_UPDATE_CARD', 'ping')
-                })
-              }}
-            />
-          )}
-        />
+        {card.isComplete == true && (
+          <Checkbox
+            color="success"
+            className="animated-checkbox"
+            size="small"
+            sx={{
+              p: 0.5,
+              opacity: 1, // Luôn hiển thị checkbox
+              transform: 'translateX(0)', // Không có hiệu ứng hover
+              cursor: 'default' // Không cho phép người dùng tương tác
+            }}
+            checked={true}
+          />
+        )}
+
         <Typography
           className="animated-title"
           variant="subtitle2"
           sx={{
+            paddingTop: shouldShowCardActions() && '4px',
             fontWeight: '600',
             opacity: 1,
-            transform: watchIsComplete ? 'translateX(0)' : 'translateX(-20px)',
-            transition: 'transform 0.3s ease'
+            transform: 'translateX(0)' // Không có hiệu ứng hover
           }}
         >
           {card?.title}

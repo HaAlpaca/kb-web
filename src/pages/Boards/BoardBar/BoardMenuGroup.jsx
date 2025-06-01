@@ -8,7 +8,12 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  Typography
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -29,11 +34,13 @@ import BoardUserRole from './BoardUserRole'
 import { useNavigate } from 'react-router-dom'
 import { useConfirm } from 'material-ui-confirm' // Import useConfirm
 import CardUserGroup from '~/components/Modal/ActiveCard/CardUserGroup'
+import useRoleInfo from '~/CustomHooks/useRoleInfo'
 
 const boardCoverImages = [
   'https://images.unsplash.com/photo-1741926376117-85ec2cef9714',
   'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5',
   'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1',
+  'https://images.unsplash.com/photo-1500333070776-343c73e1eb4a',
   'https://images.unsplash.com/photo-1703146893334-5bd85e47108e',
   'https://images.unsplash.com/photo-1673187446875-d3149449953b',
   'https://images.unsplash.com/photo-1669236712949-b58f9758898d',
@@ -51,6 +58,12 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
     Array(boardCoverImages.length).fill(false)
   )
   const navigate = useNavigate() // Hook để điều hướng sau khi archive
+  const { isAdmin, isOwner, ownerIndex } = useRoleInfo(board, user?._id) // Sử dụng hook để lấy thông tin vai trò
+
+  const isShowAddMember = isAdmin && isOwner && ownerIndex === 0 // Kiểm tra xem có hiển thị nút thêm thành viên hay không
+
+  const [openAdminDialog, setOpenAdminDialog] = useState(false) // Trạng thái mở dialog chọn admin mới
+  const [selectedAdmin, setSelectedAdmin] = useState(null) // Admin được chọn
 
   const toggleDrawer = newOpen => event => {
     if (
@@ -78,13 +91,19 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
       const newBoard = cloneDeep(boardRedux)
       newBoard.cover = url
       dispatch(updateCurrentActiveBoard(newBoard))
-      socketIoInstance.emit('FE_UPDATE_BOARD', newBoard)
+      socketIoInstance.emit('FE_UPDATE_BOARD', {
+        boardId: board._id,
+        newBoard
+      })
     })
   }
 
   const handleBoardUpdate = async (field, value) => {
     await updateBoardDetailsAPI(board?._id, { [field]: value }).then(res =>
-      socketIoInstance.emit('FE_UPDATE_BOARD', res)
+      socketIoInstance.emit('FE_UPDATE_BOARD', {
+        boardId: board._id,
+        ...res
+      })
     )
     const newBoard = cloneDeep(boardRedux)
     newBoard[field] = value
@@ -114,73 +133,169 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
     navigate('/boards')
   }
 
+  // const handleLeaveBoard = async boardId => {
+  //   // if (isAdmin && ownerIndex === 0) {
+  //   //   // Nếu là admin hiện tại, yêu cầu chọn admin mới
+  //   //   const options = board.memberIds.map(memberId => {
+  //   //     const member = board.allMembers.find(user => user._id === memberId)
+  //   //     return {
+  //   //       label: member?.displayName || 'Unknown',
+  //   //       value: memberId
+  //   //     }
+  //   //   })
+
+  //   //   const confirmed = await confirm({
+  //   //     title: 'Confirm Leave',
+  //   //     description:
+  //   //       'You are the current admin. Please select a new admin before leaving the board.',
+  //   //     // Hiển thị danh sách thành viên để chọn admin mới
+  //   //     options: options,
+  //   //     confirmationText: 'Leave',
+  //   //     cancellationText: 'Cancel'
+  //   //   })
+
+  //   //   if (!confirmed || !confirmed.value) return // Không làm gì nếu không chọn admin mới
+
+  //   //   const newAdminId = confirmed.value
+
+  //   //   // Cập nhật admin mới
+  //   //   await updateBoardDetailsAPI(boardId, { newAdminId }).then(res => {
+  //   //     const newBoard = cloneDeep(boardRedux)
+  //   //     newBoard.ownerIds = [newAdminId]
+  //   //     newBoard.allMembers = newBoard.allMembers.map(member => {
+  //   //       if (member._id === newAdminId) {
+  //   //         return { ...member, boardRole: 'admin' }
+  //   //       }
+  //   //       return member
+  //   //     })
+  //   //     dispatch(updateCurrentActiveBoard(newBoard))
+  //   //     socketIoInstance.emit('FE_UPDATE_BOARD', {
+  //   //       boardId: board._id,
+  //   //       ...res
+  //   //     })
+  //   //   })
+  //   // } else {
+  //   //   // Nếu không phải admin, chỉ cần xác nhận rời board
+  //   //   const confirmed = await confirm({
+  //   //     title: 'Confirm Leave',
+  //   //     description: 'Are you sure you want to leave this board?',
+  //   //     confirmationText: 'Leave',
+  //   //     cancellationText: 'Cancel'
+  //   //   })
+
+  //   //   if (!confirmed) return
+  //   // }
+
+  //   // Gọi API để rời board
+  //   await leaveBoardAPI(boardId, isAdmin ? board.ownerIds[1] : null)
+  //   // navigate('/boards') // Điều hướng về danh sách board
+  // }
+
   const handleLeaveBoard = async boardId => {
-    await confirm({
-      title: 'Confirm Leave',
-      description: 'Are you sure you want to leave this board?',
-      confirmationText: 'Yes',
-      cancellationText: 'No'
-    })
-    await leaveBoardAPI(boardId) // Gọi API leave board
-    navigate('/boards') // Điều hướng về danh sách boards sau khi rời khỏi
+    if (isAdmin && ownerIndex === 0) {
+      // Nếu là Owner[0], mở dialog chọn admin mới
+      handleOpenAdminDialog()
+    } else {
+      await confirm({
+        title: 'Confirm Leave',
+        description: 'Are you sure you want to leave this board?',
+        confirmationText: 'Yes',
+        cancellationText: 'No'
+      })
+      await leaveBoardAPI(boardId, { newAdminId: '' }).then(() => {
+        socketIoInstance.emit('FE_UPDATE_BOARD', { boardId: board._id })
+        navigate('/boards') // Điều hướng về danh sách boards sau khi rời khỏi
+      })
+    }
+  }
+
+  const handleOpenAdminDialog = () => {
+    setOpenAdminDialog(true)
+  }
+
+  const handleCloseAdminDialog = () => {
+    setOpenAdminDialog(false)
+    setSelectedAdmin(null)
   }
 
   const DrawerList = (
     <Box sx={{ width: 500, padding: 2, paddingTop: 1 }} role="presentation">
       <Box>
+        {/* Board Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
             Board Name:
           </Typography>
-          <ToggleFocusInput
-            value={board?.title}
-            sx={{ fontSize: 12, fontWeight: 500 }}
-            onChangedValue={newTitle => handleBoardUpdate('title', newTitle)}
-          />
+          {isAdmin ? (
+            <ToggleFocusInput
+              value={board?.title}
+              sx={{ fontSize: 12, fontWeight: 500 }}
+              onChangedValue={newTitle => handleBoardUpdate('title', newTitle)}
+            />
+          ) : (
+            <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+              {board?.title}
+            </Typography>
+          )}
         </Box>
 
+        {/* Board Description */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
             Board Description:
           </Typography>
-          <ToggleFocusInput
-            value={board?.description}
-            sx={{ fontSize: 12, fontWeight: 500 }}
-            onChangedValue={newDesc =>
-              handleBoardUpdate('description', newDesc)
-            }
-          />
+          {isAdmin ? (
+            <ToggleFocusInput
+              value={board?.description}
+              sx={{ fontSize: 12, fontWeight: 500 }}
+              onChangedValue={newDesc =>
+                handleBoardUpdate('description', newDesc)
+              }
+            />
+          ) : (
+            <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+              {board?.description || 'No description'}
+            </Typography>
+          )}
         </Box>
 
+        {/* Board Type */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: 500 }}>
             Board Type:
           </Typography>
-          <RadioGroup
-            row
-            value={boardType}
-            onChange={e => {
-              const newType = e.target.value
-              setBoardType(newType)
-              handleBoardUpdate('type', newType)
-            }}
-          >
-            <FormControlLabel
-              value={BOARD_TYPES.PRIVATE}
-              control={<Radio />}
-              label={BOARD_TYPES.PRIVATE}
-            />
-            <FormControlLabel
-              value={BOARD_TYPES.PUBLIC}
-              control={<Radio />}
-              label={BOARD_TYPES.PUBLIC}
-            />
-          </RadioGroup>
+          {isAdmin ? (
+            <RadioGroup
+              row
+              value={boardType}
+              onChange={e => {
+                const newType = e.target.value
+                setBoardType(newType)
+                handleBoardUpdate('type', newType)
+              }}
+            >
+              <FormControlLabel
+                value={BOARD_TYPES.PRIVATE}
+                control={<Radio />}
+                label={BOARD_TYPES.PRIVATE}
+              />
+              <FormControlLabel
+                value={BOARD_TYPES.PUBLIC}
+                control={<Radio />}
+                label={BOARD_TYPES.PUBLIC}
+              />
+            </RadioGroup>
+          ) : (
+            <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+              {boardType}
+            </Typography>
+          )}
         </Box>
       </Box>
 
       <Divider />
 
+      {/* Board Cover */}
       <Box
         sx={{
           display: 'flex',
@@ -197,25 +312,27 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
           {boardCoverImages.map((url, index) => (
             <Grid item xs={3} key={index}>
               <Box
-                onClick={() => handleCoverChange(url)}
+                onClick={() => isAdmin && handleCoverChange(url)}
                 sx={{
                   position: 'relative',
                   width: '100%',
                   paddingTop: '75%',
                   borderRadius: 1,
                   overflow: 'hidden',
-                  cursor: 'pointer',
+                  cursor: isAdmin ? 'pointer' : 'not-allowed',
                   border:
                     board?.cover === url
-                      ? '2px solid #60B5FF'
+                      ? '2px solid #E55050'
                       : '2px solid transparent',
                   boxShadow:
-                    board?.cover === url ? '0 0 0 2px #60B5FF' : 'none',
+                    board?.cover === url ? '0 0 0 2px #E55050' : 'none',
                   transition: 'border 0.3s, box-shadow 0.3s',
-                  '&:hover': {
-                    border: '2px solid #60B5FF',
-                    boxShadow: '0 0 0 2px #60B5FF'
-                  }
+                  '&:hover': isAdmin
+                    ? {
+                        border: '2px solid #E55050',
+                        boxShadow: '0 0 0 2px #E55050'
+                      }
+                    : {}
                 }}
               >
                 {!loadedImages[index] && (
@@ -277,30 +394,33 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
-            Owners:
+            Owner:
           </Typography>
           <CardUserGroup
             cardMemberIds={board?.ownerIds}
             onUpdateCardMembers={incomingMemberInfo => {
               onUpdateBoardMembers(incomingMemberInfo)
             }}
+            isShowAddMember={false} // Truyền giá trị isShowAddMember
           />
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
-            Members:
-          </Typography>
-          <CardUserGroup
-            cardMemberIds={board?.memberIds}
-            onUpdateCardMembers={incomingMemberInfo =>
-              onUpdateBoardMembers({
-                userId: incomingMemberInfo._id,
-                action: CARD_MEMBER_ACTION.ADD
-              })
-            }
-          />
-          {/* <BoardUserGroup boardUsers={board?.members} limit={8} /> */}
-        </Box>
+        {board?.memberIds?.length > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography sx={{ whiteSpace: 'nowrap', fontWeight: '500' }}>
+              {board?.memberIds?.length > 1 ? 'Members:' : 'Member:'}
+            </Typography>
+            <CardUserGroup
+              cardMemberIds={board?.memberIds}
+              onUpdateCardMembers={incomingMemberInfo =>
+                onUpdateBoardMembers({
+                  userId: incomingMemberInfo._id,
+                  action: CARD_MEMBER_ACTION.ADD
+                })
+              }
+              isShowAddMember={false} // Truyền giá trị isShowAddMember
+            />
+          </Box>
+        )}
       </Box>
 
       <Divider />
@@ -316,18 +436,21 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
           Danger Zone
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Chip
-            label="Leave Board"
-            color="warning"
-            onClick={() => handleLeaveBoard(board?._id)} // Gọi hàm xử lý leave board
-            sx={{
-              cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: 'warning.dark',
-                color: 'white'
-              }
-            }}
-          />
+          {board.allMembers.length > 1 && (
+            <Chip
+              label="Leave Board"
+              color="warning"
+              onClick={() => handleLeaveBoard(board?._id)} // Gọi hàm xử lý leave board
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'warning.dark',
+                  color: 'white'
+                }
+              }}
+            />
+          )}
+
           {board.ownerIds[0] === user?._id && (
             <Chip
               label="Archive Board"
@@ -389,6 +512,67 @@ function BoardMenuGroup({ board, MENU_STYLE }) {
           />
         </Box>
         {DrawerList}
+        {openAdminDialog && (
+          <Dialog open={openAdminDialog} onClose={handleCloseAdminDialog}>
+            <DialogTitle>Select New Admin</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Select a member to assign as the new admin:
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                {board?.memberIds?.map(memberId => {
+                  const member = board.allMembers.find(
+                    user => user._id === memberId
+                  )
+                  return (
+                    <Box
+                      key={memberId}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 1,
+                        padding: 1,
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        '&:hover': { backgroundColor: '#f5f5f5' }
+                      }}
+                      onClick={() => setSelectedAdmin(memberId)} // Chọn admin mới
+                    >
+                      <Typography>
+                        {member?.displayName || 'Unknown'}
+                      </Typography>
+                      {selectedAdmin === memberId && (
+                        <Chip label="Selected" color="primary" size="small" />
+                      )}
+                    </Box>
+                  )
+                })}
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseAdminDialog} color="secondary">
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!selectedAdmin) return
+                  await leaveBoardAPI(board._id, { newAdminId: selectedAdmin }) // Gọi API để rời board
+                  handleCloseAdminDialog()
+                  socketIoInstance.emit('FE_UPDATE_BOARD', {
+                    boardId: board._id
+                  })
+                  navigate('/boards') // Điều hướng về danh sách board
+                }}
+                color="primary"
+                disabled={!selectedAdmin} // Vô hiệu hóa nếu chưa chọn admin
+              >
+                Confirm
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
       </Drawer>
     </Box>
   )

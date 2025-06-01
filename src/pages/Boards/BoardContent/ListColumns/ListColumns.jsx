@@ -7,22 +7,32 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import { cloneDeep } from 'lodash'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { createNewColumnAPI } from '~/apis'
-import { generatePlaceholderCard } from '~/utils/formatters'
 import Column from './Column/Column'
 
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  fetchBoardDetailsAPI,
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  fetchFilteredBoardDetailsAPI,
+  selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import { socketIoInstance } from '~/socket-client'
+import { useParams, useSearchParams } from 'react-router-dom'
 function ListColumns({ columns }) {
   const board = useSelector(selectCurrentActiveBoard)
+  const { boardId } = useParams()
+  const [searchParams] = useSearchParams()
+
+  const handleRefreshBoard = () => {
+    dispatch(
+      fetchFilteredBoardDetailsAPI({
+        boardId,
+        queryParams: searchParams
+      })
+    )
+  }
+
   const dispatch = useDispatch()
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => {
@@ -45,9 +55,12 @@ function ListColumns({ columns }) {
       ...newColumnData,
       boardId: board._id
     }).then(res => {
-      dispatch(fetchBoardDetailsAPI(board._id))
+      handleRefreshBoard()
       // socket emit
-      socketIoInstance.emit('FE_CREATE_COLUMN', res)
+      socketIoInstance.emit('FE_CREATE_COLUMN', {
+        boardId: board._id,
+        res
+      })
     })
     // handle column
     // createdColumn.cards = [generatePlaceholderCard(createdColumn)]

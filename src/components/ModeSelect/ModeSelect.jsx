@@ -18,13 +18,24 @@ function ModeSelect() {
 
   return (
     <>
-      <FormControl size="small">
+      <FormControl
+        size="small"
+        sx={{
+          minWidth: 120,
+          '@media (max-width: 992px)': {
+            minWidth: 100 // Giảm chiều rộng trên màn hình nhỏ hơn 992px
+          }
+        }}
+      >
         <InputLabel
           id="label-select-dark-light-mode"
           sx={{
             color: 'white',
             '&.Mui-focused': {
               color: 'white'
+            },
+            '@media (max-width: 992px)': {
+              fontSize: '0.875rem' // Giảm kích thước font chữ trên màn hình nhỏ hơn 992px
             }
           }}
         >
@@ -44,7 +55,10 @@ function ModeSelect() {
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
               borderColor: 'white'
             },
-            '.MuiSvgIcon-root': { color: 'white' }
+            '.MuiSvgIcon-root': { color: 'white' },
+            '@media (max-width: 992px)': {
+              fontSize: '0.875rem' // Giảm kích thước font chữ trên màn hình nhỏ hơn 992px
+            }
           }}
           onChange={handleChange}
         >

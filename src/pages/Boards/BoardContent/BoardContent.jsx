@@ -21,12 +21,6 @@ import { cloneDeep, isEmpty } from 'lodash'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
 import { generatePlaceholderCard } from '~/utils/formatters'
-import { socketIoInstance } from '~/socket-client'
-import { updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
-import { useDispatch } from 'react-redux'
-// import { socketIoInstance } from '~/socket-client'
-// import { updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
-// import { useDispatch } from 'react-redux'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -39,18 +33,16 @@ function BoardContent({
   moveCardInTheSameColumn,
   moveCardToDifferentColumn
 }) {
-  const dispatch = useDispatch()
-
   // yeu cau chuot di 10px ms active event, fix click goi event
   // const pointerSensor = useSensor(PointerSensor, {
   //   activationConstraint: { distance: 10 }
   // })
   const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: { distance: 10 }
+    activationConstraint: { distance: 0 }
   })
   const touchSensor = useSensor(TouchSensor, {
     // tolerance la dung sai, tren 500 ms dung duoc but
-    activationConstraint: { delay: 250, tolerance: 500 }
+    activationConstraint: { delay: 300, tolerance: 600 }
   })
   const sensors = useSensors(mouseSensor, touchSensor)
   const [orderedColumns, setOrderedColumns] = useState([])
@@ -66,28 +58,6 @@ function BoardContent({
   useEffect(() => {
     setOrderedColumns(board.columns)
   }, [board])
-
-  // WEBSOCKET EVENT RECEIVE MOVE COLUMN
-  useEffect(() => {
-    const handleMoveColumn = moveColumn => {
-      // Clone board để tránh thay đổi trực tiếp
-      const newBoard = cloneDeep(board)
-
-      // Cập nhật thứ tự cột trong board
-      newBoard.columnOrderIds = moveColumn.columnOrderIds
-
-      // Cập nhật Redux Store
-      dispatch(updateCurrentActiveBoard(newBoard))
-
-      setOrderedColumns()
-    }
-
-    socketIoInstance.on('BE_MOVE_COLUMN', handleMoveColumn)
-
-    return () => {
-      socketIoInstance.off('BE_MOVE_COLUMN')
-    }
-  }, [dispatch, board])
 
   // function chung xu li cap nhat lai state trong th di chuyen card giua cac khu vuc khac nhau
   const moveCardBetweenDifferentColumns = (
@@ -435,8 +405,8 @@ function BoardContent({
             backgroundImage: theme =>
               theme.palette.mode === 'dark'
                 ? `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),url(${
-                    board?.cover ? `${board.cover}` : '/kanban-bg.png'
-                  })`
+                  board?.cover ? `${board.cover}` : '/kanban-bg.png'
+                })`
                 : `url(${board?.cover ? `${board?.cover}` : '/kanban-bg.png'})`,
 
             // filter: 'blur(px)',

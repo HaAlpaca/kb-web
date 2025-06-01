@@ -1,17 +1,17 @@
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Tooltip from '@mui/material/Tooltip'
+import { useSelector } from 'react-redux'
 import LabelModal from '~/components/Modal/Label/LabelModal'
+import useRoleInfo from '~/CustomHooks/useRoleInfo'
+import { selectCurrentUser } from '~/redux/user/userSlice'
 import BoardAnalystic from './BoardAnalystic'
+import BoardAutomation from './BoardAutomation'
+import BoardFilter from './BoardFilter'
 import BoardMenuGroup from './BoardMenuGroup'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
-import BoardFilter from './BoardFilter'
-import BoardAutomation from './BoardAutomation'
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
-import Typography from '@mui/material/Typography'
-import Tooltip from '@mui/material/Tooltip'
-import Button from '@mui/material/Button'
-import { useSelector } from 'react-redux'
-import { selectCurrentUser } from '~/redux/user/userSlice'
 
 const MENU_STYLE = {
   color: 'white',
@@ -33,6 +33,15 @@ function BoardBar({ board }) {
     board?.usersRole?.find(userRole => userRole.userId === currentUser?._id)
       ?.role || 'user' // Mặc định là 'user' nếu không tìm thấy
 
+  // Map role to display-friendly names
+  const roleDisplayName =
+    {
+      admin: 'Manager',
+      moderator: 'Member',
+      user: 'Guest'
+    }[currentUserRole] || 'Guest' // Default to 'Guest' if role is not recognized
+
+  const { isAdmin, isModerator } = useRoleInfo(board, currentUser?._id)
   return (
     <Box
       sx={{
@@ -50,13 +59,15 @@ function BoardBar({ board }) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <BoardMenuGroup board={board} MENU_STYLE={MENU_STYLE} />
-        <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />
+        {(isAdmin || isModerator) && (
+          <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />
+        )}
         <BoardAutomation board={board} MENU_STYLE={MENU_STYLE} />
         <BoardFilter board={board} MENU_STYLE={MENU_STYLE} />
         <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Tooltip title={`Role: ${currentUserRole}`}>
+        <Tooltip title={`Role: ${roleDisplayName}`}>
           <Button
             variant="outlined"
             startIcon={<AdminPanelSettingsIcon />}
@@ -66,10 +77,12 @@ function BoardBar({ board }) {
               '&:hover': { borderColor: 'white' }
             }}
           >
-            {currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1)}
+            {roleDisplayName}
           </Button>
         </Tooltip>
-        <InviteBoardUser boardId={board?._id} />
+
+        {isAdmin && <InviteBoardUser boardId={board?._id} />}
+
         <BoardUserGroup boardUsers={board?.allMembers} limit={5} />
       </Box>
     </Box>

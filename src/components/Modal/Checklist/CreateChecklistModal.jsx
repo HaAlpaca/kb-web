@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Button, TextField } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  fetchBoardDetailsAPI,
+  fetchFilteredBoardDetailsAPI,
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
@@ -15,10 +15,23 @@ import {
 import { useForm, Controller } from 'react-hook-form'
 import { handleCreateChecklistAPI } from '~/apis'
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined'
+import { useParams, useSearchParams } from 'react-router-dom'
+import { socketIoInstance } from '~/socket-client'
 function CreateChecklistModal({ SidebarItem, card }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
   const activeCardModal = useSelector(selectCurrentActiveCard)
+  const { boardId } = useParams()
+  const [searchParams] = useSearchParams()
+
+  const handleRefreshBoard = () => {
+    dispatch(
+      fetchFilteredBoardDetailsAPI({
+        boardId,
+        queryParams: searchParams
+      })
+    )
+  }
 
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const isOpenPopover = Boolean(anchorPopoverElement)
@@ -57,8 +70,13 @@ function CreateChecklistModal({ SidebarItem, card }) {
       //   })
       // })
       // dispatch(updateCurrentActiveBoard(newBoard))
-      dispatch(fetchBoardDetailsAPI(board._id))
+      handleRefreshBoard()
       dispatch(fetchCardDetailsAPI(card._id))
+      socketIoInstance.emit('FE_CREATE_CHECKLIST', {
+        ...res,
+        boardId: board._id,
+        cardId: activeCardModal._id
+      })
     })
 
     // TODO: Dispatch redux or call API to create checklist here

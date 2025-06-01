@@ -16,9 +16,7 @@ function AutoCompleteSearchBoard() {
 
   // State xử lý hiển thị kết quả fetch về từ API
   const [open, setOpen] = useState(false)
-  // State lưu trữ danh sách board fetch về được
   const [boards, setBoards] = useState(null)
-  // Sẽ hiện loading khi bắt đầu gọi api fetch boards
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -32,11 +30,9 @@ function AutoCompleteSearchBoard() {
   const handleInputSearchChange = event => {
     const searchValue = event.target?.value
     if (!searchValue) return
-    // console.log(searchValue)
 
     // Dùng createSearchParams của react-router-dom để tạo một cái searchPath chuẩn với q[title] để gọi lên API
     const searchPath = `?${createSearchParams({ 'q[title]': searchValue })}`
-    // console.log(searchPath)
 
     // Gọi API...
     setLoading(true)
@@ -63,7 +59,12 @@ function AutoCompleteSearchBoard() {
 
   return (
     <Autocomplete
-      sx={{ width: 220 }}
+      sx={{
+        width: 220,
+        '@media (max-width: 992px)': {
+          width: 180 // Giảm chiều rộng trên màn hình nhỏ hơn 992px
+        }
+      }}
       id="asynchronous-search-board"
       // Cái text này hiện ra khi boards là null hoặc sau khi đã fetch boards nhưng rỗng - không có kết quả
       noOptionsText={!boards ? 'Type to search board...' : 'No board found!'}
@@ -119,7 +120,11 @@ function AutoCompleteSearchBoard() {
               '&:hover fieldset': { borderColor: 'white' },
               '&.Mui-focused fieldset': { borderColor: 'white' }
             },
-            '.MuiSvgIcon-root': { color: 'white' }
+            '.MuiSvgIcon-root': { color: 'white' },
+            '@media (max-width: 992px)': {
+              '& input': { fontSize: '0.875rem' }, // Giảm kích thước font chữ
+              '& label': { fontSize: '0.875rem' } // Giảm kích thước label
+            }
           }}
         />
       )}

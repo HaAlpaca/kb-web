@@ -13,18 +13,36 @@ import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import {
-  fetchBoardDetailsAPI,
+  fetchFilteredBoardDetailsAPI,
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import { handleUpdateUserRole } from '~/apis'
+import useRoleInfo from '~/CustomHooks/useRoleInfo'
+import { socketIoInstance } from '~/socket-client'
+import { useParams, useSearchParams } from 'react-router-dom'
+
+const roleDisplayNameMap = {
+  admin: 'Manager',
+  moderator: 'Member',
+  user: 'Guest'
+}
 
 function BoardUserRole({ currentUserId }) {
   const board = useSelector(selectCurrentActiveBoard)
+  const { boardId } = useParams()
+  const [searchParams] = useSearchParams()
+  const handleRefreshBoard = () => {
+    dispatch(
+      fetchFilteredBoardDetailsAPI({
+        boardId,
+        queryParams: searchParams
+      })
+    )
+  }
+
   const dispatch = useDispatch()
   const allBoardUsers = board.allMembers || []
-  const currentUser = allBoardUsers.find(user => user._id === currentUserId)
-  const isAdmin = currentUser?.boardRole === 'admin'
-  const isOwner = board.ownerIds[0] === currentUserId // Kiểm tra nếu người dùng là owner đầu tiên
+  const { isOwner, isAdmin, ownerIndex } = useRoleInfo(board, currentUserId)
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
@@ -47,12 +65,13 @@ function BoardUserRole({ currentUserId }) {
       userId: selectedUser._id,
       role: newRole
     }).then(() => {
-      dispatch(fetchBoardDetailsAPI(board._id))
+      handleRefreshBoard()
+      socketIoInstance.emit('FE_UPDATE_BOARD', { boardId: board._id })
       handleClose()
     })
   }
 
-  const roles = ['user', 'moderator', 'admin']
+  const roles = ['user', 'moderator']
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -91,21 +110,25 @@ function BoardUserRole({ currentUserId }) {
                   alt={user.displayName}
                   sx={{ width: 36, height: 36 }}
                 />
-                <Tooltip title={`Role: ${user.boardRole}`}>
+                <Tooltip
+                  title={`Role: ${
+                    roleDisplayNameMap[user.boardRole] || 'Guest'
+                  }`}
+                >
                   <Typography variant="body2">{user.displayName}</Typography>
                 </Tooltip>
               </Box>
 
-              <Tooltip
-                title={
-                  isAdmin
-                    ? isOwner && user._id === currentUserId
-                      ? 'You cannot change your own role as the owner'
-                      : 'Change user role'
-                    : 'Only admin can change role'
-                }
-              >
-                <span>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Tooltip
+                  title={
+                    isAdmin
+                      ? isOwner && user._id === currentUserId
+                        ? 'You cannot change your own role as the owner'
+                        : 'Change user role'
+                      : 'Only admin can change role'
+                  }
+                >
                   <Button
                     size="small"
                     variant="outlined"
@@ -114,10 +137,11 @@ function BoardUserRole({ currentUserId }) {
                       !isAdmin || (isOwner && user._id === currentUserId) // Vô hiệu hóa nút nếu là owner và đang chỉnh sửa chính mình
                     }
                   >
-                    {user.boardRole.toUpperCase()}
+                    {roleDisplayNameMap[user.boardRole]?.toUpperCase() ||
+                      'GUEST'}
                   </Button>
-                </span>
-              </Tooltip>
+                </Tooltip>
+              </Box>
             </Box>
           ))}
         </Box>
@@ -130,7 +154,7 @@ function BoardUserRole({ currentUserId }) {
             onClick={() => handleChangeRole(role)}
             selected={selectedUser?.boardRole === role}
           >
-            {role.charAt(0).toUpperCase() + role.slice(1)}
+            {roleDisplayNameMap[role] || 'Guest'}
           </MenuItem>
         ))}
       </Menu>

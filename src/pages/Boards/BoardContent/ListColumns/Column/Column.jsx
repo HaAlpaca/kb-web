@@ -2,9 +2,6 @@ import Box from '@mui/material/Box'
 // import Typography from '@mui/material/Typography'
 import AddCardIcon from '@mui/icons-material/AddCard'
 // import Cloud from '@mui/icons-material/Cloud'
-import ContentCopy from '@mui/icons-material/ContentCopy'
-import ContentCut from '@mui/icons-material/ContentCut'
-import ContentPaste from '@mui/icons-material/ContentPaste'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import DragHandleIcon from '@mui/icons-material/DragHandle'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -31,12 +28,12 @@ import {
   updateCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 
+import { cloneDeep } from 'lodash'
 import {
   createNewCardAPI,
   deleteColumnDetailsAPI,
   updateColumnDetailsAPI
 } from '~/apis'
-import { cloneDeep } from 'lodash'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import { socketIoInstance } from '~/socket-client'
 function Column({ column }) {
@@ -119,7 +116,10 @@ function Column({ column }) {
         deleteColumnDetailsAPI(column._id).then(res => {
           toast.success(res?.deleteResult)
           // console.log('🚀 ~ deleteColumnDetails ~ columnId:', columnId)
-          socketIoInstance.emit('FE_DELETE_COLUMN', res)
+          socketIoInstance.emit('FE_DELETE_COLUMN', {
+            boardId: board._id,
+            res
+          })
         })
       })
       .catch(() => {})
