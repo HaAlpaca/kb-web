@@ -47,7 +47,6 @@ function DateModal({ SidebarItem, card }) {
           .add(1, 'day')
           .set({ hour: 9, minute: 0, second: 0, millisecond: 0 })
   )
-  const [reminder, setReminder] = useState(0)
 
   const handleTogglePopover = event => {
     setAnchorPopoverElement(prev => (prev ? null : event.currentTarget))
@@ -77,15 +76,10 @@ function DateModal({ SidebarItem, card }) {
     const startTimestamp = startDate.valueOf()
     const dueTimestamp = dueDate.valueOf()
 
-    let reminderTimestamp = null
-    if (reminder !== '') {
-      reminderTimestamp = dueTimestamp - reminder * 60 * 1000
-    }
-
     const data = {
       startDate: startTimestamp,
       dueDate: dueTimestamp,
-      reminder: reminderTimestamp
+      reminder: dueTimestamp
     }
 
     await updateCardDetailsAPI(card._id, { updateDueDate: data }).then(() => {
@@ -95,37 +89,20 @@ function DateModal({ SidebarItem, card }) {
           if (cardLoop._id === card._id) {
             cardLoop.startDate = startTimestamp
             cardLoop.dueDate = dueTimestamp
-            cardLoop.reminder = reminderTimestamp
           }
         })
       })
       dispatch(updateCurrentActiveBoard(newBoard))
-      // update card modal
+
+      // Update card modal
       const newActiveCardModal = cloneDeep(activeCardModal)
       newActiveCardModal.startDate = startTimestamp
       newActiveCardModal.dueDate = dueTimestamp
-      newActiveCardModal.reminder = reminderTimestamp
 
       dispatch(updateCurrentActiveCard(newActiveCardModal))
       setAnchorPopoverElement(null)
     })
   }
-
-  // Reminder options based on duration between startDate and dueDate
-  const reminderOptions = useMemo(() => {
-    const diffMinutes = dueDate.diff(startDate, 'minutes')
-    const options = [
-      { label: 'At time of due date', value: 0 },
-      { label: '5 Minutes Before', value: 5 },
-      { label: '10 Minutes Before', value: 10 },
-      { label: '15 Minutes Before', value: 15 },
-      { label: '1 Hour Before', value: 60 },
-      { label: '2 Hours Before', value: 120 },
-      { label: '1 Day Before', value: 1440 },
-      { label: '2 Days Before', value: 2880 }
-    ]
-    return options.filter(option => option.value <= diffMinutes)
-  }, [startDate, dueDate])
 
   return (
     <>
@@ -183,22 +160,6 @@ function DateModal({ SidebarItem, card }) {
                 )}
               />
             </LocalizationProvider>
-
-            <FormControl fullWidth>
-              <InputLabel id="reminder-label">Reminder</InputLabel>
-              <Select
-                labelId="reminder-label"
-                id="reminder-select"
-                value={reminder}
-                onChange={e => setReminder(e.target.value)}
-              >
-                {reminderOptions.map(opt => (
-                  <MenuItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
 
             <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
               <Button

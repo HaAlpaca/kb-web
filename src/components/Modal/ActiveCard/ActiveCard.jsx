@@ -57,13 +57,13 @@ import AttachmentCreateModal from '../Attachment/AttachmentCreateModal'
 
 import CardAttachment from '../Attachment/CardAttachment'
 import DateModal from '../Date/DateModal'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import moment from 'moment'
 import CardCheckList from '../Checklist/CardChecklist'
 import CreateChecklistModal from '../Checklist/CreateChecklistModal'
 import { socketIoInstance } from '~/socket-client'
 import Checkbox from '@mui/material/Checkbox'
-import { Controller, useForm, useWatch } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { handleToggleCompleteCardAPI } from '~/apis'
 import { Tooltip } from '@mui/material'
 
@@ -91,7 +91,7 @@ const SidebarItem = styled(Box)(({ theme }) => ({
 /**
  * Note: Modal là một low-component mà bọn MUI sử dụng bên trong những thứ như Dialog, Drawer, Menu, Popover. Ở đây dĩ nhiên chúng ta có thể sử dụng Dialog cũng không thành vấn đề gì, nhưng sẽ sử dụng Modal để dễ linh hoạt tùy biến giao diện từ con số 0 cho phù hợp với mọi nhu cầu nhé.
  */
-function ActiveCard() {
+const ActiveCard = () => {
   const dispatch = useDispatch()
   const activeCard = useSelector(selectCurrentActiveCard)
   const currentUser = useSelector(selectCurrentUser)
@@ -101,11 +101,13 @@ function ActiveCard() {
   const { boardId } = useParams()
   const [searchParams] = useSearchParams()
 
-  // khong dung state de check modal vi state board  _id.jsx la lam roi
-  // const [isOpen, setIsOpen] = useState(true)
-  // const handleOpenModal = () => setIsOpen(true)
-
+  const [isComplete, setIsComplete] = useState(activeCard?.isComplete || false)
   const [isPortrait, setIsPortrait] = useState(false)
+
+  useEffect(() => {
+    setIsComplete(activeCard?.isComplete || false)
+  }, [activeCard])
+
   const handleImageLoad = event => {
     const img = event.currentTarget
     setIsPortrait(img.naturalHeight > img.naturalWidth)
@@ -211,12 +213,21 @@ function ActiveCard() {
 
   const handleToggleComplete = async () => {
     await handleToggleCompleteCardAPI(activeCard._id).then(() => {
-      fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
+      dispatch(
+        fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
+      )
+      dispatch(fetchCardDetailsAPI(activeCard._id)) // Cập nhật lại thông tin card sau khi toggle complete
+
       socketIoInstance.emit('FE_UPDATE_CARD', {
         boardId: activeCard.boardId, // Gửi kèm boardId
         cardId: activeCard._id
       })
     })
+  }
+
+  const handleCompleteChange = async () => {
+    setIsComplete(!isComplete)
+    await handleToggleComplete()
   }
 
   return (
@@ -305,25 +316,15 @@ function ActiveCard() {
             gap: 1
           }}
         >
-          <Controller
-            name="isComplete"
-            control={control}
-            render={({ field }) => (
-              <Tooltip
-                title={field.value ? 'Mark as incomplete' : 'Mark as complete'}
-              >
-                <Checkbox
-                  color="success"
-                  // size="small"
-                  checked={field.value}
-                  onChange={async event => {
-                    field.onChange(event.target.checked)
-                    await handleToggleComplete(event.target.checked)
-                  }}
-                />
-              </Tooltip>
-            )}
-          />
+          <Tooltip
+            title={isComplete ? 'Mark as incomplete' : 'Mark as complete'}
+          >
+            <Checkbox
+              color="success"
+              checked={isComplete}
+              onChange={handleCompleteChange}
+            />
+          </Tooltip>
 
           {/* Feature 01: Xử lý tiêu đề của Card */}
           <ToggleFocusInput
@@ -406,22 +407,6 @@ function ActiveCard() {
                     <Typography sx={{ fontWeight: '600', color: 'white' }}>
                       Due Date:{' '}
                       {moment(activeCard?.dueDate).format(
-                        'HH:mm dddd MM/DD/YYYY '
-                      )}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      bgcolor: '#4D96FF',
-                      padding: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderRadius: '4px'
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: '600', color: 'white' }}>
-                      reminder Date:{' '}
-                      {moment(activeCard?.reminder).format(
                         'HH:mm dddd MM/DD/YYYY '
                       )}
                     </Typography>

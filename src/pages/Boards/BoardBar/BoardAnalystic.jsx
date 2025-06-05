@@ -103,6 +103,70 @@ function BoardAnalystic({ board, MENU_STYLE }) {
             </Typography>
           </Box>
         ))}
+
+        {/* Thống kê theo từng cột */}
+        <Divider sx={{ my: 2 }} />
+        <Typography sx={{ fontWeight: '500', mb: 2 }}>
+          Column Analytics:
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <BarChart
+            height={300}
+            series={[
+              {
+                data:
+                  analytics?.cardsByColumn?.map(
+                    column => column.completedCards
+                  ) || [],
+                label: 'Completed Cards',
+                id: 'completedId',
+                stack: 'total'
+              },
+              {
+                data:
+                  analytics?.cardsByColumn?.map(
+                    column => column.incompleteCards
+                  ) || [],
+                label: 'Incomplete Cards',
+                id: 'incompleteId',
+                stack: 'total'
+              }
+            ]}
+            xAxis={[
+              {
+                data:
+                  analytics?.cardsByColumn?.map(column => column.columnTitle) ||
+                  [],
+                label: 'Columns'
+              }
+            ]}
+            yAxis={[{ width: 50, label: 'Number of Cards' }]}
+          />
+        </Box>
+        {analytics?.cardsByColumn?.map(column => (
+          <Box key={column.columnId} sx={{ mb: 2 }}>
+            <Typography>
+              {column.columnTitle}: {column.totalCards} cards (
+              {column.completedCards} completed, {column.incompleteCards}{' '}
+              incomplete)
+            </Typography>
+          </Box>
+        ))}
+
+        {/* Thống kê checklist */}
+        <Divider sx={{ my: 2 }} />
+        <Typography sx={{ fontWeight: '500', mb: 2 }}>
+          Checklist Analytics:
+        </Typography>
+        {analytics?.checklistsCompletion?.map(checklist => (
+          <Box key={checklist.checklistId} sx={{ mb: 2 }}>
+            <Typography>
+              {checklist.checklistTitle}: {checklist.totalItems} items (
+              {checklist.completedItems} completed, {checklist.incompleteItems}{' '}
+              incomplete) - Completion Rate: {checklist.completionRate}%
+            </Typography>
+          </Box>
+        ))}
       </Box>
     </Box>
   )
