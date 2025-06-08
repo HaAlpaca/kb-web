@@ -199,14 +199,25 @@ function Notifications() {
                       width: '100%'
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AssignmentIcon fontSize="small" color="primary" />
-                      <Typography
-                        variant="body2"
-                        sx={{ color: 'text.primary' }}
-                      >
-                        {notification.type === ACTION_TYPES.ASSIGN_CARD ? (
-                          notification.assigner[0]?._id === currentUser._id ? (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        width: '100%'
+                      }}
+                    >
+                      {notification.type === ACTION_TYPES.ASSIGN_CARD && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.primary',
+                            whiteSpace: 'normal', // Allow text to wrap
+                            wordWrap: 'break-word', // Break long words
+                            overflowWrap: 'break-word' // Ensure proper wrapping for long text
+                          }}
+                        >
+                          {notification.assigner[0]?._id === currentUser._id ? (
                             <>
                               <strong>You</strong> assigned yourself to a new
                               card
@@ -218,22 +229,71 @@ function Notifications() {
                               </strong>{' '}
                               assigned you to a new card
                             </>
-                          )
-                        ) : notification.assigner[0]?._id ===
-                          currentUser._id ? (
-                          <>
-                            <strong>You</strong> assigned yourself to a new
-                            checklist
-                          </>
-                        ) : (
-                          <>
-                            <strong>
-                              {notification.assigner[0]?.displayName}
-                            </strong>{' '}
-                            assigned you to a new checklist
-                          </>
-                        )}
-                      </Typography>
+                          )}
+                        </Typography>
+                      )}
+
+                      {notification.type === ACTION_TYPES.ASSIGN_CHECKLIST && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.primary',
+                            whiteSpace: 'normal', // Allow text to wrap
+                            wordWrap: 'break-word', // Break long words
+                            overflowWrap: 'break-word' // Ensure proper wrapping for long text
+                          }}
+                        >
+                          {notification.assigner[0]?._id === currentUser._id ? (
+                            <>
+                              <strong>You</strong> assigned yourself to a new
+                              checklist in card{' '}
+                              <strong>
+                                {notification.metadata.ownerTargetName}
+                              </strong>
+                            </>
+                          ) : (
+                            <>
+                              <strong>
+                                {notification.assigner[0]?.displayName}
+                              </strong>{' '}
+                              assigned you to a new checklist
+                            </>
+                          )}
+                        </Typography>
+                      )}
+
+                      {notification.type === ACTION_TYPES.UPDATE_DUEDATE && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.primary',
+                            whiteSpace: 'normal', // Allow text to wrap
+                            wordWrap: 'break-word', // Break long words
+                            overflowWrap: 'break-word' // Ensure proper wrapping for long text
+                          }}
+                        >
+                          {notification.assigner[0]?._id === currentUser._id ? (
+                            <>
+                              <strong>You</strong> updated the due date for{' '}
+                              {notification.metadata.targetType}{' '}
+                              <strong>
+                                {notification.metadata.targetName}
+                              </strong>
+                            </>
+                          ) : (
+                            <>
+                              <strong>
+                                {notification.assigner[0]?.displayName}
+                              </strong>{' '}
+                              updated the due date for{' '}
+                              {notification.metadata.targetType}{' '}
+                              <strong>
+                                {notification.metadata.targetName}
+                              </strong>
+                            </>
+                          )}
+                        </Typography>
+                      )}
                     </Box>
 
                     {notification.metadata.dueDate && (
