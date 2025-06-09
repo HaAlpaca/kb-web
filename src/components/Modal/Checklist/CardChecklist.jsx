@@ -2,31 +2,27 @@ import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Unstable_Grid2'
-import { cloneDeep } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  handleCreateChecklistAPI,
   handleDeleteChecklistAPI,
   handleUpdateChecklistAPI
 } from '~/apis'
 import {
   fetchFilteredBoardDetailsAPI,
-  selectCurrentActiveBoard,
-  updateCurrentActiveBoard
+  selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
-  fetchCardDetailsAPI,
-  selectCurrentActiveCard,
-  updateCurrentActiveCard
+  fetchCardDataAPI,
+  selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 
-import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
-import CardCheckitem from './CardCheckitem'
-import ChecklistSettingModal from './ChecklistSettingModal'
-import CardUserGroup from '../ActiveCard/CardUserGroup'
-import ChecklistSetDueDate from './ChecklistSetDueDate'
 import { useParams, useSearchParams } from 'react-router-dom'
+import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import { socketIoInstance } from '~/socket-client'
+import CardUserGroup from '../ActiveCard/CardUserGroup'
+import CardCheckitem from './CardCheckitem'
+import ChecklistSetDueDate from './ChecklistSetDueDate'
+import ChecklistSettingModal from './ChecklistSettingModal'
 function CardCheckList({ checklists, cardChecklistIds }) {
   const board = useSelector(selectCurrentActiveBoard)
   const dispatch = useDispatch()
@@ -49,7 +45,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
       title: newTitle.trim()
     }).then(res => {
       handleRefreshBoard()
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       socketIoInstance.emit('FE_UPDATE_CHECKLIST', {
         ...res,
         boardId: board._id,
@@ -66,7 +62,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
       }
     }).then(res => {
       handleRefreshBoard()
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       socketIoInstance.emit('FE_UPDATE_CHECKLIST', {
         ...res,
         boardId: board._id,
@@ -78,7 +74,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
   // delete
   const onDeleteChecklist = async checklistId => {
     await handleDeleteChecklistAPI(checklistId).then(res => {
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       handleRefreshBoard()
       socketIoInstance.emit('FE_DELETE_CHECKLIST', {
         ...res,
@@ -101,7 +97,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
         dueDate: dueDate
       }
     }).then(res => {
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       handleRefreshBoard()
       // socketIoInstance.emit('FE_UPDATE_CHECKLIST', {
       //   ...res,
@@ -119,7 +115,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
     await handleUpdateChecklistAPI(checklistId, {
       dueDate
     }).then(res => {
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       handleRefreshBoard()
     })
     socketIoInstance.emit('FE_UPDATE_CHECKLIST', {
@@ -132,7 +128,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
     await handleUpdateChecklistAPI(checklistId, {
       deleteCheckItemId: checkitemId
     }).then(res => {
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       handleRefreshBoard()
       socketIoInstance.emit('FE_UPDATE_CHECKLIST', {
         ...res,
@@ -153,7 +149,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
         isCompleted
       }
     }).then(res => {
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       handleRefreshBoard()
       socketIoInstance.emit('FE_UPDATE_CHECKLIST', {
         ...res,
@@ -168,7 +164,7 @@ function CardCheckList({ checklists, cardChecklistIds }) {
         content
       }
     }).then(res => {
-      dispatch(fetchCardDetailsAPI(activeCardModal._id))
+      dispatch(fetchCardDataAPI(activeCardModal._id))
       handleRefreshBoard()
       socketIoInstance.emit('FE_UPDATE_CHECKLIST', {
         ...res,

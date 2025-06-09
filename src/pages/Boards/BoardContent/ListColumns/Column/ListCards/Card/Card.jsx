@@ -200,7 +200,7 @@ function Card({ card }) {
               {card.cardAttachmentIds.length}
             </Button>
           )}
-          {!!card?.checklists?.length > 0 && (
+          {total > 0 && !!card?.checklists?.length && (
             <Button size="small" startIcon={<CheckBoxOutlinedIcon />}>
               {completed}/{total}{' '}
               {card?.checklists?.length > 1

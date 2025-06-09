@@ -36,7 +36,7 @@ import {
   clearAndHideCurrentActiveCard,
   selectIsShowModalActiceCard,
   selectCurrentActiveCard,
-  fetchCardDetailsAPI
+  fetchCardDataAPI
 } from '~/redux/activeCard/activeCardSlice'
 import { updateCardDetailsAPI } from '~/apis'
 import {
@@ -134,7 +134,7 @@ const ActiveCard = () => {
     )
     // // nho cap nhat ca board ns vi card co trong board
     // dispatch(updateCardInBoard(updatedCard))
-    dispatch(fetchCardDetailsAPI(activeCard._id)) // Cập nhật lại thông tin card sau khi update
+    dispatch(fetchCardDataAPI(activeCard._id)) // Cập nhật lại thông tin card sau khi update
     return updatedCard
   }
 
@@ -216,7 +216,7 @@ const ActiveCard = () => {
       dispatch(
         fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
       )
-      dispatch(fetchCardDetailsAPI(activeCard._id)) // Cập nhật lại thông tin card sau khi toggle complete
+      dispatch(fetchCardDataAPI(activeCard._id)) // Cập nhật lại thông tin card sau khi toggle complete
 
       socketIoInstance.emit('FE_UPDATE_CARD', {
         boardId: activeCard.boardId, // Gửi kèm boardId

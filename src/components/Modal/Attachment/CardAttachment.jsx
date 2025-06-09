@@ -20,6 +20,7 @@ import {
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
+  fetchCardDataAPI,
   fetchCardDetailsAPI,
   selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
@@ -93,7 +94,7 @@ function CardAttachment({ attachments }) {
                 queryParams: searchParams
               })
             )
-            dispatch(fetchCardDetailsAPI(activeCardModal._id))
+            dispatch(fetchCardDataAPI(activeCardModal._id))
             socketIoInstance.emit('FE_DELETE_ATTACHMENT', {
               ...res,
               cardId: activeCardModal._id,
@@ -126,7 +127,7 @@ function CardAttachment({ attachments }) {
         dispatch(
           fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })
         )
-        dispatch(fetchCardDetailsAPI(activeCardModal._id))
+        dispatch(fetchCardDataAPI(activeCardModal._id))
       })
       .finally(res => {
         socketIoInstance.emit('FE_UPDATE_ATTACHMENT', {

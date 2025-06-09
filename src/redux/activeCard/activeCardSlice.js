@@ -18,6 +18,15 @@ export const fetchCardDetailsAPI = createAsyncThunk(
     return respond.data
   }
 )
+export const fetchCardDataAPI = createAsyncThunk(
+  'activeCard/fetchCardDataAPI',
+  async cardId => {
+    const respond = await authorizeAxiosInstance.get(
+      `${API_ROOT}/v1/cards/${cardId}`
+    )
+    return respond.data
+  }
+)
 
 export const activeCardSlice = createSlice({
   name: 'activeCard',
@@ -43,6 +52,10 @@ export const activeCardSlice = createSlice({
       // update du lieu currentActiveBoard
       state.currentActiveCard = action.payload
       state.isShowModalActiceCard = true
+    })
+    builder.addCase(fetchCardDataAPI.fulfilled, (state, action) => {
+      // update du lieu currentActiveBoard
+      state.currentActiveCard = action.payload
     })
   }
 })

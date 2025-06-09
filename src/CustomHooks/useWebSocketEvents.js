@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { fetchFilteredBoardDetailsAPI } from '~/redux/activeBoard/activeBoardSlice'
 import { socketIoInstance } from '~/socket-client'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { fetchCardDetailsAPI } from '~/redux/activeCard/activeCardSlice'
+import { fetchCardDataAPI, fetchCardDetailsAPI } from '~/redux/activeCard/activeCardSlice'
 
 function useWebSocketEvents() {
   const dispatch = useDispatch()
@@ -14,9 +14,8 @@ function useWebSocketEvents() {
     if (!boardId) return
     // Hàm xử lý sự kiện WebSocket
     const handleWebSocketEvent = action => {
-      console.log(action)
       if (cardId === action?.cardId) {
-        dispatch(fetchCardDetailsAPI(cardId))
+        dispatch(fetchCardDataAPI(cardId))
       }
       dispatch(
         fetchFilteredBoardDetailsAPI({ boardId, queryParams: searchParams })

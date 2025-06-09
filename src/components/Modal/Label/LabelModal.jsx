@@ -21,12 +21,12 @@ import {
   fetchFilteredBoardDetailsAPI,
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
-import { fetchCardDetailsAPI } from '~/redux/activeCard/activeCardSlice'
 import { socketIoInstance } from '~/socket-client'
 import { getTextColor } from '~/utils/formatters'
 import LabelAddNewModal from './LabelAddNewModal'
 import LabelEditModal from './LabelEditModal'
 import { useSearchParams } from 'react-router-dom'
+import { fetchCardDataAPI } from '~/redux/activeCard/activeCardSlice'
 
 function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
   // board query
@@ -109,7 +109,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
     }).then(res => {
       handleRefreshBoard()
       if (cardModal) {
-        dispatch(fetchCardDetailsAPI(cardModal._id))
+        dispatch(fetchCardDataAPI(cardModal._id))
       }
       socketIoInstance.emit('FE_UPDATE_LABEL', {
         ...res,
@@ -132,7 +132,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
             handleRefreshBoard()
 
             if (cardModal) {
-              dispatch(fetchCardDetailsAPI(cardModal._id))
+              dispatch(fetchCardDataAPI(cardModal._id))
             }
           })
           .finally(res => {
@@ -153,7 +153,7 @@ function LabelModal({ BOARD_BAR_MENU_STYLE, cardModal = null, SidebarItem }) {
       .then(() => {
         handleRefreshBoard()
         if (cardModal) {
-          dispatch(fetchCardDetailsAPI(cardModal._id))
+          dispatch(fetchCardDataAPI(cardModal._id))
         }
       })
       .finally(res => {

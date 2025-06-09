@@ -14,7 +14,7 @@ import {
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
-  fetchCardDetailsAPI,
+  fetchCardDataAPI,
   selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 import { socketIoInstance } from '~/socket-client'
@@ -81,7 +81,7 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
         // newActiveCardModal.cardAttachmentIds.push(res._id)
         // dispatch(updateCurrentActiveCard(newActiveCardModal))
         handleRefreshBoard()
-        dispatch(fetchCardDetailsAPI(activeCardModal._id))
+        dispatch(fetchCardDataAPI(activeCardModal._id))
         setAnchorPopoverElement(null)
         reset() // Reset form sau khi submit thành công
       })
@@ -132,7 +132,7 @@ function AttachmentCreateModal({ cardModal, SidebarItem }) {
           // dispatch(updateCurrentActiveCard(newActiveCardModal))
 
           handleRefreshBoard()
-          dispatch(fetchCardDetailsAPI(activeCardModal._id))
+          dispatch(fetchCardDataAPI(activeCardModal._id))
         })
         .finally(res => {
           socketIoInstance.emit('FE_CREATE_ATTACHMENT', {

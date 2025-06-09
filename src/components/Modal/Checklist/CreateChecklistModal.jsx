@@ -9,7 +9,7 @@ import {
   selectCurrentActiveBoard
 } from '~/redux/activeBoard/activeBoardSlice'
 import {
-  fetchCardDetailsAPI,
+  fetchCardDataAPI,
   selectCurrentActiveCard
 } from '~/redux/activeCard/activeCardSlice'
 import { useForm, Controller } from 'react-hook-form'
@@ -71,7 +71,7 @@ function CreateChecklistModal({ SidebarItem, card }) {
       // })
       // dispatch(updateCurrentActiveBoard(newBoard))
       handleRefreshBoard()
-      dispatch(fetchCardDetailsAPI(card._id))
+      dispatch(fetchCardDataAPI(card._id))
       socketIoInstance.emit('FE_CREATE_CHECKLIST', {
         ...res,
         boardId: board._id,
