@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { fetchFilteredBoardDetailsAPI } from '~/redux/activeBoard/activeBoardSlice'
 import { socketIoInstance } from '~/socket-client'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { fetchCardDataAPI, fetchCardDetailsAPI } from '~/redux/activeCard/activeCardSlice'
+import { fetchCardDataAPI } from '~/redux/activeCard/activeCardSlice'
 
 function useWebSocketEvents() {
   const dispatch = useDispatch()

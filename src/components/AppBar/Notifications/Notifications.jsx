@@ -220,7 +220,10 @@ function Notifications() {
                           {notification.assigner[0]?._id === currentUser._id ? (
                             <>
                               <strong>You</strong> assigned yourself to a new
-                              card
+                              card{' '}
+                              <strong>
+                                {notification.metadata.targetName}
+                              </strong>{' '}
                             </>
                           ) : (
                             <>
@@ -246,7 +249,11 @@ function Notifications() {
                           {notification.assigner[0]?._id === currentUser._id ? (
                             <>
                               <strong>You</strong> assigned yourself to a new
-                              checklist in card{' '}
+                              checklist{' '}
+                              <strong>
+                                {notification.metadata.targetName}
+                              </strong>{' '}
+                              in card{' '}
                               <strong>
                                 {notification.metadata.ownerTargetName}
                               </strong>
@@ -256,7 +263,10 @@ function Notifications() {
                               <strong>
                                 {notification.assigner[0]?.displayName}
                               </strong>{' '}
-                              assigned you to a new checklist
+                              assigned you to a new checklist{' '}
+                              <strong>
+                                {notification.metadata.targetName}
+                              </strong>{' '}
                             </>
                           )}
                         </Typography>
