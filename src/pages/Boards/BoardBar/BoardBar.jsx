@@ -59,9 +59,7 @@ function BoardBar({ board }) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <BoardMenuGroup board={board} MENU_STYLE={MENU_STYLE} />
-        {(isAdmin || isModerator) && (
-          <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />
-        )}
+        {isAdmin && <BoardAnalystic board={board} MENU_STYLE={MENU_STYLE} />}
         <BoardAutomation board={board} MENU_STYLE={MENU_STYLE} />
         <BoardFilter board={board} MENU_STYLE={MENU_STYLE} />
         <LabelModal BOARD_BAR_MENU_STYLE={MENU_STYLE} />
