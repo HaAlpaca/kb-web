@@ -41,7 +41,7 @@ function BoardBar({ board }) {
       user: 'Guest'
     }[currentUserRole] || 'Guest' // Default to 'Guest' if role is not recognized
 
-  const { isAdmin, isModerator } = useRoleInfo(board, currentUser?._id)
+  const { isAdmin } = useRoleInfo(board, currentUser?._id)
   return (
     <Box
       sx={{
